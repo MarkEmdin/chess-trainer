@@ -13,6 +13,11 @@ const lessons = [
     description:
       'Understand the relative value of each chess piece and why it matters.',
   },
+  {
+    slug: 'world-champions',
+    title: 'World Champions USSR history',
+    description: 'World Champions USSR history.',
+  },
 ];
 
 export default function LessonsPage() {
