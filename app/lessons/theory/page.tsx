@@ -1,7 +1,8 @@
 import Image from 'next/image';
-import { BookOpenIcon } from 'lucide-react';
+import { BookOpenIcon, ExternalLinkIcon } from 'lucide-react';
 import { theorySections } from '../../constants/theorySections';
 import VideoModal from '../../components/VideoModal';
+import { Button } from '@/app/components/ui/button';
 import {
   Card,
   CardContent,
@@ -36,12 +37,26 @@ export default function TheoryPage() {
                     <p className="text-sm text-muted-foreground mt-2">
                       {section.description}
                     </p>
-                    {section.video && (
-                      <div className="mt-4">
-                        <VideoModal
-                          url={section.video}
-                          title={section.title}
-                        />
+                    {(section.video || section.trainer) && (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {section.video && (
+                          <VideoModal
+                            url={section.video}
+                            title={section.title}
+                          />
+                        )}
+                        {section.trainer && (
+                          <Button variant="outline" asChild>
+                            <a
+                              href={section.trainer}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <ExternalLinkIcon />
+                              Тренажёр на Lichess
+                            </a>
+                          </Button>
+                        )}
                       </div>
                     )}
                   </div>
