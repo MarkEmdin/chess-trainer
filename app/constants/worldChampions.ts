@@ -1,4 +1,12 @@
-export const worldChampions = [
+type Champion = {
+  name: string;
+  years: string;
+  description: string;
+  video: string;
+  photo?: string;
+};
+
+export const worldChampions: Champion[] = [
   {
     name: 'Wilhelm Steinitz',
     years: '1836–1900',

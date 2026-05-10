@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
 const lessons = [
@@ -17,6 +18,7 @@ const lessons = [
     slug: 'world-champions',
     title: 'World Champions USSR history',
     description: 'World Champions USSR history.',
+    icon: '/pieces/king.svg',
   },
 ];
 
@@ -30,14 +32,25 @@ export default function LessonsPage() {
             <Link
               key={lesson.slug}
               href={`/lessons/${lesson.slug}`}
-              className="block rounded-lg border border-stone-300 bg-white p-5 hover:border-stone-400 hover:shadow-sm transition-all"
+              className="flex items-start gap-4 rounded-lg border border-stone-300 bg-white p-5 hover:border-stone-400 hover:shadow-sm transition-all"
             >
-              <h2 className="text-lg font-semibold text-stone-800">
-                {lesson.title}
-              </h2>
-              <p className="text-sm text-stone-500 mt-1">
-                {lesson.description}
-              </p>
+              {lesson.icon && (
+                <Image
+                  src={lesson.icon}
+                  alt=""
+                  width={40}
+                  height={40}
+                  className="shrink-0"
+                />
+              )}
+              <div className="flex flex-col">
+                <h2 className="text-lg font-semibold text-stone-800">
+                  {lesson.title}
+                </h2>
+                <p className="text-sm text-stone-500 mt-1">
+                  {lesson.description}
+                </p>
+              </div>
             </Link>
           ))}
         </div>

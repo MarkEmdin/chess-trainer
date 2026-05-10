@@ -1,5 +1,15 @@
+import Image from 'next/image';
 import { worldChampions } from '../../constants/worldChampions';
 import YouTubePlayer from '../../components/YouTubePlayer';
+
+const getInitials = (name: string) =>
+  name
+    .split(' ')
+    .map((part) => part[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
 
 export default function WorldChampionsPage() {
   return (
@@ -14,13 +24,32 @@ export default function WorldChampionsPage() {
               key={champion.name}
               className="rounded-lg border border-stone-300 bg-white p-5"
             >
-              <h2 className="text-lg font-semibold text-stone-800">
-                {champion.name}
-              </h2>
-              <p className="text-sm text-stone-500 mb-1">{champion.years}</p>
-              <p className="text-sm text-stone-600 mb-4">
-                {champion.description}
-              </p>
+              <div className="flex gap-4 mb-4">
+                <div className="shrink-0 w-24 h-24 rounded-md overflow-hidden bg-stone-200 flex items-center justify-center text-stone-500 font-semibold text-xl">
+                  {champion.photo ? (
+                    <Image
+                      src={champion.photo}
+                      alt={champion.name}
+                      width={96}
+                      height={96}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    getInitials(champion.name)
+                  )}
+                </div>
+                <div className="flex flex-col">
+                  <h2 className="text-lg font-semibold text-stone-800">
+                    {champion.name}
+                  </h2>
+                  <p className="text-sm text-stone-500 mb-1">
+                    {champion.years}
+                  </p>
+                  <p className="text-sm text-stone-600">
+                    {champion.description}
+                  </p>
+                </div>
+              </div>
               <YouTubePlayer url={champion.video} title={champion.name} />
             </div>
           ))}
