@@ -1,5 +1,5 @@
 import { worldChampions } from '../../constants/worldChampions';
-import YouTubePlayer from '../../components/YouTubePlayer';
+import VideoModal from '../../components/VideoModal';
 import {
   Card,
   CardContent,
@@ -28,7 +28,7 @@ export default function WorldChampionsPage() {
         <h1 className="text-3xl font-bold text-stone-800 mb-8">
           World Champions
         </h1>
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-4">
           {worldChampions.map((champion) => (
             <Card key={champion.name}>
               <CardContent>
@@ -44,17 +44,17 @@ export default function WorldChampionsPage() {
                       {getInitials(champion.name)}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 flex-1">
                     <CardTitle className="text-lg">{champion.name}</CardTitle>
                     <CardDescription>{champion.years}</CardDescription>
                     <p className="text-sm text-muted-foreground mt-2">
                       {champion.description}
                     </p>
+                    <div className="mt-4">
+                      <VideoModal url={champion.video} title={champion.name} />
+                    </div>
                   </div>
                 </div>
-              </CardContent>
-              <CardContent>
-                <YouTubePlayer url={champion.video} title={champion.name} />
               </CardContent>
             </Card>
           ))}
