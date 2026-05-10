@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { chessPieces } from '../../constants/chessPieces';
 import Image from 'next/image';
+import { chessPieces } from '../../constants/chessPieces';
+import { Button } from '@/app/components/ui/button';
 
 type PieceKey = keyof typeof chessPieces;
 const pieceKeys = Object.keys(chessPieces) as PieceKey[];
@@ -68,12 +69,9 @@ export default function PieceValuesTraining() {
           <span className="text-5xl font-bold text-stone-800">
             {targetValue}
           </span>
-          <button
-            onClick={reset}
-            className="mt-3 rounded-lg bg-stone-800 px-4 py-2 text-sm font-medium text-[#f5f0e8] hover:bg-stone-700 transition-colors"
-          >
+          <Button onClick={reset} className="mt-3">
             Reset
-          </button>
+          </Button>
         </div>
       </div>
       {answer.length > 0 && (
@@ -100,12 +98,9 @@ export default function PieceValuesTraining() {
       )}
       {answer.length > 0 && (
         <div className="flex items-center gap-4">
-          <button
-            onClick={checkAnswer}
-            className="rounded-lg bg-stone-800 px-6 py-3 text-sm font-medium text-[#f5f0e8] hover:bg-stone-700 transition-colors"
-          >
+          <Button onClick={checkAnswer} size="lg">
             Check Answer
-          </button>
+          </Button>
           {result !== null && (
             <span
               className={`text-lg font-semibold ${result ? 'text-green-600' : 'text-red-500'}`}

@@ -1,6 +1,16 @@
-import Image from 'next/image';
 import { worldChampions } from '../../constants/worldChampions';
 import YouTubePlayer from '../../components/YouTubePlayer';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardTitle,
+} from '@/app/components/ui/card';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@/app/components/ui/avatar';
 
 const getInitials = (name: string) =>
   name
@@ -20,38 +30,33 @@ export default function WorldChampionsPage() {
         </h1>
         <div className="flex flex-col gap-8">
           {worldChampions.map((champion) => (
-            <div
-              key={champion.name}
-              className="rounded-lg border border-stone-300 bg-white p-5"
-            >
-              <div className="flex gap-4 mb-4">
-                <div className="shrink-0 w-24 h-24 rounded-md overflow-hidden bg-stone-200 flex items-center justify-center text-stone-500 font-semibold text-xl">
-                  {champion.photo ? (
-                    <Image
-                      src={champion.photo}
-                      alt={champion.name}
-                      width={96}
-                      height={96}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    getInitials(champion.name)
-                  )}
+            <Card key={champion.name}>
+              <CardContent>
+                <div className="flex gap-4">
+                  <Avatar className="size-20">
+                    {champion.photo && (
+                      <AvatarImage
+                        src={champion.photo}
+                        alt={champion.name}
+                      />
+                    )}
+                    <AvatarFallback>
+                      {getInitials(champion.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col gap-1">
+                    <CardTitle className="text-lg">{champion.name}</CardTitle>
+                    <CardDescription>{champion.years}</CardDescription>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {champion.description}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <h2 className="text-lg font-semibold text-stone-800">
-                    {champion.name}
-                  </h2>
-                  <p className="text-sm text-stone-500 mb-1">
-                    {champion.years}
-                  </p>
-                  <p className="text-sm text-stone-600">
-                    {champion.description}
-                  </p>
-                </div>
-              </div>
-              <YouTubePlayer url={champion.video} title={champion.name} />
-            </div>
+              </CardContent>
+              <CardContent>
+                <YouTubePlayer url={champion.video} title={champion.name} />
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>

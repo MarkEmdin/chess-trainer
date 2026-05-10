@@ -1,5 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardTitle,
+} from '@/app/components/ui/card';
 
 const lessons = [
   {
@@ -29,28 +35,24 @@ export default function LessonsPage() {
         <h1 className="text-3xl font-bold text-stone-800 mb-8">Lessons</h1>
         <div className="flex flex-col gap-4">
           {lessons.map((lesson) => (
-            <Link
-              key={lesson.slug}
-              href={`/lessons/${lesson.slug}`}
-              className="flex items-start gap-4 rounded-lg border border-stone-300 bg-white p-5 hover:border-stone-400 hover:shadow-sm transition-all"
-            >
-              {lesson.icon && (
-                <Image
-                  src={lesson.icon}
-                  alt=""
-                  width={40}
-                  height={40}
-                  className="shrink-0"
-                />
-              )}
-              <div className="flex flex-col">
-                <h2 className="text-lg font-semibold text-stone-800">
-                  {lesson.title}
-                </h2>
-                <p className="text-sm text-stone-500 mt-1">
-                  {lesson.description}
-                </p>
-              </div>
+            <Link key={lesson.slug} href={`/lessons/${lesson.slug}`}>
+              <Card className="transition-shadow hover:shadow-md">
+                <CardContent className="flex items-start gap-4">
+                  {lesson.icon && (
+                    <Image
+                      src={lesson.icon}
+                      alt=""
+                      width={40}
+                      height={40}
+                      className="shrink-0"
+                    />
+                  )}
+                  <div className="flex flex-col gap-1">
+                    <CardTitle>{lesson.title}</CardTitle>
+                    <CardDescription>{lesson.description}</CardDescription>
+                  </div>
+                </CardContent>
+              </Card>
             </Link>
           ))}
         </div>
