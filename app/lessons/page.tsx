@@ -9,10 +9,10 @@ import {
 
 const lessons = [
   {
-    slug: 'queen-checkmate',
-    title: 'Queen Checkmate',
-    description:
-      'Learn how to deliver checkmate with a king and queen vs. a lone king.',
+    slug: 'theory',
+    title: 'Theory',
+    description: 'Basic checkmates: two rooks, queen, rook.',
+    icon: '/pieces/queen.svg',
   },
   {
     slug: 'piece-values',

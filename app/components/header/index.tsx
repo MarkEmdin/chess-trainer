@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const navLinks = [
   { href: "/lessons/world-champions", label: "World Champions" },
-  { href: "/lessons/queen-checkmate", label: "Basic Checkmates" },
+  { href: "/lessons/theory", label: "Theory" },
   { href: "/lessons/piece-values", label: "Piece Values" },
 ];
 
