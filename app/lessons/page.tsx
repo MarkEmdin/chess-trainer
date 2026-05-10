@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import {
   Card,
@@ -12,7 +11,6 @@ const lessons = [
     slug: 'theory',
     title: 'Theory',
     description: 'Basic checkmates: two rooks, queen, rook.',
-    icon: '/pieces/queen.svg',
   },
   {
     slug: 'piece-values',
@@ -24,7 +22,6 @@ const lessons = [
     slug: 'world-champions',
     title: 'World Champions USSR history',
     description: 'World Champions USSR history.',
-    icon: '/pieces/king.svg',
   },
 ];
 
@@ -37,20 +34,11 @@ export default function LessonsPage() {
           {lessons.map((lesson) => (
             <Link key={lesson.slug} href={`/lessons/${lesson.slug}`}>
               <Card className="transition-shadow hover:shadow-md">
-                <CardContent className="flex items-start gap-4">
-                  {lesson.icon && (
-                    <Image
-                      src={lesson.icon}
-                      alt=""
-                      width={40}
-                      height={40}
-                      className="shrink-0"
-                    />
-                  )}
-                  <div className="flex flex-col gap-1">
-                    <CardTitle>{lesson.title}</CardTitle>
-                    <CardDescription>{lesson.description}</CardDescription>
-                  </div>
+                <CardContent>
+                  <CardTitle>{lesson.title}</CardTitle>
+                  <CardDescription className="mt-1">
+                    {lesson.description}
+                  </CardDescription>
                 </CardContent>
               </Card>
             </Link>
