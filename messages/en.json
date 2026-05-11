@@ -135,9 +135,6 @@
       "showing": "Showing the last {count} games of {username}"
     },
     "tile": {
-      "vs": "vs {opponent}",
-      "youAreWhite": "You played White",
-      "youAreBlack": "You played Black",
       "result": {
         "win": "Win",
         "loss": "Loss",
@@ -158,7 +155,6 @@
       "nextMove": "Next move",
       "lastMove": "Go to end",
       "viewOnChessCom": "View on Chess.com",
-      "openingLabel": "Opening",
       "white": "White",
       "black": "Black"
     }

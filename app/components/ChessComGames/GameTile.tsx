@@ -41,21 +41,16 @@ export default function GameTile({ game, onClick }: Props) {
                 </span>
               </div>
               <p className="text-sm text-foreground">
-                {t('vs', { opponent: game.opponent.username })}{' '}
+                <span className="font-semibold">{game.user.username}</span>
                 <span className="text-muted-foreground">
-                  ({game.opponent.rating})
+                  {' '}({game.user.rating})
+                </span>
+                {' vs '}
+                {game.opponent.username}
+                <span className="text-muted-foreground">
+                  {' '}({game.opponent.rating})
                 </span>
               </p>
-              <p className="text-xs text-muted-foreground">
-                {game.userColor === 'white'
-                  ? t('youAreWhite')
-                  : t('youAreBlack')}
-              </p>
-              {game.opening && (
-                <p className="text-xs italic text-muted-foreground mt-1">
-                  {game.opening}
-                </p>
-              )}
             </div>
             <span className="text-xs text-muted-foreground shrink-0">
               {dateStr}

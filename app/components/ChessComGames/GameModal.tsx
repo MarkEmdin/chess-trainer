@@ -169,16 +169,20 @@ export default function GameModal({ game, onClose }: Props) {
     >
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>
-            {tTile('vs', { opponent: game.opponent.username })}{' '}
-            <span className="text-muted-foreground text-base font-normal">
-              ({game.opponent.rating})
+          <DialogTitle className="font-normal">
+            <span className="font-bold">{game.user.username}</span>
+            <span className="text-muted-foreground text-base">
+              {' '}({game.user.rating})
+            </span>
+            {' vs '}
+            {game.opponent.username}
+            <span className="text-muted-foreground text-base">
+              {' '}({game.opponent.rating})
             </span>
           </DialogTitle>
           <DialogDescription>
             {dateStr} · {tTile(`timeClass.${game.timeClass}`)} ·{' '}
             {tTile(`result.${game.result}`)}
-            {game.opening ? ` · ${game.opening}` : ''}
           </DialogDescription>
         </DialogHeader>
 

@@ -135,9 +135,6 @@
       "showing": "Последние {count} партий пользователя {username}"
     },
     "tile": {
-      "vs": "против {opponent}",
-      "youAreWhite": "Вы играли белыми",
-      "youAreBlack": "Вы играли чёрными",
       "result": {
         "win": "Победа",
         "loss": "Поражение",
@@ -158,7 +155,6 @@
       "nextMove": "Следующий ход",
       "lastMove": "В конец",
       "viewOnChessCom": "Открыть на Chess.com",
-      "openingLabel": "Дебют",
       "white": "Белые",
       "black": "Чёрные"
     }
