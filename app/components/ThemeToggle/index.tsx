@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
+import { useTranslations } from 'next-intl';
 import { HeartIcon, MoonIcon, SunIcon } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import {
@@ -13,6 +14,7 @@ import {
 
 export default function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const t = useTranslations('common');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -30,22 +32,22 @@ export default function ThemeToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Toggle theme">
+        <Button variant="ghost" size="icon" aria-label={t('toggleTheme')}>
           <ActiveIcon />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => setTheme('light')}>
           <SunIcon />
-          Light
+          {t('theme.light')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme('dark')}>
           <MoonIcon />
-          Dark
+          {t('theme.dark')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme('rose')}>
           <HeartIcon />
-          Rose
+          {t('theme.rose')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

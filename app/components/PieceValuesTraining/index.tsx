@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { chessPieces } from '../../constants/chessPieces';
 import { Button } from '@/app/components/ui/button';
 
@@ -9,6 +10,8 @@ type PieceKey = keyof typeof chessPieces;
 const pieceKeys = Object.keys(chessPieces) as PieceKey[];
 
 export default function PieceValuesTraining() {
+  const t = useTranslations('pieceValues');
+  const tPieces = useTranslations('pieces');
   const randomValue = () => Math.floor(Math.random() * 40) + 1;
   const [targetValue, setTargetValue] = useState<number>(0);
 
@@ -42,6 +45,7 @@ export default function PieceValuesTraining() {
         <div className="flex flex-wrap gap-4">
           {pieceKeys.map((key) => {
             const piece = chessPieces[key];
+            const name = tPieces(key);
             return (
               <div
                 key={key}
@@ -50,16 +54,16 @@ export default function PieceValuesTraining() {
               >
                 <Image
                   src={piece.image}
-                  alt={piece.name}
+                  alt={name}
                   width={80}
                   height={80}
                   loading="eager"
                 />
                 <span className="text-sm font-semibold text-foreground">
-                  {piece.name}
+                  {name}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  Points: {piece.points}
+                  {t('points', { value: piece.points })}
                 </span>
               </div>
             );
@@ -70,7 +74,7 @@ export default function PieceValuesTraining() {
             {targetValue}
           </span>
           <Button onClick={reset} className="mt-3">
-            Reset
+            {t('reset')}
           </Button>
         </div>
       </div>
@@ -84,13 +88,13 @@ export default function PieceValuesTraining() {
             >
               <Image
                 src={chessPieces[value].image}
-                alt={value}
+                alt={tPieces(value)}
                 width={40}
                 height={40}
                 loading="eager"
               />
               <span className="text-xs text-muted-foreground">
-                {chessPieces[value].name}
+                {tPieces(value)}
               </span>
             </div>
           ))}
@@ -99,13 +103,13 @@ export default function PieceValuesTraining() {
       {answer.length > 0 && (
         <div className="flex items-center gap-4">
           <Button onClick={checkAnswer} size="lg">
-            Check Answer
+            {t('checkAnswer')}
           </Button>
           {result !== null && (
             <span
               className={`text-lg font-semibold ${result ? 'text-green-600' : 'text-destructive'}`}
             >
-              {result ? 'Correct!' : 'Wrong, try again'}
+              {result ? t('correct') : t('wrong')}
             </span>
           )}
         </div>

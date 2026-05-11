@@ -1,6 +1,7 @@
 'use client';
 
 import { PlayIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui/button';
 import {
   Dialog,
@@ -20,14 +21,16 @@ type VideoModalProps = {
 export default function VideoModal({
   url,
   title,
-  triggerLabel = 'Watch video',
+  triggerLabel,
 }: VideoModalProps) {
+  const t = useTranslations('videoModal');
+  const label = triggerLabel ?? t('watchVideo');
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline">
           <PlayIcon />
-          {triggerLabel}
+          {label}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-3xl">

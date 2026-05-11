@@ -1,0 +1,135 @@
+{
+  "nav": {
+    "worldChampions": "World Champions",
+    "theory": "Theory",
+    "pieceValues": "Piece Values"
+  },
+  "home": {
+    "subtitle": "Master the basics — pieces, moves, and core strategies.",
+    "startLearning": "Start Learning"
+  },
+  "lessons": {
+    "title": "Lessons",
+    "theory": {
+      "title": "Theory",
+      "description": "Basic checkmates: two rooks, queen, rook."
+    },
+    "pieceValues": {
+      "title": "Piece Values",
+      "description": "Understand the relative value of each chess piece and why it matters."
+    },
+    "worldChampions": {
+      "title": "World Champions USSR history",
+      "description": "World Champions USSR history."
+    }
+  },
+  "theory": {
+    "title": "Theory",
+    "lichessTrainer": "Lichess trainer",
+    "sections": {
+      "twoRooksMate": {
+        "title": "Two-rook checkmate",
+        "description": "The 'ladder' method — two rooks alternately push the opponent's king to the edge of the board. Also known as the linear mate."
+      },
+      "queenMate": {
+        "title": "Queen checkmate",
+        "description": "King and queen versus a lone king. The queen restricts space; the king helps to deliver mate."
+      },
+      "rookMate": {
+        "title": "Rook checkmate",
+        "description": "King and rook versus a lone king. King opposition plus a cutting line by the rook."
+      },
+      "windmill": {
+        "title": "Windmill",
+        "description": "Tactical pattern: a sequence of discovered checks by bishop and rook lets you pick off the opponent's pieces one by one."
+      }
+    }
+  },
+  "champions": {
+    "title": "World Champions",
+    "list": {
+      "steinitz": {
+        "name": "Wilhelm Steinitz",
+        "description": "First official World Chess Champion. Founder of the positional school, introduced the principles of accumulating small advantages."
+      },
+      "lasker": {
+        "name": "Emanuel Lasker",
+        "description": "World champion for 27 years — a record. Known for his psychological approach and universal style."
+      },
+      "capablanca": {
+        "name": "José Raúl Capablanca",
+        "description": "Cuban genius with phenomenal intuition. Hardly lost a game during his prime."
+      },
+      "alekhine": {
+        "name": "Alexander Alekhine",
+        "description": "Famous for aggressive style and deep combinations. The only champion to die while holding the title."
+      },
+      "euwe": {
+        "name": "Max Euwe",
+        "description": "Dutch champion and mathematician. Defeated Alekhine in their 1935 match."
+      },
+      "botvinnik": {
+        "name": "Mikhail Botvinnik",
+        "description": "Patriarch of the Soviet chess school. Mentored a whole generation of champions."
+      },
+      "smyslov": {
+        "name": "Vasily Smyslov",
+        "description": "Known for his harmonious style and outstanding endgame technique."
+      },
+      "tal": {
+        "name": "Mikhail Tal",
+        "description": "The 'Magician from Riga'. Legendary tactician famed for sacrifices and attacking play."
+      },
+      "petrosian": {
+        "name": "Tigran Petrosian",
+        "description": "Master of defense and prophylaxis. One of the toughest players ever to crack."
+      },
+      "spassky": {
+        "name": "Boris Spassky",
+        "description": "All-rounder. World champion who lost the title to Fischer in 1972."
+      },
+      "fischer": {
+        "name": "Bobby Fischer",
+        "description": "Chess legend who broke Soviet dominance. World champion in 1972."
+      },
+      "karpov": {
+        "name": "Anatoly Karpov",
+        "description": "Master of positional play and control. Dominated the 1970s–80s."
+      },
+      "kasparov": {
+        "name": "Garry Kasparov",
+        "description": "One of the strongest players in history. Aggressive style and deep opening preparation."
+      }
+    }
+  },
+  "pieces": {
+    "pawn": "Pawn",
+    "knight": "Knight",
+    "bishop": "Bishop",
+    "rook": "Rook",
+    "queen": "Queen",
+    "king": "King"
+  },
+  "pieceValues": {
+    "reset": "Reset",
+    "checkAnswer": "Check Answer",
+    "correct": "Correct!",
+    "wrong": "Wrong, try again",
+    "points": "Points: {value}"
+  },
+  "videoModal": {
+    "watchVideo": "Watch video"
+  },
+  "common": {
+    "toggleTheme": "Toggle theme",
+    "toggleLanguage": "Toggle language",
+    "theme": {
+      "light": "Light",
+      "dark": "Dark",
+      "rose": "Rose"
+    }
+  },
+  "metadata": {
+    "description": "Learn the basics of chess — pieces, rules, and strategies"
+  }
+}
