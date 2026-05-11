@@ -3,6 +3,7 @@
 import { useFormatter, useTranslations } from 'next-intl';
 import type { Game } from '@/lib/chesscom/types';
 import { Card, CardContent } from '@/app/components/ui/card';
+import GameMatchup from '@/app/components/GameMatchup';
 
 const RESULT_STYLES: Record<Game['result'], string> = {
   win: 'bg-green-600/10 text-green-700 dark:text-green-400',
@@ -41,15 +42,7 @@ export default function GameTile({ game, onClick }: Props) {
                 </span>
               </div>
               <p className="text-sm text-foreground">
-                <span className="font-semibold">{game.user.username}</span>
-                <span className="text-muted-foreground">
-                  {' '}({game.user.rating})
-                </span>
-                {' vs '}
-                {game.opponent.username}
-                <span className="text-muted-foreground">
-                  {' '}({game.opponent.rating})
-                </span>
+                <GameMatchup game={game} />
               </p>
             </div>
             <span className="text-xs text-muted-foreground shrink-0">

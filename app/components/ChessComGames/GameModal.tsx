@@ -19,7 +19,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/app/components/ui/dialog';
+import { formatSeconds } from '@/lib/chesscom/format';
 import type { Game, GameColor, GamePlayer } from '@/lib/chesscom/types';
+import GameMatchup from '@/app/components/GameMatchup';
 
 function buildPositions(pgn: string): string[] {
   const parser = new Chess();
@@ -40,18 +42,6 @@ function buildPositions(pgn: string): string[] {
     positions.push(replay.fen());
   }
   return positions;
-}
-
-function formatSeconds(seconds: number): string {
-  if (seconds < 0) seconds = 0;
-  const total = Math.floor(seconds);
-  const h = Math.floor(total / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
-  if (h > 0) {
-    return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-  }
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
 function PlayerRow({
@@ -97,13 +87,14 @@ function PlayerRow({
 type Props = {
   game: Game;
   onClose: () => void;
+  initialIndex?: number;
 };
 
-export default function GameModal({ game, onClose }: Props) {
+export default function GameModal({ game, onClose, initialIndex }: Props) {
   const t = useTranslations('games.modal');
   const tTile = useTranslations('games.tile');
   const format = useFormatter();
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(initialIndex ?? 0);
 
   const positions = useMemo(() => buildPositions(game.pgn), [game.pgn]);
   const totalMoves = Math.max(0, positions.length - 1);
@@ -170,15 +161,7 @@ export default function GameModal({ game, onClose }: Props) {
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="font-normal">
-            <span className="font-bold">{game.user.username}</span>
-            <span className="text-muted-foreground text-base">
-              {' '}({game.user.rating})
-            </span>
-            {' vs '}
-            {game.opponent.username}
-            <span className="text-muted-foreground text-base">
-              {' '}({game.opponent.rating})
-            </span>
+            <GameMatchup game={game} ratingClassName="text-base" />
           </DialogTitle>
           <DialogDescription>
             {dateStr} · {tTile(`timeClass.${game.timeClass}`)} ·{' '}

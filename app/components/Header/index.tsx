@@ -8,6 +8,7 @@ const navLinks = [
   { href: '/lessons/theory', key: 'theory' },
   { href: '/lessons/piece-values', key: 'pieceValues' },
   { href: '/games', key: 'games' },
+  { href: '/think-time', key: 'thinkTime' },
 ] as const;
 
 export default async function Header() {

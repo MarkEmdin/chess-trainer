@@ -3,7 +3,8 @@
     "worldChampions": "World Champions",
     "theory": "Theory",
     "pieceValues": "Piece Values",
-    "games": "Games"
+    "games": "Games",
+    "thinkTime": "Think Time"
   },
   "home": {
     "subtitle": "Master the basics — pieces, moves, and core strategies.",
@@ -158,6 +159,16 @@
       "white": "White",
       "black": "Black"
     }
+  },
+  "thinkTime": {
+    "title": "Think Time",
+    "subtitle": "Positions where you spent 45+ seconds thinking. Click a card to open the full game.",
+    "loading": "Loading games…",
+    "errorGeneric": "Could not load games. Try again.",
+    "errorNotFound": "Player not found.",
+    "empty": "No long thinks in your last 10 games (threshold: 45s).",
+    "showing": "{count, plural, one {# long think} other {# long thinks}} across {gameCount, plural, one {# game} other {# games}}",
+    "thoughtFor": "Thought {duration}"
   },
   "videoModal": {
     "watchVideo": "Watch video"

@@ -7,7 +7,7 @@ import { useChessComGames } from '@/lib/chesscom/useChessComGames';
 import { useStoredUsername } from '@/lib/chesscom/useStoredUsername';
 import type { Game } from '@/lib/chesscom/types';
 import { Button } from '@/app/components/ui/button';
-import UsernameForm from './UsernameForm';
+import ChessComUsernameForm from '@/app/components/ChessComUsernameForm';
 import GamesList from './GamesList';
 import GameModal from './GameModal';
 
@@ -18,7 +18,7 @@ export default function ChessComGames() {
   const t = useTranslations('games');
 
   if (!username) {
-    return <UsernameForm onSubmit={setUsername} />;
+    return <ChessComUsernameForm onSubmit={setUsername} />;
   }
 
   return (
