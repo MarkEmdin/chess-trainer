@@ -2,7 +2,8 @@
   "nav": {
     "worldChampions": "World Champions",
     "theory": "Theory",
-    "pieceValues": "Piece Values"
+    "pieceValues": "Piece Values",
+    "games": "Games"
   },
   "home": {
     "subtitle": "Master the basics — pieces, moves, and core strategies.",
@@ -116,6 +117,51 @@
     "correct": "Correct!",
     "wrong": "Wrong, try again",
     "points": "Points: {value}"
+  },
+  "games": {
+    "title": "Chess.com Games",
+    "subtitle": "Browse the last 10 games of any Chess.com player.",
+    "usernameForm": {
+      "label": "Chess.com username",
+      "placeholder": "e.g. magnuscarlsen",
+      "submit": "Load games",
+      "change": "Change user"
+    },
+    "list": {
+      "loading": "Loading games…",
+      "errorGeneric": "Could not load games. Try again.",
+      "errorNotFound": "Player not found.",
+      "empty": "This player has no games yet.",
+      "showing": "Showing the last {count} games of {username}"
+    },
+    "tile": {
+      "vs": "vs {opponent}",
+      "youAreWhite": "You played White",
+      "youAreBlack": "You played Black",
+      "result": {
+        "win": "Win",
+        "loss": "Loss",
+        "draw": "Draw"
+      },
+      "timeClass": {
+        "bullet": "Bullet",
+        "blitz": "Blitz",
+        "rapid": "Rapid",
+        "daily": "Daily"
+      }
+    },
+    "modal": {
+      "moveCounter": "Move {current} / {total}",
+      "startPosition": "Starting position",
+      "firstMove": "Go to start",
+      "prevMove": "Previous move",
+      "nextMove": "Next move",
+      "lastMove": "Go to end",
+      "viewOnChessCom": "View on Chess.com",
+      "openingLabel": "Opening",
+      "white": "White",
+      "black": "Black"
+    }
   },
   "videoModal": {
     "watchVideo": "Watch video"

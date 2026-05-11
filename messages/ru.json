@@ -2,7 +2,8 @@
   "nav": {
     "worldChampions": "Чемпионы мира",
     "theory": "Теория",
-    "pieceValues": "Ценность фигур"
+    "pieceValues": "Ценность фигур",
+    "games": "Партии"
   },
   "home": {
     "subtitle": "Освойте основы — фигуры, ходы и базовые стратегии.",
@@ -116,6 +117,51 @@
     "correct": "Правильно!",
     "wrong": "Неверно, попробуйте ещё раз",
     "points": "Очки: {value}"
+  },
+  "games": {
+    "title": "Партии с Chess.com",
+    "subtitle": "Последние 10 партий любого игрока Chess.com.",
+    "usernameForm": {
+      "label": "Ник на Chess.com",
+      "placeholder": "например, magnuscarlsen",
+      "submit": "Загрузить партии",
+      "change": "Сменить пользователя"
+    },
+    "list": {
+      "loading": "Загружаем партии…",
+      "errorGeneric": "Не удалось загрузить партии. Попробуйте ещё раз.",
+      "errorNotFound": "Пользователь не найден.",
+      "empty": "У этого пользователя ещё нет партий.",
+      "showing": "Последние {count} партий пользователя {username}"
+    },
+    "tile": {
+      "vs": "против {opponent}",
+      "youAreWhite": "Вы играли белыми",
+      "youAreBlack": "Вы играли чёрными",
+      "result": {
+        "win": "Победа",
+        "loss": "Поражение",
+        "draw": "Ничья"
+      },
+      "timeClass": {
+        "bullet": "Пуля",
+        "blitz": "Блиц",
+        "rapid": "Рапид",
+        "daily": "Дейли"
+      }
+    },
+    "modal": {
+      "moveCounter": "Ход {current} / {total}",
+      "startPosition": "Начальная позиция",
+      "firstMove": "В начало",
+      "prevMove": "Предыдущий ход",
+      "nextMove": "Следующий ход",
+      "lastMove": "В конец",
+      "viewOnChessCom": "Открыть на Chess.com",
+      "openingLabel": "Дебют",
+      "white": "Белые",
+      "black": "Чёрные"
+    }
   },
   "videoModal": {
     "watchVideo": "Смотреть видео"

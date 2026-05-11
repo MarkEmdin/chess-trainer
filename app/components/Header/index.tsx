@@ -7,6 +7,7 @@ const navLinks = [
   { href: '/lessons/world-champions', key: 'worldChampions' },
   { href: '/lessons/theory', key: 'theory' },
   { href: '/lessons/piece-values', key: 'pieceValues' },
+  { href: '/games', key: 'games' },
 ] as const;
 
 export default async function Header() {
