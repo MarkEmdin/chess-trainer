@@ -27,9 +27,9 @@ const lessons = [
 
 export default function LessonsPage() {
   return (
-    <div className="flex flex-col flex-1 bg-[#f5f0e8] font-sans px-6 py-12">
+    <div className="flex flex-col flex-1 bg-background font-sans px-6 py-12">
       <div className="max-w-2xl mx-auto w-full">
-        <h1 className="text-3xl font-bold text-stone-800 mb-8">Lessons</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-8">Lessons</h1>
         <div className="flex flex-col gap-4">
           {lessons.map((lesson) => (
             <Link key={lesson.slug} href={`/lessons/${lesson.slug}`}>

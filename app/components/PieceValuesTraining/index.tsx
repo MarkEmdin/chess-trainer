@@ -46,7 +46,7 @@ export default function PieceValuesTraining() {
               <div
                 key={key}
                 onClick={() => addToAnswer(key)}
-                className="flex flex-col items-center rounded-lg border border-stone-300 bg-white p-4 w-28 cursor-pointer hover:border-stone-400 transition-colors"
+                className="flex flex-col items-center rounded-lg border border-border bg-card p-4 w-28 cursor-pointer hover:border-foreground/40 transition-colors"
               >
                 <Image
                   src={piece.image}
@@ -55,10 +55,10 @@ export default function PieceValuesTraining() {
                   height={80}
                   loading="eager"
                 />
-                <span className="text-sm font-semibold text-stone-800">
+                <span className="text-sm font-semibold text-foreground">
                   {piece.name}
                 </span>
-                <span className="text-xs text-stone-500">
+                <span className="text-xs text-muted-foreground">
                   Points: {piece.points}
                 </span>
               </div>
@@ -66,7 +66,7 @@ export default function PieceValuesTraining() {
           })}
         </div>
         <div className="flex flex-col items-center justify-center shrink-0">
-          <span className="text-5xl font-bold text-stone-800">
+          <span className="text-5xl font-bold text-foreground">
             {targetValue}
           </span>
           <Button onClick={reset} className="mt-3">
@@ -75,12 +75,12 @@ export default function PieceValuesTraining() {
         </div>
       </div>
       {answer.length > 0 && (
-        <div className="flex flex-wrap gap-2 pt-4 border-t border-stone-300">
+        <div className="flex flex-wrap gap-2 pt-4 border-t border-border">
           {answer.map((value, i) => (
             <div
               key={i}
               onClick={() => removeFromAnswer(i)}
-              className="flex flex-col items-center bg-white rounded-lg border border-stone-300 p-2 w-16 cursor-pointer hover:border-red-300 transition-colors"
+              className="flex flex-col items-center bg-card rounded-lg border border-border p-2 w-16 cursor-pointer hover:border-destructive/50 transition-colors"
             >
               <Image
                 src={chessPieces[value].image}
@@ -89,7 +89,7 @@ export default function PieceValuesTraining() {
                 height={40}
                 loading="eager"
               />
-              <span className="text-xs text-stone-600">
+              <span className="text-xs text-muted-foreground">
                 {chessPieces[value].name}
               </span>
             </div>
@@ -103,7 +103,7 @@ export default function PieceValuesTraining() {
           </Button>
           {result !== null && (
             <span
-              className={`text-lg font-semibold ${result ? 'text-green-600' : 'text-red-500'}`}
+              className={`text-lg font-semibold ${result ? 'text-green-600' : 'text-destructive'}`}
             >
               {result ? 'Correct!' : 'Wrong, try again'}
             </span>
