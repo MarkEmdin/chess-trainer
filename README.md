@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chess Fundamentals
 
-## Getting Started
+A chess training app: explore the World Champions, learn basic checkmates and tactics, train piece-value intuition, and analyze your own Chess.com games — including the positions where you took longest to decide.
 
-First, run the development server:
+## Features
+
+- **Theory** — basic checkmate patterns (two rooks, queen, rook, windmill) with explainer videos and direct links to Lichess practice trainers.
+- **Piece Values** — drag-free puzzle: pick the combination of pieces whose point values sum to a random target.
+- **World Champions** — bios of the thirteen World Champions from Steinitz to Kasparov, each with a photo and a lecture video.
+- **Chess.com Games** — enter any username, browse the last 10 games as cards (white vs black, result, time class, date), click one to replay it move by move on an interactive board with live clocks and per-move think time.
+- **Long Moves** — across the loaded games, surface every position where the user spent 45+ seconds thinking, sorted by time descending. The mini-board on each card highlights the opponent's last move so you immediately see what you were responding to. Click any card to open that exact half-move in the full replay.
+
+## UX
+
+- **Three themes:** light, dark, and a custom rose palette (default).
+- **Two languages:** English and Russian, URL-prefixed (`/en/...`, `/ru/...`), locale auto-detected from `Accept-Language` with a manual switcher in the header.
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Framework:** Next.js 16 (App Router, Turbopack), React 19
+- **Language:** TypeScript (strict mode)
+- **Styling:** Tailwind CSS 4 (CSS-first config), shadcn/ui primitives
+- **Theming:** `next-themes` (light / dark / rose)
+- **i18n:** `next-intl` with locale-prefixed routing — `[locale]` segment + `proxy.ts` middleware (Next.js 16's renamed `middleware.ts`)
+- **Chess:** `chess.js` (PGN parsing, move replay) + `react-chessboard` v5 (board rendering)
+- **Icons:** `lucide-react`
+- **Data:** Chess.com Public API (no auth, client-side fetch) via a custom hook that mirrors the SWR `{ data, error, isLoading }` shape so a library swap is one diff away
