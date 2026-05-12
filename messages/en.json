@@ -129,10 +129,6 @@
       "change": "Change user"
     },
     "list": {
-      "loading": "Loading games…",
-      "errorGeneric": "Could not load games. Try again.",
-      "errorNotFound": "Player not found.",
-      "empty": "This player has no games yet.",
       "showing": "Showing the last {count} games of {username}"
     },
     "tile": {
@@ -163,9 +159,6 @@
   "thinkTime": {
     "title": "Think Time",
     "subtitle": "Positions where you spent 45+ seconds thinking. Click a card to open the full game.",
-    "loading": "Loading games…",
-    "errorGeneric": "Could not load games. Try again.",
-    "errorNotFound": "Player not found.",
     "empty": "No long thinks in your last 10 games (threshold: 45s).",
     "showing": "{count, plural, one {# long think} other {# long thinks}} across {gameCount, plural, one {# game} other {# games}}",
     "thoughtFor": "Thought {duration}"
@@ -180,6 +173,12 @@
       "light": "Light",
       "dark": "Dark",
       "rose": "Rose"
+    },
+    "chesscom": {
+      "loading": "Loading games…",
+      "errorGeneric": "Could not load games. Try again.",
+      "errorNotFound": "Player not found.",
+      "emptyGames": "This player has no games yet."
     }
   },
   "metadata": {

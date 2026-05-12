@@ -45,5 +45,6 @@
 
 ## Data fetching
 
-- Currently no library — `useEffect` + `useState` + `AbortController` in custom hooks. Pattern: hook returns `{ data, error, isLoading }` shape that mirrors SWR, so swapping in `useSWR` later is a single-file change. See `lib/chesscom/useChessComGames.ts` for the template.
-- When SWR (or TanStack Query) gets pulled in for the first time, migrate via the existing hook interfaces — don't change call sites.
+- Use [SWR](https://swr.vercel.app/) for client-side reads. Wrap calls in a custom hook under `lib/<feature>/` so the call site stays domain-typed (`useChessComGames(username)` → `{ games, error, isLoading, isNotFound }`), not generic. See `lib/chesscom/useChessComGames.ts` for the template.
+- Key shape is a typed tuple — first element is a string discriminator, second+ are the params. This namespaces cache keys across features and dedupes identical requests across routes (e.g. `/games` and `/think-time` share one fetch per username).
+- For data that doesn't change after the fact (game archives, finished games), turn off `revalidateOnFocus` and `revalidateOnReconnect`. Leave `revalidateIfStale` at its default — it acts as a free retry on remount when the cached state is an error.
