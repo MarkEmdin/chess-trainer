@@ -122,11 +122,12 @@
     "king": "King"
   },
   "pieceValues": {
+    "title": "Piece Values",
+    "howTo": "Pick a combination of pieces whose point values add up to the target number.",
     "reset": "Reset",
     "checkAnswer": "Check Answer",
     "correct": "Correct!",
-    "wrong": "Wrong, try again",
-    "points": "Points: {value}"
+    "wrong": "Wrong, try again"
   },
   "games": {
     "title": "Chess.com Games",
