@@ -37,8 +37,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-
 
+      # --legacy-peer-deps because next@16 pins @swc/helpers@0.5.15 while
+      # next-intl's nested @swc/core asks for >=0.5.17 as an optional peer.
+      # Local npm logs a warning and moves on; CI's stricter npm refuses
+      # `npm ci` without the flag.
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Lint
         run: npm run lint
