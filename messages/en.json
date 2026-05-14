@@ -167,10 +167,12 @@
   },
   "thinkTime": {
     "title": "Think Time",
-    "subtitle": "Positions where you spent 45+ seconds thinking. Click a card to open the full game.",
-    "empty": "No long thinks in your last 10 games (threshold: 45s).",
+    "subtitle": "Positions where you spent extra time thinking. Click a card to open the full game.",
+    "empty": "No moves crossed the {threshold}s threshold in your last 10 games.",
     "showing": "{count, plural, one {# long think} other {# long thinks}} across {gameCount, plural, one {# game} other {# games}}",
-    "thoughtFor": "Thought {duration}"
+    "thoughtFor": "Thought {duration}",
+    "thresholdLabel": "Threshold",
+    "secondsShort": "{value}s"
   },
   "videoModal": {
     "watchVideo": "Watch video"

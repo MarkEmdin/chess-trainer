@@ -19,11 +19,15 @@ export type LongThink = {
   lastOpponentMove?: { from: string; to: string };
 };
 
-// Find every move where the player spent at least `thresholdSec` thinking.
-// Uses the same `(prev + increment) − current` formula as the GameModal's
-// per-move delta, so increment-style time controls don't mis-attribute the
-// auto-gain as thinking.
-export function findLongThinks(game: Game, thresholdSec: number): LongThink[] {
+// Parsing PGN with chess.js is the expensive step (≈5-10ms per game with
+// 30-60 moves). Cache the full unfiltered list of the user's thinks per Game
+// object so threshold-slider re-renders are O(n) array filters instead of
+// full re-parses. Game objects keep stable identity across renders thanks to
+// SWR's cache, so a WeakMap is the natural store and entries are GC'd when
+// the user fetches a different account.
+const parsedCache = new WeakMap<Game, LongThink[]>();
+
+function computeAllThinks(game: Game): LongThink[] {
   if (game.clockSnapshots.length < 2) return [];
 
   const parser = new Chess();
@@ -43,8 +47,6 @@ export function findLongThinks(game: Game, thresholdSec: number): LongThink[] {
     const moverIsWhite = halfMoveIndex % 2 === 1;
     const moverColor: GameColor = moverIsWhite ? 'white' : 'black';
 
-    // Only the user's thinks are interesting on this page — opponent's
-    // hesitation is informative too but conceptually a different feature.
     if (moverColor === game.userColor) {
       const prev = game.clockSnapshots[Math.max(0, halfMoveIndex - 2)];
       const curr = game.clockSnapshots[halfMoveIndex];
@@ -53,7 +55,9 @@ export function findLongThinks(game: Game, thresholdSec: number): LongThink[] {
 
       if (prevSec !== undefined && currSec !== undefined) {
         const spent = prevSec + game.increment - currSec;
-        if (spent >= thresholdSec) {
+        // Negative `spent` can happen with weird time-adjustment edge cases;
+        // drop those rather than show them as 0:00 thinks.
+        if (spent >= 0) {
           const prevMove = i > 0 ? history[i - 1] : undefined;
           result.push({
             gameId: game.id,
@@ -79,4 +83,23 @@ export function findLongThinks(game: Game, thresholdSec: number): LongThink[] {
   }
 
   return result;
+}
+
+function findAllThinks(game: Game): LongThink[] {
+  const cached = parsedCache.get(game);
+  if (cached) return cached;
+  const result = computeAllThinks(game);
+  parsedCache.set(game, result);
+  return result;
+}
+
+// Find every user move where they spent at least `thresholdSec` thinking.
+// Uses the same `(prev + increment) − current` formula as the GameModal's
+// per-move delta, so increment-style time controls don't mis-attribute the
+// auto-gain as thinking.
+export function findLongThinks(
+  game: Game,
+  thresholdSec: number,
+): LongThink[] {
+  return findAllThinks(game).filter((think) => think.seconds >= thresholdSec);
 }
