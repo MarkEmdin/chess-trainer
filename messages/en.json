@@ -179,6 +179,11 @@
       "errorGeneric": "Could not load games. Try again.",
       "errorNotFound": "Player not found.",
       "emptyGames": "This player has no games yet."
+    },
+    "error": {
+      "title": "Something went wrong",
+      "description": "An unexpected error occurred. Please try again.",
+      "retry": "Try again"
     }
   },
   "metadata": {

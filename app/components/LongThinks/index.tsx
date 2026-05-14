@@ -2,11 +2,18 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import dynamic from 'next/dynamic';
 import { findLongThinks, type LongThink } from '@/lib/chesscom/longThinks';
 import type { Game } from '@/lib/chesscom/types';
 import ChessComShell from '@/app/components/ChessComShell';
-import GameModal from '@/app/components/ChessComGames/GameModal';
 import LongThinkCard from './LongThinkCard';
+
+// Same chunk as /games — Turbopack/webpack dedupes, so opening the modal
+// from either route pays for the chess engine just once.
+const GameModal = dynamic(
+  () => import('@/app/components/ChessComGames/GameModal'),
+  { ssr: false },
+);
 
 const THRESHOLD_SECONDS = 45;
 
