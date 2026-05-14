@@ -1,5 +1,7 @@
 # Chess Fundamentals
 
+[![CI](https://github.com/MarkEmdin/chess-trainer/actions/workflows/ci.yml/badge.svg)](https://github.com/MarkEmdin/chess-trainer/actions/workflows/ci.yml)
+
 A chess training app: explore the World Champions, learn basic checkmates and tactics, train piece-value intuition, and analyze your own Chess.com games — including the positions where you took longest to decide.
 
 ## Features
