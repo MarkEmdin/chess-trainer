@@ -29,7 +29,7 @@ export default function GameTile({ game, onClick }: Props) {
     >
       <Card className="hover:shadow-md transition-shadow">
         <CardContent>
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-3">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <span
@@ -45,7 +45,7 @@ export default function GameTile({ game, onClick }: Props) {
                 <GameMatchup game={game} />
               </p>
             </div>
-            <span className="text-xs text-muted-foreground shrink-0">
+            <span className="text-xs text-muted-foreground sm:shrink-0">
               {dateStr}
             </span>
           </div>

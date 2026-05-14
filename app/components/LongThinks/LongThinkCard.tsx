@@ -52,8 +52,8 @@ export default function LongThinkCard({ think, game, onClick }: Props) {
     >
       <Card className="hover:shadow-md transition-shadow">
         <CardContent>
-          <div className="flex gap-4">
-            <div className="w-[160px] shrink-0">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <div className="w-[200px] mx-auto sm:w-[160px] sm:mx-0 sm:shrink-0">
               <Chessboard
                 options={{
                   position: think.fenBefore,

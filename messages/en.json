@@ -4,7 +4,8 @@
     "theory": "Theory",
     "pieceValues": "Piece Values",
     "games": "Games",
-    "thinkTime": "Think Time"
+    "thinkTime": "Think Time",
+    "openMenu": "Open menu"
   },
   "home": {
     "subtitle": "Master the basics — pieces, moves, and core strategies.",
@@ -23,6 +24,14 @@
     "worldChampions": {
       "title": "World Champions USSR history",
       "description": "World Champions USSR history."
+    },
+    "games": {
+      "title": "Chess.com Games",
+      "description": "Browse and replay the last 10 games of any Chess.com player."
+    },
+    "thinkTime": {
+      "title": "Think Time",
+      "description": "Surface every move where you spent 45+ seconds thinking."
     }
   },
   "theory": {

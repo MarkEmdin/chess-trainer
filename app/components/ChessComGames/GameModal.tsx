@@ -201,7 +201,7 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
             />
           </div>
 
-          <div className="flex items-center justify-center gap-1">
+          <div className="flex items-center justify-center gap-1 flex-wrap">
             <Button
               variant="ghost"
               size="icon"
@@ -220,7 +220,7 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
             >
               <ChevronLeftIcon />
             </Button>
-            <span className="text-sm text-muted-foreground min-w-[140px] text-center">
+            <span className="text-sm text-muted-foreground min-w-[100px] sm:min-w-[140px] text-center">
               {index === 0
                 ? t('startPosition')
                 : t('moveCounter', { current: index, total: totalMoves })}

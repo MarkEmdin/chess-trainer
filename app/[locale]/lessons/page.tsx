@@ -7,10 +7,12 @@ import {
   CardTitle,
 } from '@/app/components/ui/card';
 
-const lessons = [
-  { slug: 'theory', key: 'theory' },
-  { slug: 'piece-values', key: 'pieceValues' },
-  { slug: 'world-champions', key: 'worldChampions' },
+const items = [
+  { href: '/lessons/theory', key: 'theory' },
+  { href: '/lessons/piece-values', key: 'pieceValues' },
+  { href: '/lessons/world-champions', key: 'worldChampions' },
+  { href: '/games', key: 'games' },
+  { href: '/think-time', key: 'thinkTime' },
 ] as const;
 
 export default async function LessonsPage() {
@@ -20,13 +22,13 @@ export default async function LessonsPage() {
       <div className="max-w-2xl mx-auto w-full">
         <h1 className="text-3xl font-bold text-foreground mb-8">{t('title')}</h1>
         <div className="flex flex-col gap-4">
-          {lessons.map((lesson) => (
-            <Link key={lesson.slug} href={`/lessons/${lesson.slug}`}>
+          {items.map((item) => (
+            <Link key={item.href} href={item.href}>
               <Card className="transition-shadow hover:shadow-md">
                 <CardContent>
-                  <CardTitle>{t(`${lesson.key}.title`)}</CardTitle>
+                  <CardTitle>{t(`${item.key}.title`)}</CardTitle>
                   <CardDescription className="mt-1">
-                    {t(`${lesson.key}.description`)}
+                    {t(`${item.key}.description`)}
                   </CardDescription>
                 </CardContent>
               </Card>

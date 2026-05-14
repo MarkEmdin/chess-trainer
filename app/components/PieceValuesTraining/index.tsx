@@ -41,7 +41,7 @@ export default function PieceValuesTraining() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex gap-6">
+      <div className="flex flex-col-reverse sm:flex-row gap-4 sm:gap-6">
         <div className="flex flex-wrap gap-4">
           {pieceKeys.map((key) => {
             const piece = chessPieces[key];
@@ -69,7 +69,7 @@ export default function PieceValuesTraining() {
             );
           })}
         </div>
-        <div className="flex flex-col items-center justify-center shrink-0">
+        <div className="flex flex-col items-center justify-center sm:shrink-0">
           <span className="text-5xl font-bold text-foreground">
             {targetValue}
           </span>
