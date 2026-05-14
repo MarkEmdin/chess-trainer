@@ -20,3 +20,17 @@ with the trace pointing at `app/components/ThemeProvider/index.tsx` (the `<NextT
 - It's an ecosystem issue between `next-themes` and React 19, tracked upstream
 
 **Revisit when:** bumping `next-themes` past 0.4.6 — check release notes for the fix before assuming the warning is still present.
+
+## `radix-ui` `asChild` hydration mismatch (Slot + SSR)
+
+**Symptom:** when an `asChild` pattern from the `radix-ui` barrel package nests through multiple Slot layers (e.g. `<SheetTrigger asChild><Button>...</Button></SheetTrigger>` or `<SheetClose asChild><Link>...</Link></SheetClose>`) and the parent tree is server-rendered, React 19 reports a hydration mismatch where the inner element is missing on the server side. Visually: drawer opens but nav links are blank, or a console "Hydration failed" appears with the diff pointing at our `Button` inside the trigger.
+
+**Cause:** the `radix-ui@1.4.3` barrel's `Slot.Root` composition doesn't always produce byte-identical output across SSR and client when the asChild chain goes `SheetTrigger → DialogTrigger → Primitive.button (Slot) → our Button`. Adding `next-themes`' inline `<script>` (see issue above) as a sibling seems to compound the offsets.
+
+**Impact:** dev console errors; in extreme cases (SheetClose + Link) the inner element doesn't render server-side and the drawer is empty until JS hydrates.
+
+**Workaround:**
+- For triggers: drop `asChild`, render the trigger as its own element and apply shadcn styling via `cn(buttonVariants(...), ...)` on the className. See `app/components/MobileNav/index.tsx` for the trigger.
+- For close-wrapped children (`SheetClose asChild` around an interactive child): lift the open state to React via `useState` + `<Sheet open onOpenChange>` and call `setOpen(false)` from each child's own `onClick`. See the same MobileNav for the close pattern.
+
+**Revisit when:** updating past `radix-ui@1.4.3` — verify against a minimal Sheet/Trigger reproducer before re-introducing asChild.

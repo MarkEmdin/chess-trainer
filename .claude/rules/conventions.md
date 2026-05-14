@@ -38,7 +38,7 @@
 ## i18n
 
 - All user-facing copy goes through next-intl. Server components: `getTranslations('namespace')`. Client components: `useTranslations('namespace')`. Date/number formatting: `useFormatter()` / `format.dateTime(...)`.
-- Translation strings live in `messages/{en,ru}.json` under topic namespaces (`nav`, `home`, `theory`, `champions`, `pieces`, `pieceValues`, `games`, `common`, `metadata`, etc.). Keep both files structurally identical — same key tree, different values.
+- Translation strings live in `messages/{en,ru}.json` under topic namespaces (`nav`, `home`, `lessons`, `theory`, `champions`, `pieces`, `pieceValues`, `games`, `thinkTime`, `videoModal`, `common`, `metadata`). Keep both files structurally identical — same key tree, different values.
 - Brand name "Chess Fundamentals" is the explicit exception: left as a literal in both locales, not a translation key.
 - For features with their own UI surface (forms, modals, lists), put strings under one feature namespace (e.g. `games.usernameForm.*`, `games.modal.*`). Don't sprinkle generic keys into `common` unless they're genuinely reusable across features.
 - Page `<title>`/`<meta>` come from `generateMetadata` (async function in the layout/page), not the static `metadata` const, when the description needs translation.
@@ -48,3 +48,15 @@
 - Use [SWR](https://swr.vercel.app/) for client-side reads. Wrap calls in a custom hook under `lib/<feature>/` so the call site stays domain-typed (`useChessComGames(username)` → `{ games, error, isLoading, isNotFound }`), not generic. See `lib/chesscom/useChessComGames.ts` for the template.
 - Key shape is a typed tuple — first element is a string discriminator, second+ are the params. This namespaces cache keys across features and dedupes identical requests across routes (e.g. `/games` and `/think-time` share one fetch per username).
 - For data that doesn't change after the fact (game archives, finished games), turn off `revalidateOnFocus` and `revalidateOnReconnect`. Leave `revalidateIfStale` at its default — it acts as a free retry on remount when the cached state is an error.
+
+## Persisted client state
+
+- Values that should survive page reloads (saved username, threshold pick) use `useSyncExternalStore` + localStorage, not `useState` + `useEffect`. See `lib/chesscom/useStoredUsername.ts` for the template. Reading localStorage synchronously during render means the first paint already reflects the saved value — no SSR-null-then-mount-update flash. Cross-tab sync comes free via the `storage` event; same-tab via a custom event the setter dispatches so multiple hook instances stay in lockstep.
+
+## Code splitting
+
+- Heavy client-only components (chess engine bundles, etc.) load via `dynamic(() => import('./Foo'), { ssr: false })`. `GameModal` is the canonical example — imported from both `ChessComGames` and `LongThinks` containers; the bundler dedupes the chunk across consumers.
+
+## Route-level UI
+
+- `app/[locale]/loading.tsx` and `app/[locale]/error.tsx` are wired up: a centered spinner for the SSR/streaming fallback, and a translated retry screen for client error boundaries. New routes under `[locale]` inherit them automatically — no per-route copy needed unless you want a feature-specific variant.
