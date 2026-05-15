@@ -24,6 +24,13 @@ const buildConfig = async () => {
   const nextConfig = await createJestConfig(config)();
   return {
     ...nextConfig,
+    // Re-state the `@/*` alias explicitly so `jest.mock('@/...')` (used in
+    // component tests to swap router/SWR hooks) resolves the same way as
+    // ordinary `import` does.
+    moduleNameMapper: {
+      ...nextConfig.moduleNameMapper,
+      '^@/(.*)$': '<rootDir>/$1',
+    },
     transformIgnorePatterns: [
       'node_modules/(?!(next-intl|use-intl|@formatjs|intl-messageformat)/)',
       '^.+\\.module\\.(css|sass|scss)$',
