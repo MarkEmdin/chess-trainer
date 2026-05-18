@@ -134,7 +134,7 @@
     "subtitle": "Последние 10 партий любого игрока Chess.com.",
     "usernameForm": {
       "label": "Ник на Chess.com",
-      "placeholder": "например, magnuscarlsen",
+      "placeholder": "например, MarkEmdin",
       "submit": "Загрузить партии",
       "change": "Сменить пользователя"
     },

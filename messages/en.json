@@ -134,7 +134,7 @@
     "subtitle": "Browse the last 10 games of any Chess.com player.",
     "usernameForm": {
       "label": "Chess.com username",
-      "placeholder": "e.g. magnuscarlsen",
+      "placeholder": "e.g. MarkEmdin",
       "submit": "Load games",
       "change": "Change user"
     },
