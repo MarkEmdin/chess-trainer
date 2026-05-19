@@ -8,6 +8,9 @@ import '@/app/globals.css';
 import Header from '@/app/components/Header';
 import ThemeProvider from '@/app/components/ThemeProvider';
 
+const SITE_URL = 'https://chess-trainer-amber.vercel.app';
+const BRAND = 'Chess Fundamentals';
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -25,9 +28,36 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'metadata' });
+  const description = t('description');
+  const path = `/${locale}`;
+  const ogLocale = locale === 'ru' ? 'ru_RU' : 'en_US';
+  const altLocale = locale === 'ru' ? 'en_US' : 'ru_RU';
+
   return {
-    title: 'Chess Fundamentals',
-    description: t('description'),
+    metadataBase: new URL(SITE_URL),
+    title: BRAND,
+    description,
+    applicationName: BRAND,
+    authors: [{ name: 'Mark Emdin' }],
+    creator: 'Mark Emdin',
+    alternates: {
+      canonical: path,
+      languages: { en: '/en', ru: '/ru' },
+    },
+    openGraph: {
+      type: 'website',
+      url: path,
+      siteName: BRAND,
+      title: BRAND,
+      description,
+      locale: ogLocale,
+      alternateLocale: [altLocale],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: BRAND,
+      description,
+    },
   };
 }
 
