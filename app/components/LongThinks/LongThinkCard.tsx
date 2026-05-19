@@ -5,9 +5,9 @@ import { Chessboard } from 'react-chessboard';
 import { ClockIcon } from 'lucide-react';
 import { formatSeconds } from '@/lib/chesscom/format';
 import type { LongThink } from '@/lib/chesscom/longThinks';
-import type { Game } from '@/lib/chesscom/types';
+import type { Game, GamePlayer } from '@/lib/chesscom/types';
 import { Card, CardContent } from '@/app/components/ui/card';
-import GameMatchup from '@/app/components/GameMatchup';
+import { cn } from '@/lib/utils';
 
 type Props = {
   think: LongThink;
@@ -26,11 +26,48 @@ function formatMove(think: LongThink): string {
     : `${think.fullMoveNumber}… ${think.san}`;
 }
 
+function PlayerRow({
+  player,
+  pieceColor,
+  isUser,
+}: {
+  player: GamePlayer;
+  pieceColor: 'white' | 'black';
+  isUser: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-2 min-w-0 text-sm">
+      <span
+        aria-hidden
+        className={cn(
+          'size-3 rounded-full shrink-0 border border-foreground/30',
+          pieceColor === 'white' ? 'bg-white' : 'bg-black',
+        )}
+      />
+      {isUser ? (
+        <strong className="truncate text-foreground">{player.username}</strong>
+      ) : (
+        <span className="truncate text-foreground">{player.username}</span>
+      )}
+      <span className="text-xs text-muted-foreground shrink-0">
+        ({player.rating})
+      </span>
+    </div>
+  );
+}
+
 export default function LongThinkCard({ think, game, onClick }: Props) {
   const t = useTranslations('thinkTime');
   const tTile = useTranslations('games.tile');
   const format = useFormatter();
   const dateStr = format.dateTime(game.endTime, { dateStyle: 'medium' });
+
+  // Board is oriented so the user is at the bottom — opponent labels the top
+  // row, user labels the bottom row. Each player's piece color flips with
+  // game.userColor.
+  const userIsWhite = game.userColor === 'white';
+  const topPieceColor: 'white' | 'black' = userIsWhite ? 'black' : 'white';
+  const bottomPieceColor: 'white' | 'black' = userIsWhite ? 'white' : 'black';
 
   const squareStyles: Record<string, React.CSSProperties> =
     think.lastOpponentMove
@@ -53,19 +90,31 @@ export default function LongThinkCard({ think, game, onClick }: Props) {
       <Card className="hover:shadow-md transition-shadow">
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-            <div className="w-[200px] mx-auto sm:w-[160px] sm:mx-0 sm:shrink-0 pointer-events-none">
-              <Chessboard
-                options={{
-                  position: think.fenBefore,
-                  boardOrientation: game.userColor,
-                  allowDragging: false,
-                  showNotation: false,
-                  showAnimations: false,
-                  squareStyles,
-                }}
+            <div className="w-[200px] mx-auto sm:w-[160px] sm:mx-0 sm:shrink-0 flex flex-col gap-1.5">
+              <PlayerRow
+                player={game.opponent}
+                pieceColor={topPieceColor}
+                isUser={false}
+              />
+              <div className="pointer-events-none">
+                <Chessboard
+                  options={{
+                    position: think.fenBefore,
+                    boardOrientation: game.userColor,
+                    allowDragging: false,
+                    showNotation: false,
+                    showAnimations: false,
+                    squareStyles,
+                  }}
+                />
+              </div>
+              <PlayerRow
+                player={game.user}
+                pieceColor={bottomPieceColor}
+                isUser
               />
             </div>
-            <div className="flex flex-col gap-1 flex-1 min-w-0">
+            <div className="flex flex-col gap-2 flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-semibold text-foreground">
                   {formatMove(think)}
@@ -79,9 +128,6 @@ export default function LongThinkCard({ think, game, onClick }: Props) {
                   </span>
                 </span>
               </div>
-              <p className="text-sm text-foreground">
-                <GameMatchup game={game} />
-              </p>
               <p className="text-xs text-muted-foreground">
                 {tTile(`timeClass.${game.timeClass}`)} · {dateStr}
               </p>
