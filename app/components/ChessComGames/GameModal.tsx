@@ -22,63 +22,91 @@ import {
 import { formatSeconds } from '@/lib/chesscom/format';
 import type { Game, GameColor, GamePlayer } from '@/lib/chesscom/types';
 import GameMatchup from '@/app/components/GameMatchup';
+import { cn } from '@/lib/utils';
 
-function buildPositions(pgn: string): string[] {
+type ReplayMove = {
+  san: string;
+  color: GameColor;
+  fullMoveNumber: number;
+};
+
+function buildReplay(pgn: string): {
+  positions: string[];
+  moves: ReplayMove[];
+} {
   const parser = new Chess();
   try {
     parser.loadPgn(pgn);
   } catch {
-    return [new Chess().fen()];
+    return { positions: [new Chess().fen()], moves: [] };
   }
   const history = parser.history({ verbose: true });
   const replay = new Chess();
   const positions = [replay.fen()];
-  for (const move of history) {
+  const moves: ReplayMove[] = [];
+  history.forEach((move, i) => {
     replay.move({
       from: move.from,
       to: move.to,
       promotion: move.promotion,
     });
     positions.push(replay.fen());
-  }
-  return positions;
+    moves.push({
+      san: move.san,
+      color: move.color === 'w' ? 'white' : 'black',
+      fullMoveNumber: Math.floor(i / 2) + 1,
+    });
+  });
+  return { positions, moves };
+}
+
+function formatMoveLabel(move: ReplayMove): string {
+  return move.color === 'white'
+    ? `${move.fullMoveNumber}. ${move.san}`
+    : `${move.fullMoveNumber}… ${move.san}`;
 }
 
 function PlayerRow({
-  label,
   player,
+  pieceColor,
   clock,
-  timeSpent,
   isUser,
+  isActive,
 }: {
-  label: string;
   player: GamePlayer;
+  pieceColor: GameColor;
   clock: string | undefined;
-  timeSpent: string | undefined;
   isUser: boolean;
+  isActive: boolean;
 }) {
   return (
     <div
-      className={`flex items-center justify-between gap-3 px-2 py-1.5 text-sm rounded-md ${isUser ? 'bg-accent/40' : ''}`}
+      className={cn(
+        'flex items-center justify-between gap-3 px-2 py-1.5 text-sm rounded-md transition-colors',
+        // Highlight whichever side is to move at the current position, so the
+        // viewer can tell the game state at a glance.
+        isActive && 'bg-accent/60 ring-1 ring-foreground/25',
+      )}
     >
-      <div className="flex items-baseline gap-2 min-w-0">
-        <span className="text-xs uppercase tracking-wide text-muted-foreground shrink-0">
-          {label}
-        </span>
-        <span className="font-medium truncate">{player.username}</span>
+      <div className="flex items-center gap-2 min-w-0">
+        <span
+          aria-hidden
+          className={cn(
+            'size-3 rounded-full shrink-0 border border-foreground/30',
+            pieceColor === 'white' ? 'bg-white' : 'bg-black',
+          )}
+        />
+        {isUser ? (
+          <strong className="truncate font-semibold">{player.username}</strong>
+        ) : (
+          <span className="truncate">{player.username}</span>
+        )}
         <span className="text-muted-foreground shrink-0">
           ({player.rating})
         </span>
       </div>
       {clock && (
-        <span className="font-mono text-sm tabular-nums shrink-0">
-          {clock}
-          {timeSpent && (
-            <span className="ml-1.5 text-xs text-muted-foreground">
-              −{timeSpent}
-            </span>
-          )}
-        </span>
+        <span className="font-mono text-sm tabular-nums shrink-0">{clock}</span>
       )}
     </div>
   );
@@ -96,7 +124,10 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
   const format = useFormatter();
   const [index, setIndex] = useState(initialIndex ?? 0);
 
-  const positions = useMemo(() => buildPositions(game.pgn), [game.pgn]);
+  const { positions, moves } = useMemo(
+    () => buildReplay(game.pgn),
+    [game.pgn],
+  );
   const totalMoves = Math.max(0, positions.length - 1);
 
   useEffect(() => {
@@ -117,6 +148,9 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
   const topColor: GameColor = game.userColor === 'white' ? 'black' : 'white';
   const bottomColor: GameColor = game.userColor;
 
+  // Side to move at the displayed position — second field of the FEN is "w" or "b".
+  const sideToMove: GameColor = currentFen.split(' ')[1] === 'b' ? 'black' : 'white';
+
   // Clocks at the currently displayed position.
   const snapshot = game.clockSnapshots?.[index];
   const whiteClock =
@@ -131,8 +165,7 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
   // Time spent by whoever just moved into this position.
   // Formula: (prevClock + increment) − currentClock — increment cancels out
   // the gain the player received for completing the move, leaving raw thinking time.
-  let timeSpentColor: GameColor | undefined;
-  let timeSpentFormatted: string | undefined;
+  let lastMoveDuration: string | undefined;
   if (index > 0 && snapshot) {
     const moverIsWhite = index % 2 === 1;
     const prev = game.clockSnapshots?.[Math.max(0, index - 2)];
@@ -143,13 +176,15 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
     if (prevSec !== undefined && currSec !== undefined) {
       const spent = prevSec + game.increment - currSec;
       if (spent >= 0) {
-        timeSpentColor = moverIsWhite ? 'white' : 'black';
-        timeSpentFormatted = formatSeconds(spent);
+        lastMoveDuration = formatSeconds(spent);
       }
     }
   }
 
   const clocks = { white: whiteClock, black: blackClock };
+
+  const lastMove = index > 0 ? moves[index - 1] : undefined;
+  const lastMoveLabel = lastMove ? formatMoveLabel(lastMove) : undefined;
 
   return (
     <Dialog
@@ -160,25 +195,25 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
     >
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="font-normal">
-            <GameMatchup game={game} ratingClassName="text-base" />
-          </DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="font-normal text-base">
             {dateStr} · {tTile(`timeClass.${game.timeClass}`)} ·{' '}
             {tTile(`result.${game.result}`)}
+          </DialogTitle>
+          {/* Names are visible on the player rows; keep the matchup in a
+              visually-hidden description so screen readers still announce it. */}
+          <DialogDescription className="sr-only">
+            <GameMatchup game={game} />
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-3">
           <div className="mx-auto w-full max-w-[400px] flex flex-col gap-1.5">
             <PlayerRow
-              label={t(topColor)}
               player={game.opponent}
+              pieceColor={topColor}
               clock={clocks[topColor]}
-              timeSpent={
-                timeSpentColor === topColor ? timeSpentFormatted : undefined
-              }
               isUser={false}
+              isActive={sideToMove === topColor}
             />
             <Chessboard
               options={{
@@ -189,15 +224,11 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
               }}
             />
             <PlayerRow
-              label={t(bottomColor)}
               player={game.user}
+              pieceColor={bottomColor}
               clock={clocks[bottomColor]}
-              timeSpent={
-                timeSpentColor === bottomColor
-                  ? timeSpentFormatted
-                  : undefined
-              }
               isUser
+              isActive={sideToMove === bottomColor}
             />
           </div>
 
@@ -243,6 +274,16 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
             >
               <ChevronLastIcon />
             </Button>
+          </div>
+
+          <div className="h-5 text-xs text-muted-foreground text-center">
+            {lastMoveLabel &&
+              (lastMoveDuration
+                ? t('lastMoveWithDuration', {
+                    move: lastMoveLabel,
+                    duration: lastMoveDuration,
+                  })
+                : t('lastMoveCaption', { move: lastMoveLabel }))}
           </div>
 
           <div className="flex justify-center">

@@ -161,9 +161,9 @@
       "prevMove": "Предыдущий ход",
       "nextMove": "Следующий ход",
       "lastMove": "В конец",
-      "viewOnChessCom": "Открыть на Chess.com",
-      "white": "Белые",
-      "black": "Чёрные"
+      "lastMoveCaption": "Последний ход: {move}",
+      "lastMoveWithDuration": "Последний ход: {move} — {duration}",
+      "viewOnChessCom": "Открыть на Chess.com"
     }
   },
   "thinkTime": {

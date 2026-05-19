@@ -161,9 +161,9 @@
       "prevMove": "Previous move",
       "nextMove": "Next move",
       "lastMove": "Go to end",
-      "viewOnChessCom": "View on Chess.com",
-      "white": "White",
-      "black": "Black"
+      "lastMoveCaption": "Last move: {move}",
+      "lastMoveWithDuration": "Last move: {move} — {duration}",
+      "viewOnChessCom": "View on Chess.com"
     }
   },
   "thinkTime": {
