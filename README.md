@@ -2,37 +2,33 @@
 
 [![CI](https://github.com/MarkEmdin/chess-trainer/actions/workflows/ci.yml/badge.svg)](https://github.com/MarkEmdin/chess-trainer/actions/workflows/ci.yml)
 
-A chess training app: explore the World Champions, learn basic checkmates and tactics, train piece-value intuition, and analyze your own Chess.com games — including the positions where you took longest to decide.
+Interactive chess learning platform built with Next.js, React, and TypeScript.
+
+The project combines my background as a former competitive chess player and coach (2250 FIDE) with modern frontend development and AI-assisted workflows.
+
+## Live Demo
+
+[chess-trainer-amber.vercel.app/en](https://chess-trainer-amber.vercel.app/en)
 
 ## Features
 
-- **Theory** — basic checkmate patterns (two rooks, queen, rook, windmill) with explainer videos and direct links to Lichess practice trainers.
-- **Piece Values** — drag-free puzzle: pick the combination of pieces whose point values sum to a random target.
-- **World Champions** — bios of the thirteen World Champions from Steinitz to Kasparov, each with a photo and a lecture video.
-- **Chess.com Games** — enter any username, browse the last 10 games as cards (white vs black, result, time class, date), click one to replay it move by move on an interactive board with live clocks and per-move think time.
-- **Long Moves** — across the loaded games, surface every position where the user spent more than the configured threshold thinking (default 45s, adjustable from a preset picker). Sorted by time descending. The mini-board on each card highlights the opponent's last move so you immediately see what you were responding to. Click any card to open that exact half-move in the full replay.
+- **Theory** — basic checkmate patterns with explainer videos and Lichess practice links
+- **Piece Values** — puzzle: pick the combination of pieces whose point values sum to a random target
+- **World Champions** — bios and lecture videos from Steinitz to Kasparov
+- **Chess.com Games** — load any player's last 10 games and replay them move by move with live clocks and per-move think time
+- **Long Moves** — surface every position where the user spent more than the configured threshold thinking, sorted by time
+- Three themes (light / dark / rose) and two languages (English / Russian), URL-prefixed with auto-detect
 
-## UX
+> Note: part of the educational video content is in Russian only.
 
-- **Three themes:** light, dark, and a custom rose palette (default).
-- **Two languages:** English and Russian, URL-prefixed (`/en/...`, `/ru/...`), locale auto-detected from `Accept-Language` with a manual switcher in the header.
+## Tech Stack
 
-## Getting started
-
-```bash
-npm install
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
-
-## Tech stack
-
-- **Framework:** Next.js 16 (App Router, Turbopack), React 19
-- **Language:** TypeScript (strict mode)
-- **Styling:** Tailwind CSS 4 (CSS-first config), shadcn/ui primitives
-- **Theming:** `next-themes` (light / dark / rose)
-- **i18n:** `next-intl` with locale-prefixed routing — `[locale]` segment + `proxy.ts` middleware (Next.js 16's renamed `middleware.ts`)
-- **Chess:** `chess.js` (PGN parsing, move replay) + `react-chessboard` v5 (board rendering)
-- **Icons:** `lucide-react`
-- **Data:** Chess.com Public API (no auth, client-side fetch) wrapped in [SWR](https://swr.vercel.app/)-backed custom hooks with typed tuple cache keys — the same username fetched on `/games` and `/think-time` resolves to a single network call
+- Next.js 16 (App Router, Turbopack), React 19
+- TypeScript (strict mode)
+- Tailwind CSS 4, shadcn/ui
+- next-intl for locale-prefixed routing
+- SWR for client-side data fetching
+- chess.js + react-chessboard
+- Jest + React Testing Library
+- Vercel hosting, GitHub Actions CI
+- Built with Claude Code (AI-assisted development)
