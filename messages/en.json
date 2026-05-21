@@ -45,6 +45,20 @@
     "title": "Admin",
     "signedInAs": "Signed in as {nickname}"
   },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "Set your Chess.com and Lichess usernames here so they sync across the app.",
+    "chesscom": "Chess.com username",
+    "lichess": "Lichess username",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "errors": {
+      "chesscomFormat": "Chess.com username: 3-25 chars, letters, digits, \"-\" or \"_\"",
+      "lichessFormat": "Lichess username: 2-20 chars, letters, digits, \"-\" or \"_\"",
+      "notAuthenticated": "You must be signed in"
+    }
+  },
   "home": {
     "subtitle": "Master the basics — pieces, moves, and core strategies.",
     "startLearning": "Start Learning"

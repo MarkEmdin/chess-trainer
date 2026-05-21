@@ -45,6 +45,20 @@
     "title": "Админ",
     "signedInAs": "Вы вошли как {nickname}"
   },
+  "profile": {
+    "title": "Профиль",
+    "subtitle": "Никнеймы Chess.com и Lichess — будут использоваться по всему сайту.",
+    "chesscom": "Никнейм на Chess.com",
+    "lichess": "Никнейм на Lichess",
+    "save": "Сохранить",
+    "saving": "Сохранение…",
+    "saved": "Сохранено",
+    "errors": {
+      "chesscomFormat": "Chess.com никнейм: 3-25 символов — латиница, цифры, «-» или «_»",
+      "lichessFormat": "Lichess никнейм: 2-20 символов — латиница, цифры, «-» или «_»",
+      "notAuthenticated": "Нужно войти"
+    }
+  },
   "home": {
     "subtitle": "Освойте основы — фигуры, ходы и базовые стратегии.",
     "startLearning": "Начать обучение"

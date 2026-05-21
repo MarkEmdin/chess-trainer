@@ -40,9 +40,12 @@ export default async function AuthMenu() {
           {t('admin')}
         </Link>
       )}
-      <span className="text-muted-foreground hidden lg:inline">
+      <Link
+        href="/profile"
+        className="text-muted-foreground hover:text-foreground transition-colors hidden lg:inline"
+      >
         {user.nickname}
-      </span>
+      </Link>
       <form action={signOut}>
         <button
           type="submit"
