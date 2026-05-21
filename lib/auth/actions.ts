@@ -1,7 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -18,6 +18,7 @@ export async function signIn(
   formData: FormData,
 ): Promise<AuthFormState> {
   const t = await getTranslations('auth.errors');
+  const currentLocale = await getLocale();
   const nickname = String(formData.get('nickname') ?? '').trim();
   const password = String(formData.get('password') ?? '');
 
@@ -37,13 +38,24 @@ export async function signIn(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error, data } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-  if (error) {
+  if (error || !data.user) {
     return { error: t('wrongPassword') };
   }
 
-  redirect('/');
+  // Honour the user's stored language preference over the URL they
+  // landed on. Falls back to whatever locale they were already viewing.
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('preferred_locale')
+    .eq('id', data.user.id)
+    .single();
+
+  redirect(`/${profile?.preferred_locale ?? currentLocale}/`);
 }
 
 export async function signUp(
@@ -51,6 +63,7 @@ export async function signUp(
   formData: FormData,
 ): Promise<AuthFormState> {
   const t = await getTranslations('auth.errors');
+  const currentLocale = await getLocale();
   const email = String(formData.get('email') ?? '').trim();
   const nickname = String(formData.get('nickname') ?? '').trim();
   const password = String(formData.get('password') ?? '');
@@ -76,20 +89,23 @@ export async function signUp(
     return { error: t('nicknameTaken'), suggest: 'login' };
   }
 
-  // The trigger reads options.data.nickname out of raw_user_meta_data and
-  // writes it to user_profiles.
+  // The trigger reads options.data.nickname and preferred_locale out of
+  // raw_user_meta_data and writes them to user_profiles. We seed
+  // preferred_locale with the user's current page language so the post-
+  // login redirect (and any other locale-aware lookup) finds something
+  // sensible right away.
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { nickname } },
+    options: { data: { nickname, preferred_locale: currentLocale } },
   });
 
   if (error) {
     return { error: error.message };
   }
 
-  redirect('/');
+  redirect(`/${currentLocale}/`);
 }
 
 export async function signOut(): Promise<void> {

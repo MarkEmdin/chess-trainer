@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/app/components/ui/dropdown-menu';
+import { updatePreferredLocale } from '@/lib/auth/profileActions';
 
 const localeLabels: Record<(typeof routing.locales)[number], string> = {
   en: 'English',
@@ -27,6 +28,9 @@ export default function LanguageToggle() {
 
   const switchTo = (next: (typeof routing.locales)[number]) => {
     if (next === locale) return;
+    // Fire-and-forget: persists to user_profiles when signed in, no-op
+    // for guests. Don't block the URL switch on the DB round-trip.
+    void updatePreferredLocale(next);
     startTransition(() => {
       router.replace(pathname, { locale: next });
     });

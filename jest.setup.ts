@@ -11,6 +11,18 @@ class ResizeObserverStub {
 (globalThis as unknown as { ResizeObserver: typeof ResizeObserverStub }).ResizeObserver =
   ResizeObserverStub;
 
+// next/cache (revalidatePath, revalidateTag, unstable_cache) is a
+// server-only module that initialises Node Web Streams at import time —
+// fine in the Next runtime, fatal in JSDOM. Components that transitively
+// pull it in (e.g. Server Actions reachable from a Client Component's
+// import graph) would otherwise fail to mount in unit tests. Mocking
+// here keeps each test file from having to do it.
+jest.mock('next/cache', () => ({
+  revalidatePath: () => {},
+  revalidateTag: () => {},
+  unstable_cache: <T,>(fn: T) => fn,
+}));
+
 if (typeof window !== 'undefined' && !window.matchMedia) {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,

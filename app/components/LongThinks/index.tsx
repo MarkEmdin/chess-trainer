@@ -28,7 +28,15 @@ function enrich(games: Game[], thresholdSec: number): EnrichedThink[] {
     .sort((a, b) => b.think.seconds - a.think.seconds);
 }
 
-export default function LongThinks() {
+type Props = {
+  isAuthenticated: boolean;
+  initialUsername: string | null;
+};
+
+export default function LongThinks({
+  isAuthenticated,
+  initialUsername,
+}: Props) {
   const [selected, setSelected] = useState<EnrichedThink | null>(null);
   const [threshold, setThreshold] = useStoredThreshold();
   // `threshold` updates synchronously for the picker button (instant
@@ -42,6 +50,8 @@ export default function LongThinks() {
   return (
     <>
       <ChessComShell
+        isAuthenticated={isAuthenticated}
+        initialUsername={initialUsername}
         emptyMessage={t('empty', { threshold: deferredThreshold })}
         renderStatus={({ games }) =>
           t('showing', {
