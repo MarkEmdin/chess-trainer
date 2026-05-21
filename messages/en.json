@@ -7,6 +7,44 @@
     "thinkTime": "Think Time",
     "openMenu": "Open menu"
   },
+  "auth": {
+    "signIn": "Login",
+    "signUp": "Register",
+    "signOut": "Logout",
+    "admin": "Admin",
+    "email": "Email",
+    "nickname": "Nickname",
+    "password": "Password",
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Login to your account.",
+      "submit": "Login",
+      "pending": "Logging in…",
+      "switchPrompt": "Don't have an account?",
+      "switchLink": "Register"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Start tracking your chess progress.",
+      "submit": "Register",
+      "pending": "Creating…",
+      "switchPrompt": "Already have an account?",
+      "switchLink": "Login"
+    },
+    "errors": {
+      "fieldsRequired": "All fields are required",
+      "noAccount": "No account with this nickname.",
+      "wrongPassword": "Wrong password.",
+      "nicknameTaken": "This nickname is already taken.",
+      "nicknameFormat": "Nickname must be 3-30 letters, digits, \"-\" or \"_\"",
+      "registerSuggest": "Register?",
+      "loginSuggest": "Login?"
+    }
+  },
+  "admin": {
+    "title": "Admin",
+    "signedInAs": "Signed in as {nickname}"
+  },
   "home": {
     "subtitle": "Master the basics — pieces, moves, and core strategies.",
     "startLearning": "Start Learning"

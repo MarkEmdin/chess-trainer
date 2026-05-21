@@ -7,6 +7,44 @@
     "thinkTime": "Долгие ходы",
     "openMenu": "Открыть меню"
   },
+  "auth": {
+    "signIn": "Login",
+    "signUp": "Register",
+    "signOut": "Logout",
+    "admin": "Админ",
+    "email": "Email",
+    "nickname": "Никнейм",
+    "password": "Пароль",
+    "login": {
+      "title": "С возвращением",
+      "subtitle": "Войдите в свой аккаунт.",
+      "submit": "Login",
+      "pending": "Вход…",
+      "switchPrompt": "Нет аккаунта?",
+      "switchLink": "Register"
+    },
+    "register": {
+      "title": "Создать аккаунт",
+      "subtitle": "Начни отслеживать свой шахматный прогресс.",
+      "submit": "Register",
+      "pending": "Создание…",
+      "switchPrompt": "Уже есть аккаунт?",
+      "switchLink": "Login"
+    },
+    "errors": {
+      "fieldsRequired": "Все поля обязательны",
+      "noAccount": "Аккаунта с таким никнеймом нет.",
+      "wrongPassword": "Неверный пароль.",
+      "nicknameTaken": "Этот никнейм уже занят.",
+      "nicknameFormat": "Никнейм: 3-30 символов — латиница, цифры, «-» или «_»",
+      "registerSuggest": "Зарегистрироваться?",
+      "loginSuggest": "Войти?"
+    }
+  },
+  "admin": {
+    "title": "Админ",
+    "signedInAs": "Вы вошли как {nickname}"
+  },
   "home": {
     "subtitle": "Освойте основы — фигуры, ходы и базовые стратегии.",
     "startLearning": "Начать обучение"

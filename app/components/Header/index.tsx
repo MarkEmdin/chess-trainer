@@ -3,6 +3,7 @@ import { Link } from '@/i18n/navigation';
 import LanguageToggle from '@/app/components/LanguageToggle';
 import ThemeToggle from '@/app/components/ThemeToggle';
 import MobileNav from '@/app/components/MobileNav';
+import AuthMenu from '@/app/components/AuthMenu';
 
 const navLinks = [
   { href: '/lessons/world-champions', key: 'worldChampions' },
@@ -38,14 +39,17 @@ export default async function Header() {
               </li>
             ))}
           </ul>
-          <div className="flex items-center gap-1">
-            <LanguageToggle />
-            <ThemeToggle />
+          <div className="flex items-center gap-3">
+            <AuthMenu />
+            <div className="flex items-center gap-1">
+              <LanguageToggle />
+              <ThemeToggle />
+            </div>
           </div>
         </div>
 
         {/* Mobile drawer — state-managed for clean onClick close behavior */}
-        <MobileNav navLinks={navLinks} />
+        <MobileNav navLinks={navLinks} authMenu={<AuthMenu />} />
       </nav>
     </header>
   );

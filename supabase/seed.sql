@@ -32,7 +32,7 @@ begin
     crypt('123456', gen_salt('bf')),
     now(),
     '{"provider":"email","providers":["email"]}',
-    '{}',
+    '{"nickname":"mark"}',
     now(),
     now(),
     '',

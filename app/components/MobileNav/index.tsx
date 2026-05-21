@@ -23,9 +23,12 @@ type NavLink = {
 
 type Props = {
   navLinks: ReadonlyArray<NavLink>;
+  // Server-rendered auth controls passed as ReactNode so this client
+  // component doesn't need to know about Supabase or auth state.
+  authMenu: React.ReactNode;
 };
 
-export default function MobileNav({ navLinks }: Props) {
+export default function MobileNav({ navLinks, authMenu }: Props) {
   const [open, setOpen] = useState(false);
   const t = useTranslations('nav');
 
@@ -58,6 +61,7 @@ export default function MobileNav({ navLinks }: Props) {
               </li>
             ))}
           </ul>
+          <div className="pt-4 mt-2 border-t border-border">{authMenu}</div>
           <div className="flex items-center gap-2 pt-4 mt-2 border-t border-border">
             <LanguageToggle />
             <ThemeToggle />
