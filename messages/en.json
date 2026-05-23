@@ -45,6 +45,26 @@
     "title": "Admin",
     "signedInAs": "Signed in as {nickname}"
   },
+  "coaching": {
+    "askCoach": "Ask coach",
+    "viewThread": "View thread",
+    "askTitle": "Ask the coach",
+    "threadTitle": "Coaching thread",
+    "bodyLabel": "What were you thinking in this position?",
+    "bodyPlaceholder": "Describe your thoughts, the candidate moves you considered, what made you hesitate…",
+    "submit": "Send to coach",
+    "submitting": "Sending…",
+    "submitted": "Your question is on its way.",
+    "yourQuestion": "Your question",
+    "coachResponse": "Coach's response",
+    "awaitingReply": "Awaiting reply.",
+    "errors": {
+      "missingFields": "Position data is missing — try reopening the modal.",
+      "bodyTooLong": "Keep it under {max} characters.",
+      "notAuthenticated": "You must be signed in.",
+      "alreadyAsked": "You've already asked about this position."
+    }
+  },
   "profile": {
     "title": "Profile",
     "subtitle": "Set your Chess.com and Lichess usernames here so they sync across the app.",

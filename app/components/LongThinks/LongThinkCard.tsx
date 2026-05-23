@@ -2,17 +2,24 @@
 
 import { useFormatter, useTranslations } from 'next-intl';
 import { Chessboard } from 'react-chessboard';
-import { ClockIcon } from 'lucide-react';
+import { ClockIcon, MessageSquareIcon } from 'lucide-react';
 import { formatSeconds } from '@/lib/chesscom/format';
 import type { LongThink } from '@/lib/chesscom/longThinks';
 import type { Game, GamePlayer } from '@/lib/chesscom/types';
 import { Card, CardContent } from '@/app/components/ui/card';
+import { Button } from '@/app/components/ui/button';
 import { cn } from '@/lib/utils';
 
 type Props = {
   think: LongThink;
   game: Game;
   onClick: () => void;
+  // Coaching surface — only meaningful for signed-in users. `existingThread`
+  // flips the "Ask coach" button into "View thread"; `onAskCoach` opens
+  // the modal regardless.
+  showCoachingButton: boolean;
+  existingThread: boolean;
+  onAskCoach: () => void;
 };
 
 // Soft yellow — classic chess "last move" highlight (matches Lichess/Chess.com
@@ -56,8 +63,16 @@ function PlayerRow({
   );
 }
 
-export default function LongThinkCard({ think, game, onClick }: Props) {
+export default function LongThinkCard({
+  think,
+  game,
+  onClick,
+  showCoachingButton,
+  existingThread,
+  onAskCoach,
+}: Props) {
   const t = useTranslations('thinkTime');
+  const tCoaching = useTranslations('coaching');
   const tTile = useTranslations('games.tile');
   const format = useFormatter();
   const dateStr = format.dateTime(game.endTime, { dateStyle: 'medium' });
@@ -81,11 +96,26 @@ export default function LongThinkCard({ think, game, onClick }: Props) {
         }
       : {};
 
+  // Outer was a <button> when the card's only action was opening the
+  // game modal. The coaching button as a sibling forced a refactor —
+  // nested <button>s are invalid HTML, so the outer becomes a focusable
+  // div and the coaching button stops propagation so it doesn't also
+  // fire onClick.
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.target !== e.currentTarget) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onClick();
+    }
+  };
+
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
-      className="block w-full text-left appearance-none bg-transparent p-0 border-0 cursor-pointer"
+      onKeyDown={handleKeyDown}
+      className="block w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
     >
       <Card className="hover:shadow-md transition-shadow">
         <CardContent>
@@ -131,10 +161,27 @@ export default function LongThinkCard({ think, game, onClick }: Props) {
               <p className="text-xs text-muted-foreground">
                 {tTile(`timeClass.${game.timeClass}`)} · {dateStr}
               </p>
+              {showCoachingButton && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAskCoach();
+                  }}
+                  className="self-start mt-1"
+                >
+                  <MessageSquareIcon className="size-3.5" />
+                  {existingThread
+                    ? tCoaching('viewThread')
+                    : tCoaching('askCoach')}
+                </Button>
+              )}
             </div>
           </div>
         </CardContent>
       </Card>
-    </button>
+    </div>
   );
 }

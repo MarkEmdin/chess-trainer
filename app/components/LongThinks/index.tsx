@@ -7,6 +7,7 @@ import { Loader2Icon } from 'lucide-react';
 import { findLongThinks, type LongThink } from '@/lib/chesscom/longThinks';
 import type { Game } from '@/lib/chesscom/types';
 import { useStoredThreshold } from '@/lib/chesscom/useStoredThreshold';
+import { useMyCoachingRequests } from '@/lib/coaching/useMyCoachingRequests';
 import ChessComShell from '@/app/components/ChessComShell';
 import LongThinkCard from './LongThinkCard';
 import ThresholdSelector from './ThresholdSelector';
@@ -15,6 +16,14 @@ import ThresholdSelector from './ThresholdSelector';
 // from either route pays for the chess engine just once.
 const GameModal = dynamic(
   () => import('@/app/components/ChessComGames/GameModal'),
+  { ssr: false },
+);
+
+// Coaching modal pulls in react-chessboard too but only mounts when a
+// signed-in user clicks "Ask coach" — defer to keep it out of the
+// first render budget.
+const CoachingRequestModal = dynamic(
+  () => import('@/app/components/CoachingRequestModal'),
   { ssr: false },
 );
 
@@ -38,7 +47,14 @@ export default function LongThinks({
   initialUsername,
 }: Props) {
   const [selected, setSelected] = useState<EnrichedThink | null>(null);
+  const [coachingTarget, setCoachingTarget] =
+    useState<EnrichedThink | null>(null);
   const [threshold, setThreshold] = useStoredThreshold();
+  // Only fetched when signed in (the hook handles the gating). Map is
+  // keyed by fen so each card can do an O(1) "do I have a thread for
+  // this position?" lookup.
+  const { data: requestsByFen, mutate: refreshRequests } =
+    useMyCoachingRequests(isAuthenticated);
   // `threshold` updates synchronously for the picker button (instant
   // feedback). `deferredThreshold` lags during heavy re-renders so React
   // can keep the picker responsive — we use it for the actual filtering.
@@ -84,6 +100,11 @@ export default function LongThinks({
                       think={think}
                       game={game}
                       onClick={() => setSelected({ think, game })}
+                      showCoachingButton={isAuthenticated}
+                      existingThread={
+                        !!requestsByFen?.[think.fenBefore]
+                      }
+                      onAskCoach={() => setCoachingTarget({ think, game })}
                     />
                   ))}
                 </div>
@@ -98,6 +119,16 @@ export default function LongThinks({
           game={selected.game}
           initialIndex={selected.think.moveIndex - 1}
           onClose={() => setSelected(null)}
+        />
+      )}
+
+      {coachingTarget && (
+        <CoachingRequestModal
+          think={coachingTarget.think}
+          game={coachingTarget.game}
+          existingRequest={requestsByFen?.[coachingTarget.think.fenBefore]}
+          onClose={() => setCoachingTarget(null)}
+          onSubmitted={() => refreshRequests()}
         />
       )}
     </>

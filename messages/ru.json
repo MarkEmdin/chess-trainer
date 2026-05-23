@@ -45,6 +45,26 @@
     "title": "Админ",
     "signedInAs": "Вы вошли как {nickname}"
   },
+  "coaching": {
+    "askCoach": "Спросить тренера",
+    "viewThread": "Смотреть переписку",
+    "askTitle": "Спросить тренера",
+    "threadTitle": "Переписка с тренером",
+    "bodyLabel": "Что вы думали в этой позиции?",
+    "bodyPlaceholder": "Опишите свои размышления, какие ходы рассматривали, что вызвало сомнения…",
+    "submit": "Отправить тренеру",
+    "submitting": "Отправка…",
+    "submitted": "Вопрос отправлен.",
+    "yourQuestion": "Ваш вопрос",
+    "coachResponse": "Ответ тренера",
+    "awaitingReply": "Ожидание ответа.",
+    "errors": {
+      "missingFields": "Не хватает данных о позиции — переоткройте окно.",
+      "bodyTooLong": "Не более {max} символов.",
+      "notAuthenticated": "Нужно войти.",
+      "alreadyAsked": "Вы уже задали вопрос по этой позиции."
+    }
+  },
   "profile": {
     "title": "Профиль",
     "subtitle": "Никнеймы Chess.com и Lichess — будут использоваться по всему сайту.",
