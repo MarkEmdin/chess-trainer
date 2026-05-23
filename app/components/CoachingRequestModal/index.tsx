@@ -77,7 +77,7 @@ export default function CoachingRequestModal({
         </DialogHeader>
 
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="w-full sm:w-[200px] sm:shrink-0 pointer-events-none">
+          <div className="w-full sm:w-[200px] sm:shrink-0 sm:self-start pointer-events-none">
             <Chessboard
               options={{
                 position: think.fenBefore,

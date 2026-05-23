@@ -39,7 +39,7 @@ export default function CoachingThreadCard({ thread }: Props) {
     <Card>
       <CardContent>
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="w-[200px] mx-auto sm:w-[160px] sm:mx-0 sm:shrink-0 pointer-events-none">
+          <div className="w-[200px] mx-auto sm:w-[160px] sm:mx-0 sm:shrink-0 sm:self-start pointer-events-none">
             <Chessboard
               options={{
                 position: thread.fen,

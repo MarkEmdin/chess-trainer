@@ -123,7 +123,7 @@ export default function AuthForm({ mode }: Props) {
           href={otherMode === 'login' ? '/login' : '/register'}
           className="text-foreground underline hover:no-underline"
         >
-          {t(`${otherMode}.switchLink`)}
+          {t(`${mode}.switchLink`)}
         </Link>
       </p>
     </div>
