@@ -1,9 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { Loader2Icon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useChessComGames } from '@/lib/chesscom/useChessComGames';
 import { useStoredUsername } from '@/lib/chesscom/useStoredUsername';
+import { updateChesscomUsername } from '@/lib/auth/profileActions';
 import type { Game } from '@/lib/chesscom/types';
 import { Button } from '@/app/components/ui/button';
 import ChessComUsernameForm from '@/app/components/ChessComUsernameForm';
@@ -14,6 +16,13 @@ type RenderProps = {
 };
 
 type Props = {
+  // True when the visitor is signed in — switches storage from
+  // localStorage to user_profiles.chesscom_username so the value lives
+  // in one place and follows them across devices.
+  isAuthenticated: boolean;
+  // Initial username for signed-in users (their saved profile value).
+  // Ignored for guests, who read from localStorage.
+  initialUsername: string | null;
   // Status text rendered to the left of the change-user button. Only called
   // when games loaded successfully and the list is non-empty.
   renderStatus: (props: RenderProps) => React.ReactNode;
@@ -30,11 +39,31 @@ type Props = {
 // the "change user" button, and the status line. Consumers focus on what to
 // render once games are in hand.
 export default function ChessComShell({
+  isAuthenticated,
+  initialUsername,
   renderStatus,
   emptyMessage,
   children,
 }: Props) {
-  const [username, setUsername] = useStoredUsername();
+  // Both branches always render — conditional hooks are illegal. The unused
+  // one is cheap (localStorage read for guests is O(1); useState init for
+  // authed users is free).
+  const [storedUsername, setStoredUsername] = useStoredUsername();
+  const [profileUsername, setProfileUsername] =
+    useState<string | null>(initialUsername);
+
+  const username = isAuthenticated ? profileUsername : storedUsername;
+  const setUsername = (next: string | null) => {
+    if (isAuthenticated) {
+      setProfileUsername(next);
+      // Fire-and-forget DB update — failure leaves the optimistic local
+      // state in place, which the next page load will reconcile.
+      void updateChesscomUsername(next);
+    } else {
+      setStoredUsername(next);
+    }
+  };
+
   const { games, error, isLoading, isNotFound } = useChessComGames(username);
   const tCommon = useTranslations('common.chesscom');
   const tForm = useTranslations('games.usernameForm');

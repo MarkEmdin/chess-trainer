@@ -74,6 +74,8 @@ function shell({
   if (username) localStorage.setItem('chesscom-username', username);
   return renderWithIntl(
     <ChessComShell
+      isAuthenticated={false}
+      initialUsername={null}
       emptyMessage="no-games-here"
       renderStatus={({ games }) => `status-${games.length}`}
     >

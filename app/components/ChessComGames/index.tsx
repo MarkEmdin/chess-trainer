@@ -12,7 +12,15 @@ import GamesList from './GamesList';
 // need the chess engine in the initial bundle.
 const GameModal = dynamic(() => import('./GameModal'), { ssr: false });
 
-export default function ChessComGames() {
+type Props = {
+  isAuthenticated: boolean;
+  initialUsername: string | null;
+};
+
+export default function ChessComGames({
+  isAuthenticated,
+  initialUsername,
+}: Props) {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const t = useTranslations('games.list');
   const tCommon = useTranslations('common.chesscom');
@@ -20,6 +28,8 @@ export default function ChessComGames() {
   return (
     <>
       <ChessComShell
+        isAuthenticated={isAuthenticated}
+        initialUsername={initialUsername}
         emptyMessage={tCommon('emptyGames')}
         renderStatus={({ games, username }) =>
           t('showing', { username, count: games.length })

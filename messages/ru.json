@@ -7,6 +7,94 @@
     "thinkTime": "Долгие ходы",
     "openMenu": "Открыть меню"
   },
+  "auth": {
+    "signIn": "Login",
+    "signUp": "Register",
+    "signOut": "Logout",
+    "admin": "Админ",
+    "myCoaching": "Мои вопросы",
+    "email": "Email",
+    "nickname": "Никнейм",
+    "password": "Пароль",
+    "login": {
+      "title": "С возвращением",
+      "subtitle": "Войдите в свой аккаунт.",
+      "submit": "Login",
+      "pending": "Вход…",
+      "switchPrompt": "Нет аккаунта?",
+      "switchLink": "Register"
+    },
+    "register": {
+      "title": "Создать аккаунт",
+      "subtitle": "Начни отслеживать свой шахматный прогресс.",
+      "submit": "Register",
+      "pending": "Создание…",
+      "switchPrompt": "Уже есть аккаунт?",
+      "switchLink": "Login"
+    },
+    "errors": {
+      "fieldsRequired": "Все поля обязательны",
+      "noAccount": "Аккаунта с таким никнеймом нет.",
+      "wrongPassword": "Неверный пароль.",
+      "nicknameTaken": "Этот никнейм уже занят.",
+      "nicknameFormat": "Никнейм: 3-30 символов — латиница, цифры, «-» или «_»",
+      "registerSuggest": "Зарегистрироваться?",
+      "loginSuggest": "Войти?"
+    }
+  },
+  "coaching": {
+    "askCoach": "Спросить тренера",
+    "viewThread": "Смотреть переписку",
+    "askTitle": "Спросить тренера",
+    "threadTitle": "Переписка с тренером",
+    "bodyLabel": "Что вы думали в этой позиции?",
+    "bodyPlaceholder": "Опишите свои размышления, какие ходы рассматривали, что вызвало сомнения…",
+    "submit": "Отправить тренеру",
+    "submitting": "Отправка…",
+    "submitted": "Вопрос отправлен.",
+    "yourQuestion": "Ваш вопрос",
+    "coachResponse": "Ответ тренера",
+    "awaitingReply": "Ожидание ответа.",
+    "viewOnChessCom": "Открыть на Chess.com",
+    "errors": {
+      "missingFields": "Не хватает данных о позиции — переоткройте окно.",
+      "bodyTooLong": "Не более {max} символов.",
+      "notAuthenticated": "Нужно войти.",
+      "alreadyAsked": "Вы уже задали вопрос по этой позиции.",
+      "notAdmin": "Отвечать может только тренер.",
+      "alreadyResponded": "Вы уже ответили на этот вопрос."
+    }
+  },
+  "coachingAdmin": {
+    "title": "Запросы учеников",
+    "subtitle": "Все открытые вопросы.",
+    "empty": "Пока нет запросов.",
+    "askedBy": "от {nickname}",
+    "question": "Вопрос",
+    "yourResponse": "Ваш ответ",
+    "responsePlaceholder": "Разберите идею — что ученик упустил, что лучше сыграть и почему.",
+    "send": "Отправить",
+    "sending": "Отправка…"
+  },
+  "coachingPage": {
+    "title": "Мои вопросы",
+    "subtitle": "Позиции, по которым вы спросили тренера.",
+    "empty": "Пока ничего нет — зайдите в раздел «Долгие ходы» и нажмите «Спросить тренера» на любой позиции."
+  },
+  "profile": {
+    "title": "Профиль",
+    "subtitle": "Никнеймы Chess.com и Lichess — будут использоваться по всему сайту.",
+    "chesscom": "Никнейм на Chess.com",
+    "lichess": "Никнейм на Lichess",
+    "save": "Сохранить",
+    "saving": "Сохранение…",
+    "saved": "Сохранено",
+    "errors": {
+      "chesscomFormat": "Chess.com никнейм: 3-25 символов — латиница, цифры, «-» или «_»",
+      "lichessFormat": "Lichess никнейм: 2-20 символов — латиница, цифры, «-» или «_»",
+      "notAuthenticated": "Нужно войти"
+    }
+  },
   "home": {
     "subtitle": "Освойте основы — фигуры, ходы и базовые стратегии.",
     "startLearning": "Начать обучение"

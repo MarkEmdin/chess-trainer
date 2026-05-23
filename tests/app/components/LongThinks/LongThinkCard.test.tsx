@@ -40,10 +40,24 @@ const whiteThink: LongThink = {
   lastOpponentMove: { from: 'b8', to: 'c6' },
 };
 
+// Coaching surface stays off in these tests so there's only one
+// role="button" on the page (the outer card) — the coaching button
+// would otherwise compete for `getByRole('button')`.
+const defaultCoachingProps = {
+  showCoachingButton: false,
+  existingThread: false,
+  onAskCoach: () => {},
+};
+
 describe('<LongThinkCard />', () => {
   it("formats a white move as '3. Nf3'", () => {
     renderWithIntl(
-      <LongThinkCard think={whiteThink} game={baseGame} onClick={() => {}} />,
+      <LongThinkCard
+        think={whiteThink}
+        game={baseGame}
+        onClick={() => {}}
+        {...defaultCoachingProps}
+      />,
     );
     expect(screen.getByText('3. Nf3')).toBeInTheDocument();
   });
@@ -55,6 +69,7 @@ describe('<LongThinkCard />', () => {
         think={blackThink}
         game={{ ...baseGame, userColor: 'black' }}
         onClick={() => {}}
+        {...defaultCoachingProps}
       />,
     );
     expect(screen.getByText('3… Nf6')).toBeInTheDocument();
@@ -62,7 +77,12 @@ describe('<LongThinkCard />', () => {
 
   it('renders the thinking time using the formatSeconds output', () => {
     renderWithIntl(
-      <LongThinkCard think={whiteThink} game={baseGame} onClick={() => {}} />,
+      <LongThinkCard
+        think={whiteThink}
+        game={baseGame}
+        onClick={() => {}}
+        {...defaultCoachingProps}
+      />,
     );
     // formatSeconds(47) === "00:47", message template "Thought {duration}".
     expect(screen.getByText(/Thought 00:47/i)).toBeInTheDocument();
@@ -70,7 +90,12 @@ describe('<LongThinkCard />', () => {
 
   it('renders the matchup with the user emphasised', () => {
     renderWithIntl(
-      <LongThinkCard think={whiteThink} game={baseGame} onClick={() => {}} />,
+      <LongThinkCard
+        think={whiteThink}
+        game={baseGame}
+        onClick={() => {}}
+        {...defaultCoachingProps}
+      />,
     );
     const card = screen.getByRole('button');
     expect(card).toHaveTextContent('alice');
@@ -80,7 +105,12 @@ describe('<LongThinkCard />', () => {
 
   it('hands the fenBefore position to the chessboard', () => {
     renderWithIntl(
-      <LongThinkCard think={whiteThink} game={baseGame} onClick={() => {}} />,
+      <LongThinkCard
+        think={whiteThink}
+        game={baseGame}
+        onClick={() => {}}
+        {...defaultCoachingProps}
+      />,
     );
     expect(screen.getByTestId('chessboard')).toHaveAttribute(
       'data-position',
@@ -92,7 +122,12 @@ describe('<LongThinkCard />', () => {
     const onClick = jest.fn();
     const user = userEvent.setup();
     renderWithIntl(
-      <LongThinkCard think={whiteThink} game={baseGame} onClick={onClick} />,
+      <LongThinkCard
+        think={whiteThink}
+        game={baseGame}
+        onClick={onClick}
+        {...defaultCoachingProps}
+      />,
     );
     await user.click(screen.getByRole('button'));
     expect(onClick).toHaveBeenCalledTimes(1);

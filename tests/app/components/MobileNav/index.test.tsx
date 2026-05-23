@@ -30,7 +30,7 @@ const navLinks = [
 
 describe('<MobileNav />', () => {
   it('renders the menu trigger', () => {
-    renderWithIntl(<MobileNav navLinks={navLinks} />);
+    renderWithIntl(<MobileNav navLinks={navLinks} authMenu={null} />);
     expect(
       screen.getByRole('button', { name: /open menu/i }),
     ).toBeInTheDocument();
@@ -42,7 +42,7 @@ describe('<MobileNav />', () => {
 
   it('opens the drawer with all nav links on trigger click', async () => {
     const user = userEvent.setup();
-    renderWithIntl(<MobileNav navLinks={navLinks} />);
+    renderWithIntl(<MobileNav navLinks={navLinks} authMenu={null} />);
     await user.click(screen.getByRole('button', { name: /open menu/i }));
 
     expect(screen.getByRole('link', { name: /theory/i })).toBeInTheDocument();
@@ -51,7 +51,7 @@ describe('<MobileNav />', () => {
 
   it('closes the drawer when a nav link is clicked', async () => {
     const user = userEvent.setup();
-    renderWithIntl(<MobileNav navLinks={navLinks} />);
+    renderWithIntl(<MobileNav navLinks={navLinks} authMenu={null} />);
     await user.click(screen.getByRole('button', { name: /open menu/i }));
 
     await user.click(screen.getByRole('link', { name: /theory/i }));
