@@ -12,6 +12,7 @@
     "signUp": "Register",
     "signOut": "Logout",
     "admin": "Админ",
+    "myCoaching": "Мои вопросы",
     "email": "Email",
     "nickname": "Никнейм",
     "password": "Пароль",
@@ -58,12 +59,18 @@
     "yourQuestion": "Ваш вопрос",
     "coachResponse": "Ответ тренера",
     "awaitingReply": "Ожидание ответа.",
+    "viewOnChessCom": "Открыть на Chess.com",
     "errors": {
       "missingFields": "Не хватает данных о позиции — переоткройте окно.",
       "bodyTooLong": "Не более {max} символов.",
       "notAuthenticated": "Нужно войти.",
       "alreadyAsked": "Вы уже задали вопрос по этой позиции."
     }
+  },
+  "coachingPage": {
+    "title": "Мои вопросы",
+    "subtitle": "Позиции, по которым вы спросили тренера.",
+    "empty": "Пока ничего нет — зайдите в раздел «Долгие ходы» и нажмите «Спросить тренера» на любой позиции."
   },
   "profile": {
     "title": "Профиль",

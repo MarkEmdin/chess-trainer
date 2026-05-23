@@ -41,6 +41,12 @@ export default async function AuthMenu() {
         </Link>
       )}
       <Link
+        href="/coaching"
+        className="hover:text-muted-foreground transition-colors"
+      >
+        {t('myCoaching')}
+      </Link>
+      <Link
         href="/profile"
         className="text-muted-foreground hover:text-foreground transition-colors hidden lg:inline"
       >
