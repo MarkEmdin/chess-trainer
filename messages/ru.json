@@ -42,10 +42,6 @@
       "loginSuggest": "Войти?"
     }
   },
-  "admin": {
-    "title": "Админ",
-    "signedInAs": "Вы вошли как {nickname}"
-  },
   "coaching": {
     "askCoach": "Спросить тренера",
     "viewThread": "Смотреть переписку",
@@ -64,8 +60,21 @@
       "missingFields": "Не хватает данных о позиции — переоткройте окно.",
       "bodyTooLong": "Не более {max} символов.",
       "notAuthenticated": "Нужно войти.",
-      "alreadyAsked": "Вы уже задали вопрос по этой позиции."
+      "alreadyAsked": "Вы уже задали вопрос по этой позиции.",
+      "notAdmin": "Отвечать может только тренер.",
+      "alreadyResponded": "Вы уже ответили на этот вопрос."
     }
+  },
+  "coachingAdmin": {
+    "title": "Запросы учеников",
+    "subtitle": "Все открытые вопросы.",
+    "empty": "Пока нет запросов.",
+    "askedBy": "от {nickname}",
+    "question": "Вопрос",
+    "yourResponse": "Ваш ответ",
+    "responsePlaceholder": "Разберите идею — что ученик упустил, что лучше сыграть и почему.",
+    "send": "Отправить",
+    "sending": "Отправка…"
   },
   "coachingPage": {
     "title": "Мои вопросы",

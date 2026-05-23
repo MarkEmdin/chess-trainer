@@ -42,10 +42,6 @@
       "loginSuggest": "Login?"
     }
   },
-  "admin": {
-    "title": "Admin",
-    "signedInAs": "Signed in as {nickname}"
-  },
   "coaching": {
     "askCoach": "Ask coach",
     "viewThread": "View thread",
@@ -64,8 +60,21 @@
       "missingFields": "Position data is missing — try reopening the modal.",
       "bodyTooLong": "Keep it under {max} characters.",
       "notAuthenticated": "You must be signed in.",
-      "alreadyAsked": "You've already asked about this position."
+      "alreadyAsked": "You've already asked about this position.",
+      "notAdmin": "Only the coach can reply.",
+      "alreadyResponded": "You've already responded to this question."
     }
+  },
+  "coachingAdmin": {
+    "title": "Coaching requests",
+    "subtitle": "All open questions from students.",
+    "empty": "No coaching requests yet.",
+    "askedBy": "asked by {nickname}",
+    "question": "Question",
+    "yourResponse": "Your response",
+    "responsePlaceholder": "Walk through the key ideas — what they missed, what to play, why.",
+    "send": "Send reply",
+    "sending": "Sending…"
   },
   "coachingPage": {
     "title": "My coaching",

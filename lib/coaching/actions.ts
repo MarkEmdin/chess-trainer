@@ -1,11 +1,18 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
+import { getAuthedUser } from '@/lib/auth/getUser';
 
 export type CoachingRequestState =
   | { error: string }
   | { success: true; requestId: string }
+  | undefined;
+
+export type RespondState =
+  | { error: string }
+  | { success: true }
   | undefined;
 
 const MAX_BODY_LENGTH = 4000;
@@ -66,4 +73,57 @@ export async function createCoachingRequest(
   }
 
   return { success: true, requestId: data.id };
+}
+
+// Admin-side: write a response to a coaching request. Belt-and-suspenders
+// authorization — RLS on coaching_responses already blocks non-admins,
+// but explicit role check returns a clean error message instead of a
+// silent "0 rows" failure. One response per request is enforced here
+// at the action layer (schema permits multiple — keeping the door open
+// for threaded replies later without a migration).
+export async function respondToRequest(
+  _prev: RespondState,
+  formData: FormData,
+): Promise<RespondState> {
+  const t = await getTranslations('coaching.errors');
+
+  const request_id = String(formData.get('request_id') ?? '').trim();
+  const body = String(formData.get('body') ?? '').trim();
+
+  if (!request_id || !body) {
+    return { error: t('missingFields') };
+  }
+
+  if (body.length > 4000) {
+    return { error: t('bodyTooLong', { max: 4000 }) };
+  }
+
+  const user = await getAuthedUser();
+  if (!user || user.role !== 'admin') {
+    return { error: t('notAdmin') };
+  }
+
+  const supabase = await createClient();
+
+  const { data: existing } = await supabase
+    .from('coaching_responses')
+    .select('id')
+    .eq('request_id', request_id)
+    .maybeSingle();
+
+  if (existing) {
+    return { error: t('alreadyResponded') };
+  }
+
+  const { error } = await supabase
+    .from('coaching_responses')
+    .insert({ request_id, body });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  // Refresh the admin dashboard so the form swaps to read-only mode.
+  revalidatePath('/[locale]/admin', 'page');
+  return { success: true };
 }
