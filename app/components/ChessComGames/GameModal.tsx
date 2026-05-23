@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Chess } from 'chess.js';
-import { Chessboard } from 'react-chessboard';
+import ChessboardWithNotation from '@/app/components/ChessboardWithNotation';
 import {
   ChevronFirstIcon,
   ChevronLastIcon,
@@ -207,7 +207,7 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
         </DialogHeader>
 
         <div className="flex flex-col gap-3">
-          <div className="mx-auto w-full max-w-[400px] flex flex-col gap-1.5">
+          <div className="mx-auto w-full max-w-[480px] flex flex-col gap-1.5">
             <PlayerRow
               player={game.opponent}
               pieceColor={topColor}
@@ -215,13 +215,9 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
               isUser={false}
               isActive={sideToMove === topColor}
             />
-            <Chessboard
-              options={{
-                position: currentFen,
-                boardOrientation: game.userColor,
-                allowDragging: false,
-                animationDurationInMs: 150,
-              }}
+            <ChessboardWithNotation
+              position={currentFen}
+              boardOrientation={game.userColor}
             />
             <PlayerRow
               player={game.user}

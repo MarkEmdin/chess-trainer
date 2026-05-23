@@ -2,8 +2,8 @@
 
 import { useActionState } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
-import { Chessboard } from 'react-chessboard';
 import { Button } from '@/app/components/ui/button';
+import ChessboardWithNotation from '@/app/components/ChessboardWithNotation';
 import {
   Dialog,
   DialogContent,
@@ -77,15 +77,10 @@ export default function CoachingRequestModal({
         </DialogHeader>
 
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="w-full sm:w-[200px] sm:shrink-0 sm:self-start pointer-events-none">
-            <Chessboard
-              options={{
-                position: think.fenBefore,
-                boardOrientation: game.userColor,
-                allowDragging: false,
-                showNotation: false,
-                showAnimations: false,
-              }}
+          <div className="w-full sm:w-[240px] sm:shrink-0 sm:self-start pointer-events-none">
+            <ChessboardWithNotation
+              position={think.fenBefore}
+              boardOrientation={game.userColor}
             />
           </div>
 

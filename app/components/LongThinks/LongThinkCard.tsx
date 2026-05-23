@@ -1,8 +1,8 @@
 'use client';
 
 import { useFormatter, useTranslations } from 'next-intl';
-import { Chessboard } from 'react-chessboard';
 import { ClockIcon, MessageSquareIcon } from 'lucide-react';
+import ChessboardWithNotation from '@/app/components/ChessboardWithNotation';
 import { formatSeconds } from '@/lib/chesscom/format';
 import type { LongThink } from '@/lib/chesscom/longThinks';
 import type { Game, GamePlayer } from '@/lib/chesscom/types';
@@ -120,22 +120,17 @@ export default function LongThinkCard({
       <Card className="hover:shadow-md transition-shadow">
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-            <div className="w-[200px] mx-auto sm:w-[160px] sm:mx-0 sm:shrink-0 flex flex-col gap-1.5">
+            <div className="w-[220px] mx-auto sm:w-[200px] sm:mx-0 sm:shrink-0 flex flex-col gap-1.5">
               <PlayerRow
                 player={game.opponent}
                 pieceColor={topPieceColor}
                 isUser={false}
               />
               <div className="pointer-events-none">
-                <Chessboard
-                  options={{
-                    position: think.fenBefore,
-                    boardOrientation: game.userColor,
-                    allowDragging: false,
-                    showNotation: false,
-                    showAnimations: false,
-                    squareStyles,
-                  }}
+                <ChessboardWithNotation
+                  position={think.fenBefore}
+                  boardOrientation={game.userColor}
+                  squareStyles={squareStyles}
                 />
               </div>
               <PlayerRow

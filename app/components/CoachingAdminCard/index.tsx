@@ -1,10 +1,10 @@
 'use client';
 
 import { useFormatter, useTranslations } from 'next-intl';
-import { Chessboard } from 'react-chessboard';
 import { ExternalLinkIcon } from 'lucide-react';
 import { Card, CardContent } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
+import ChessboardWithNotation from '@/app/components/ChessboardWithNotation';
 import CoachingResponseForm from '@/app/components/CoachingResponseForm';
 
 export type AdminCoachingRequest = {
@@ -38,15 +38,10 @@ export default function CoachingAdminCard({ request }: Props) {
     <Card>
       <CardContent>
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="w-[200px] mx-auto sm:w-[160px] sm:mx-0 sm:shrink-0 sm:self-start pointer-events-none">
-            <Chessboard
-              options={{
-                position: request.fen,
-                boardOrientation: sideToMove(request.fen),
-                allowDragging: false,
-                showNotation: false,
-                showAnimations: false,
-              }}
+          <div className="w-[220px] mx-auto sm:w-[200px] sm:mx-0 sm:shrink-0 sm:self-start pointer-events-none">
+            <ChessboardWithNotation
+              position={request.fen}
+              boardOrientation={sideToMove(request.fen)}
             />
           </div>
 
