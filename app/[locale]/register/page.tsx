@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation';
+import { redirect } from '@/i18n/navigation';
 import AuthForm from '@/app/components/AuthForm';
 import { getAuthedUser } from '@/lib/auth/getUser';
 
