@@ -1,5 +1,5 @@
 import { redirect } from '@/i18n/navigation';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, getLocale } from 'next-intl/server';
 import { getAuthedUser } from '@/lib/auth/getUser';
 import { createClient } from '@/lib/supabase/server';
 import CoachingThreadCard, {
@@ -8,7 +8,10 @@ import CoachingThreadCard, {
 
 export default async function CoachingPage() {
   const user = await getAuthedUser();
-  if (!user) redirect('/login');
+  if (!user) {
+    const locale = await getLocale();
+    redirect({ href: '/login', locale });
+  }
 
   const t = await getTranslations('coachingPage');
 

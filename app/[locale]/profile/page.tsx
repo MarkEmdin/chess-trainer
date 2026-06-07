@@ -1,18 +1,18 @@
 import { redirect } from '@/i18n/navigation';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, getLocale } from 'next-intl/server';
 import { getAuthedUser } from '@/lib/auth/getUser';
 import { createClient } from '@/lib/supabase/server';
 import ProfileForm from '@/app/components/ProfileForm';
 
 export default async function ProfilePage() {
-  const user = await getAuthedUser();
-  if (!user) redirect('/login');
+  const [user, locale] = await Promise.all([getAuthedUser(), getLocale()]);
+  if (!user) return redirect({ href: '/login', locale });
 
   const supabase = await createClient();
   const { data: profile } = await supabase
     .from('user_profiles')
     .select('chesscom_username, lichess_username')
-    .eq('id', user.id)
+    .eq('id', user!.id)
     .single();
 
   const t = await getTranslations('profile');

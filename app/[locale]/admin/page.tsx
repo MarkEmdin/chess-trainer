@@ -1,5 +1,5 @@
 import { redirect } from '@/i18n/navigation';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, getLocale } from 'next-intl/server';
 import { getAuthedUser } from '@/lib/auth/getUser';
 import { createClient } from '@/lib/supabase/server';
 import CoachingAdminCard, {
@@ -8,7 +8,10 @@ import CoachingAdminCard, {
 
 export default async function AdminPage() {
   const user = await getAuthedUser();
-  if (!user || user.role !== 'admin') redirect('/');
+  if (!user || user.role !== 'admin') {
+    const locale = await getLocale();
+    redirect({ href: '/', locale });
+  }
 
   const t = await getTranslations('coachingAdmin');
 
