@@ -1,6 +1,6 @@
 'use server';
 
-import { redirect } from 'next/navigation';
+import { redirect } from '@/i18n/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -55,7 +55,7 @@ export async function signIn(
     .eq('id', data.user.id)
     .single();
 
-  redirect(`/${profile?.preferred_locale ?? currentLocale}/`);
+  redirect({ href: '/', locale: profile?.preferred_locale ?? currentLocale });
 }
 
 export async function signUp(
@@ -105,11 +105,12 @@ export async function signUp(
     return { error: error.message };
   }
 
-  redirect(`/${currentLocale}/`);
+  redirect({ href: '/', locale: currentLocale });
 }
 
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect('/');
+  const locale = await getLocale();
+  redirect({ href: '/', locale });
 }
