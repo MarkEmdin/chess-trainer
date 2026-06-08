@@ -4,6 +4,7 @@ import { useActionState } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui/button';
 import ChessboardWithNotation from '@/app/components/ChessboardWithNotation';
+import SectionLabel from '@/app/components/SectionLabel';
 import {
   Dialog,
   DialogContent,
@@ -163,19 +164,13 @@ function ThreadView({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <span className="text-xs uppercase tracking-wide text-muted-foreground">
-          {t('yourQuestion')}
-        </span>
+      <SectionLabel label={t('yourQuestion')}>
         <p className="text-sm text-foreground whitespace-pre-wrap">
           {request.body}
         </p>
-      </div>
+      </SectionLabel>
 
-      <div className="flex flex-col gap-1">
-        <span className="text-xs uppercase tracking-wide text-muted-foreground">
-          {t('coachResponse')}
-        </span>
+      <SectionLabel label={t('coachResponse')}>
         {request.responses.length === 0 ? (
           <p className="text-sm text-muted-foreground italic">
             {t('awaitingReply')}
@@ -190,7 +185,7 @@ function ThreadView({
             </p>
           ))
         )}
-      </div>
+      </SectionLabel>
     </div>
   );
 }

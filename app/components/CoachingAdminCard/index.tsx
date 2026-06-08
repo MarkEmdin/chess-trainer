@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
 import ChessboardWithNotation from '@/app/components/ChessboardWithNotation';
 import CoachingResponseForm from '@/app/components/CoachingResponseForm';
+import SectionLabel from '@/app/components/SectionLabel';
 
 export type AdminCoachingRequest = {
   id: string;
@@ -58,24 +59,18 @@ export default function CoachingAdminCard({ request }: Props) {
               </span>
             </div>
 
-            <div className="flex flex-col gap-1">
-              <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                {t('question')}
-              </span>
+            <SectionLabel label={t('question')}>
               <p className="text-sm text-foreground whitespace-pre-wrap">
                 {request.body}
               </p>
-            </div>
+            </SectionLabel>
 
             {request.response ? (
-              <div className="flex flex-col gap-1">
-                <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                  {t('yourResponse')}
-                </span>
+              <SectionLabel label={t('yourResponse')}>
                 <p className="text-sm text-foreground whitespace-pre-wrap">
                   {request.response.body}
                 </p>
-              </div>
+              </SectionLabel>
             ) : (
               <CoachingResponseForm requestId={request.id} />
             )}

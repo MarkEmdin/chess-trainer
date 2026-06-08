@@ -5,6 +5,7 @@ import { ExternalLinkIcon } from 'lucide-react';
 import { Card, CardContent } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
 import ChessboardWithNotation from '@/app/components/ChessboardWithNotation';
+import SectionLabel from '@/app/components/SectionLabel';
 
 export type CoachingThread = {
   id: string;
@@ -56,19 +57,13 @@ export default function CoachingThreadCard({ thread }: Props) {
               </span>
             </div>
 
-            <div className="flex flex-col gap-1">
-              <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                {t('yourQuestion')}
-              </span>
+            <SectionLabel label={t('yourQuestion')}>
               <p className="text-sm text-foreground whitespace-pre-wrap">
                 {thread.body}
               </p>
-            </div>
+            </SectionLabel>
 
-            <div className="flex flex-col gap-1">
-              <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                {t('coachResponse')}
-              </span>
+            <SectionLabel label={t('coachResponse')}>
               {thread.responses.length === 0 ? (
                 <p className="text-sm text-muted-foreground italic">
                   {t('awaitingReply')}
@@ -83,7 +78,7 @@ export default function CoachingThreadCard({ thread }: Props) {
                   </p>
                 ))
               )}
-            </div>
+            </SectionLabel>
 
             <Button variant="outline" size="sm" asChild className="self-start">
               <a
