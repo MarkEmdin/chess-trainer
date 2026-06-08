@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui/button';
+import { Textarea } from '@/app/components/ui/textarea';
 import ChessboardContainer from '@/app/components/ChessboardContainer';
 import SectionLabel from '@/app/components/SectionLabel';
 import {
@@ -110,14 +111,14 @@ export default function CoachingRequestModal({
                 >
                   {t('bodyLabel')}
                 </label>
-                <textarea
+                <Textarea
                   id="coaching-body"
                   name="body"
                   rows={6}
                   required
                   minLength={1}
                   maxLength={4000}
-                  className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 outline-none resize-y"
+                  className="resize-y"
                   placeholder={t('bodyPlaceholder')}
                 />
 

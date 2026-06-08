@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui/button';
+import { Textarea } from '@/app/components/ui/textarea';
 import {
   respondToRequest,
   type RespondState,
@@ -26,14 +27,14 @@ export default function CoachingResponseForm({ requestId }: Props) {
   return (
     <form action={formAction} className="flex flex-col gap-2">
       <input type="hidden" name="request_id" value={requestId} />
-      <textarea
+      <Textarea
         name="body"
         rows={4}
         required
         minLength={1}
         maxLength={4000}
         placeholder={t('responsePlaceholder')}
-        className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 outline-none resize-y"
+        className="resize-y"
       />
 
       {state && 'error' in state && (
