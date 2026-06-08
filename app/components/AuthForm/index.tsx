@@ -4,7 +4,7 @@ import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/app/components/ui/button';
-import { Input } from '@/app/components/ui/input';
+import FormField from '@/app/components/FormField';
 import { signIn, signUp, type AuthFormState } from '@/lib/auth/actions';
 
 type Props = {
@@ -32,57 +32,34 @@ export default function AuthForm({ mode }: Props) {
 
       <form action={formAction} className="flex flex-col gap-4">
         {mode === 'register' && (
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="email"
-              className="text-sm font-medium text-foreground"
-            >
-              {t('email')}
-            </label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-            />
-          </div>
+          <FormField
+            label={t('email')}
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+          />
         )}
 
-        <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="nickname"
-            className="text-sm font-medium text-foreground"
-          >
-            {t('nickname')}
-          </label>
-          <Input
-            id="nickname"
-            name="nickname"
-            type="text"
-            autoComplete="username"
-            required
-          />
-        </div>
+        <FormField
+          label={t('nickname')}
+          id="nickname"
+          name="nickname"
+          type="text"
+          autoComplete="username"
+          required
+        />
 
-        <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="password"
-            className="text-sm font-medium text-foreground"
-          >
-            {t('password')}
-          </label>
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete={
-              mode === 'login' ? 'current-password' : 'new-password'
-            }
-            minLength={6}
-            required
-          />
-        </div>
+        <FormField
+          label={t('password')}
+          id="password"
+          name="password"
+          type="password"
+          autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+          minLength={6}
+          required
+        />
 
         {state?.error && (
           <p className="text-sm text-destructive" role="alert">

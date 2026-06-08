@@ -3,7 +3,7 @@
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui/button';
-import { Input } from '@/app/components/ui/input';
+import FormField from '@/app/components/FormField';
 import {
   updateExternalUsernames,
   type ProfileFormState,
@@ -25,41 +25,27 @@ export default function ProfileForm({ initial }: Props) {
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor="chesscom_username"
-          className="text-sm font-medium text-foreground"
-        >
-          {t('chesscom')}
-        </label>
-        <Input
-          id="chesscom_username"
-          name="chesscom_username"
-          type="text"
-          defaultValue={initial.chesscom}
-          placeholder="MarkEmdin"
-          autoCapitalize="none"
-          spellCheck={false}
-        />
-      </div>
+      <FormField
+        label={t('chesscom')}
+        id="chesscom_username"
+        name="chesscom_username"
+        type="text"
+        defaultValue={initial.chesscom}
+        placeholder="MarkEmdin"
+        autoCapitalize="none"
+        spellCheck={false}
+      />
 
-      <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor="lichess_username"
-          className="text-sm font-medium text-foreground"
-        >
-          {t('lichess')}
-        </label>
-        <Input
-          id="lichess_username"
-          name="lichess_username"
-          type="text"
-          defaultValue={initial.lichess}
-          placeholder="mark_emdin"
-          autoCapitalize="none"
-          spellCheck={false}
-        />
-      </div>
+      <FormField
+        label={t('lichess')}
+        id="lichess_username"
+        name="lichess_username"
+        type="text"
+        defaultValue={initial.lichess}
+        placeholder="mark_emdin"
+        autoCapitalize="none"
+        spellCheck={false}
+      />
 
       {state && 'error' in state && (
         <p className="text-sm text-destructive" role="alert">
