@@ -4,7 +4,7 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { ExternalLinkIcon } from 'lucide-react';
 import { Card, CardContent } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
-import ChessboardWithNotation from '@/app/components/ChessboardWithNotation';
+import ChessboardContainer from '@/app/components/ChessboardContainer';
 import SectionLabel from '@/app/components/SectionLabel';
 
 export type CoachingThread = {
@@ -40,12 +40,10 @@ export default function CoachingThreadCard({ thread }: Props) {
     <Card>
       <CardContent>
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="w-[220px] mx-auto sm:w-[200px] sm:mx-0 sm:shrink-0 sm:self-start pointer-events-none">
-            <ChessboardWithNotation
-              position={thread.fen}
-              boardOrientation={sideToMove(thread.fen)}
-            />
-          </div>
+          <ChessboardContainer
+            position={thread.fen}
+            orientation={sideToMove(thread.fen)}
+          />
 
           <div className="flex flex-col gap-3 flex-1 min-w-0">
             <div className="flex items-baseline gap-2 flex-wrap">

@@ -3,7 +3,7 @@
 import { useActionState } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui/button';
-import ChessboardWithNotation from '@/app/components/ChessboardWithNotation';
+import ChessboardContainer from '@/app/components/ChessboardContainer';
 import SectionLabel from '@/app/components/SectionLabel';
 import {
   Dialog,
@@ -78,12 +78,11 @@ export default function CoachingRequestModal({
         </DialogHeader>
 
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="w-full sm:w-[240px] sm:shrink-0 sm:self-start pointer-events-none">
-            <ChessboardWithNotation
-              position={think.fenBefore}
-              boardOrientation={game.userColor}
-            />
-          </div>
+          <ChessboardContainer
+            position={think.fenBefore}
+            orientation={game.userColor}
+            variant="modal"
+          />
 
           <div className="flex flex-col gap-4 flex-1 min-w-0">
             {isThreadView ? (
