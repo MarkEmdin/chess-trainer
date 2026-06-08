@@ -2,6 +2,7 @@ import { redirect } from '@/i18n/navigation';
 import { getTranslations, getLocale } from 'next-intl/server';
 import { getAuthedUser } from '@/lib/auth/getUser';
 import { createClient } from '@/lib/supabase/server';
+import PageLayout from '@/app/components/PageLayout';
 import CoachingAdminCard, {
   type AdminCoachingRequest,
 } from '@/app/components/CoachingAdminCard';
@@ -62,12 +63,7 @@ export default async function AdminPage() {
   }));
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12 flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-foreground">{t('title')}</h1>
-        <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
-      </header>
-
+    <PageLayout title={t('title')} subtitle={t('subtitle')}>
       {cards.length === 0 ? (
         <p className="text-muted-foreground">{t('empty')}</p>
       ) : (
@@ -77,6 +73,6 @@ export default async function AdminPage() {
           ))}
         </div>
       )}
-    </main>
+    </PageLayout>
   );
 }

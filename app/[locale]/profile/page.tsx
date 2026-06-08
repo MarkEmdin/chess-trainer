@@ -2,6 +2,7 @@ import { redirect } from '@/i18n/navigation';
 import { getTranslations, getLocale } from 'next-intl/server';
 import { getAuthedUser } from '@/lib/auth/getUser';
 import { createClient } from '@/lib/supabase/server';
+import PageLayout from '@/app/components/PageLayout';
 import ProfileForm from '@/app/components/ProfileForm';
 
 export default async function ProfilePage() {
@@ -18,17 +19,13 @@ export default async function ProfilePage() {
   const t = await getTranslations('profile');
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-12 flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-foreground">{t('title')}</h1>
-        <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
-      </header>
+    <PageLayout title={t('title')} subtitle={t('subtitle')} maxWidth="2xl">
       <ProfileForm
         initial={{
           chesscom: profile?.chesscom_username ?? '',
           lichess: profile?.lichess_username ?? '',
         }}
       />
-    </main>
+    </PageLayout>
   );
 }
