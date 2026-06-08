@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from '@/app/components/ui/dialog';
 import { formatSeconds } from '@/lib/chesscom/format';
+import { sideToMove } from '@/lib/chess/fen';
 import type { Game, GameColor, GamePlayer } from '@/lib/chesscom/types';
 import GameMatchup from '@/app/components/GameMatchup';
 import { cn } from '@/lib/utils';
@@ -148,8 +149,7 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
   const topColor: GameColor = game.userColor === 'white' ? 'black' : 'white';
   const bottomColor: GameColor = game.userColor;
 
-  // Side to move at the displayed position — second field of the FEN is "w" or "b".
-  const sideToMove: GameColor = currentFen.split(' ')[1] === 'b' ? 'black' : 'white';
+  const colorToMove: GameColor = sideToMove(currentFen);
 
   // Clocks at the currently displayed position.
   const snapshot = game.clockSnapshots?.[index];
@@ -213,7 +213,7 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
               pieceColor={topColor}
               clock={clocks[topColor]}
               isUser={false}
-              isActive={sideToMove === topColor}
+              isActive={colorToMove === topColor}
             />
             <ChessboardWithNotation
               position={currentFen}
@@ -224,7 +224,7 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
               pieceColor={bottomColor}
               clock={clocks[bottomColor]}
               isUser
-              isActive={sideToMove === bottomColor}
+              isActive={colorToMove === bottomColor}
             />
           </div>
 

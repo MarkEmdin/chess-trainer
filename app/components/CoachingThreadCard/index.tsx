@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
 import ChessboardContainer from '@/app/components/ChessboardContainer';
 import SectionLabel from '@/app/components/SectionLabel';
+import { sideToMove } from '@/lib/chess/fen';
 
 export type CoachingThread = {
   id: string;
@@ -20,14 +21,6 @@ export type CoachingThread = {
 type Props = {
   thread: CoachingThread;
 };
-
-// Pick the side to render the board from — second token of the FEN
-// after the position is "w" or "b" and tells us whose move it is. We
-// orient the board so the side to move is at the bottom (matches what
-// the user saw when they thought about the position).
-function sideToMove(fen: string): 'white' | 'black' {
-  return fen.split(' ')[1] === 'b' ? 'black' : 'white';
-}
 
 export default function CoachingThreadCard({ thread }: Props) {
   const t = useTranslations('coaching');

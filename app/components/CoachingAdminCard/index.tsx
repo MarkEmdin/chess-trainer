@@ -7,6 +7,7 @@ import { Button } from '@/app/components/ui/button';
 import ChessboardContainer from '@/app/components/ChessboardContainer';
 import CoachingResponseForm from '@/app/components/CoachingResponseForm';
 import SectionLabel from '@/app/components/SectionLabel';
+import { sideToMove } from '@/lib/chess/fen';
 
 export type AdminCoachingRequest = {
   id: string;
@@ -22,10 +23,6 @@ export type AdminCoachingRequest = {
 type Props = {
   request: AdminCoachingRequest;
 };
-
-function sideToMove(fen: string): 'white' | 'black' {
-  return fen.split(' ')[1] === 'b' ? 'black' : 'white';
-}
 
 export default function CoachingAdminCard({ request }: Props) {
   const t = useTranslations('coachingAdmin');
