@@ -35,28 +35,6 @@ export default async function Image({
           fontFamily: 'sans-serif',
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 18,
-            fontSize: 26,
-            letterSpacing: 4,
-            textTransform: 'uppercase',
-            opacity: 0.7,
-          }}
-        >
-          <div
-            style={{
-              width: 14,
-              height: 14,
-              background: '#e85a72',
-              borderRadius: 999,
-            }}
-          />
-          Portfolio · Mark Emdin
-        </div>
-
         <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
           <div
             style={{
@@ -83,19 +61,9 @@ export default async function Image({
         <div
           style={{
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            fontSize: 28,
-            opacity: 0.7,
+            justifyContent: 'flex-end',
           }}
         >
-          <div style={{ display: 'flex', gap: 24 }}>
-            <span>Next.js 16</span>
-            <span style={{ opacity: 0.4 }}>·</span>
-            <span>React 19</span>
-            <span style={{ opacity: 0.4 }}>·</span>
-            <span>TypeScript</span>
-          </div>
           <div
             style={{
               display: 'flex',
