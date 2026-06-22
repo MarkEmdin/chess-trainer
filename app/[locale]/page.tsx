@@ -10,7 +10,8 @@ export default async function Home() {
         <h1 className="text-4xl font-bold text-foreground mb-4">
           Chess Fundamentals
         </h1>
-        <p className="text-lg text-muted-foreground mb-8">{t('subtitle')}</p>
+        <p className="text-lg text-muted-foreground mb-4">{t('subtitle')}</p>
+        <p className="text-sm text-muted-foreground mb-8">{t('description')}</p>
         <Link
           href="/lessons"
           className="inline-block rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"

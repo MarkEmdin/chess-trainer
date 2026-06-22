@@ -4,7 +4,7 @@
     "theory": "Theory",
     "pieceValues": "Piece Values",
     "games": "Games",
-    "thinkTime": "Think Time",
+    "thinkTime": "Key Positions",
     "openMenu": "Open menu"
   },
   "auth": {
@@ -79,7 +79,7 @@
   "coachingPage": {
     "title": "My coaching",
     "subtitle": "Positions you've asked the coach about.",
-    "empty": "No questions yet — go to Think Time and click \"Ask coach\" on any long-think position."
+    "empty": "No questions yet — go to Key Positions and click \"Ask coach\" on any long-think position."
   },
   "profile": {
     "title": "Profile",
@@ -97,6 +97,7 @@
   },
   "home": {
     "subtitle": "Master the basics — pieces, moves, and core strategies.",
+    "description": "The idea behind this project is to help players analyze positions on their own. The Key Positions section surfaces positions where you spent a long time thinking. You can send your own analysis of these to the platform's coaches and get a reply. The platform also includes learning materials, though those are in Russian only. Thanks for visiting!",
     "startLearning": "Start Learning"
   },
   "lessons": {
@@ -118,7 +119,7 @@
       "description": "Browse and replay the last 10 games of any Chess.com player."
     },
     "thinkTime": {
-      "title": "Think Time",
+      "title": "Key Positions",
       "description": "Surface every move where you spent 45+ seconds thinking."
     }
   },
@@ -255,7 +256,7 @@
     }
   },
   "thinkTime": {
-    "title": "Think Time",
+    "title": "Key Positions",
     "subtitle": "Positions where you spent extra time thinking. Click a card to open the full game.",
     "empty": "No moves crossed the {threshold}s threshold in your last 10 games.",
     "showing": "{count, plural, one {# long think} other {# long thinks}} across {gameCount, plural, one {# game} other {# games}}",

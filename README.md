@@ -16,7 +16,7 @@ The project combines my background as a former competitive chess player and coac
 - **Piece Values** — puzzle: pick the combination of pieces whose point values sum to a random target
 - **World Champions** — bios and lecture videos from Steinitz to Kasparov
 - **Chess.com Games** — load any player's last 10 games and replay them move by move with live clocks and per-move think time
-- **Long Moves** — surface every position where the user spent more than the configured threshold thinking, sorted by time
+- **Key Positions** — surface every position where the user spent more than the configured threshold thinking, sorted by time; users can send their own analysis of these to a platform coach and get a reply
 - Three themes (light / dark / rose) and two languages (English / Russian), URL-prefixed with auto-detect
 
 > Note: part of the educational video content is in Russian only.
@@ -27,6 +27,7 @@ The project combines my background as a former competitive chess player and coac
 - TypeScript (strict mode)
 - Tailwind CSS 4, shadcn/ui
 - next-intl for locale-prefixed routing
+- Supabase — auth and Postgres database (backend)
 - SWR for client-side data fetching
 - chess.js + react-chessboard
 - Jest + React Testing Library
