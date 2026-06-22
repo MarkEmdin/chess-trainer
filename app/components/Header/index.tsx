@@ -1,7 +1,4 @@
-import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import LanguageToggle from '@/app/components/LanguageToggle';
-import ThemeToggle from '@/app/components/ThemeToggle';
 import MobileNav from '@/app/components/MobileNav';
 import AuthMenu from '@/app/components/AuthMenu';
 
@@ -13,8 +10,10 @@ const navLinks = [
   { href: '/think-time', key: 'thinkTime' },
 ] as const;
 
-export default async function Header() {
-  const t = await getTranslations('nav');
+// One drawer-style nav at every breakpoint — a fixed-width desktop row
+// keeps breaking as authenticated-only links (coaching, admin) get added,
+// since how many items fit depends on who's logged in, not viewport size.
+export default function Header() {
   return (
     <header className="bg-card text-card-foreground border-b border-border">
       <nav className="max-w-5xl mx-auto flex items-center justify-between gap-4 px-6 py-4">
@@ -25,30 +24,6 @@ export default async function Header() {
           ♔ Chess Fundamentals
         </Link>
 
-        {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-6">
-          <ul className="flex gap-6">
-            {navLinks.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="text-sm hover:text-muted-foreground transition-colors"
-                >
-                  {t(link.key)}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <div className="flex items-center gap-3">
-            <AuthMenu />
-            <div className="flex items-center gap-1">
-              <LanguageToggle />
-              <ThemeToggle />
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile drawer — state-managed for clean onClick close behavior */}
         <MobileNav navLinks={navLinks} authMenu={<AuthMenu />} />
       </nav>
     </header>

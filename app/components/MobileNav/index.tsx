@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { MenuIcon } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
-import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/app/components/ui/button';
 import LanguageToggle from '@/app/components/LanguageToggle';
 import ThemeToggle from '@/app/components/ThemeToggle';
@@ -36,10 +35,7 @@ export default function MobileNav({ navLinks, authMenu }: Props) {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         aria-label={t('openMenu')}
-        className={cn(
-          buttonVariants({ variant: 'ghost', size: 'icon' }),
-          'md:hidden',
-        )}
+        className={buttonVariants({ variant: 'ghost', size: 'icon' })}
       >
         <MenuIcon />
       </SheetTrigger>
