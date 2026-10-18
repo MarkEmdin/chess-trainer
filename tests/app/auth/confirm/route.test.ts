@@ -22,7 +22,7 @@ describe('GET /auth/confirm', () => {
     const request = new NextRequest(
       'https://example.com/en/auth/confirm?code=abc123&next=%2Fen%2Freset-password',
     );
-    const response = await GET(request);
+    const response = await GET(request, { params: Promise.resolve({ locale: 'en' }) });
     expect(exchangeCodeForSession).toHaveBeenCalledWith('abc123');
     expect(response.headers.get('location')).toBe(
       'https://example.com/en/reset-password',
@@ -36,14 +36,24 @@ describe('GET /auth/confirm', () => {
     const request = new NextRequest(
       'https://example.com/en/auth/confirm?code=bad&next=%2Fen%2Freset-password',
     );
-    const response = await GET(request);
-    expect(response.headers.get('location')).toBe('https://example.com/login');
+    const response = await GET(request, { params: Promise.resolve({ locale: 'en' }) });
+    expect(response.headers.get('location')).toBe('https://example.com/en/login');
   });
 
   it('redirects to /login when there is no code', async () => {
     const request = new NextRequest('https://example.com/en/auth/confirm');
-    const response = await GET(request);
+    const response = await GET(request, { params: Promise.resolve({ locale: 'en' }) });
     expect(exchangeCodeForSession).not.toHaveBeenCalled();
-    expect(response.headers.get('location')).toBe('https://example.com/login');
+    expect(response.headers.get('location')).toBe('https://example.com/en/login');
+  });
+
+  it('falls back to locale-prefixed home when next is not an absolute path', async () => {
+    exchangeCodeForSession.mockResolvedValue({ error: null });
+    const request = new NextRequest(
+      'https://example.com/en/auth/confirm?code=abc123&next=https://evil.com',
+    );
+    const response = await GET(request, { params: Promise.resolve({ locale: 'en' }) });
+    expect(exchangeCodeForSession).toHaveBeenCalledWith('abc123');
+    expect(response.headers.get('location')).toBe('https://example.com/en');
   });
 });
