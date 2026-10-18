@@ -22,7 +22,8 @@
       "submit": "Login",
       "pending": "Вход…",
       "switchPrompt": "Нет аккаунта?",
-      "switchLink": "Register"
+      "switchLink": "Register",
+      "forgotPasswordLink": "Забыли пароль?"
     },
     "register": {
       "title": "Создать аккаунт",
@@ -39,7 +40,27 @@
       "nicknameTaken": "Этот никнейм уже занят.",
       "nicknameFormat": "Никнейм: 3-30 символов — латиница, цифры, «-» или «_»",
       "registerSuggest": "Зарегистрироваться?",
-      "loginSuggest": "Войти?"
+      "loginSuggest": "Войти?",
+      "passwordMismatch": "Пароли не совпадают.",
+      "passwordTooShort": "Пароль должен быть не короче 6 символов.",
+      "sessionExpired": "Ссылка для сброса устарела или уже использована. Запросите новую."
+    },
+    "forgotPassword": {
+      "title": "Восстановление пароля",
+      "subtitle": "Введите никнейм — мы отправим ссылку для сброса пароля на email.",
+      "submit": "Отправить ссылку",
+      "pending": "Отправка…",
+      "success": "Если такой аккаунт существует, письмо отправлено.",
+      "backToLogin": "Назад ко входу"
+    },
+    "resetPassword": {
+      "title": "Новый пароль",
+      "subtitle": "Выберите новый пароль для аккаунта.",
+      "newPassword": "Новый пароль",
+      "confirmPassword": "Подтвердите пароль",
+      "submit": "Обновить пароль",
+      "pending": "Обновление…",
+      "success": "Пароль обновлён. Теперь можно войти."
     }
   },
   "coaching": {

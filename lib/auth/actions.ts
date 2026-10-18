@@ -1,5 +1,6 @@
 'use server';
 
+import { headers } from 'next/headers';
 import { redirect } from '@/i18n/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
@@ -7,6 +8,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 
 export type AuthFormState =
   | { error: string; suggest?: 'register' | 'login' }
+  | { success: string }
   | undefined;
 
 // 3-30 chars, letters/digits/underscore/hyphen — keeps nicknames URL-safe
@@ -106,6 +108,77 @@ export async function signUp(
   }
 
   redirect({ href: '/', locale: currentLocale });
+}
+
+export async function requestPasswordReset(
+  _prev: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const t = await getTranslations('auth');
+  const locale = await getLocale();
+  const nickname = String(formData.get('nickname') ?? '').trim();
+
+  if (!nickname) {
+    return { error: t('errors.fieldsRequired') };
+  }
+
+  const admin = createAdminClient();
+  const { data: email } = await admin.rpc('lookup_email_by_nickname', {
+    p_nickname: nickname,
+  });
+
+  if (email) {
+    const origin = (await headers()).get('origin');
+    const next = encodeURIComponent(`/${locale}/reset-password`);
+    const supabase = await createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${origin}/${locale}/auth/confirm?next=${next}`,
+    });
+    if (error) {
+      console.error('resetPasswordForEmail failed:', error.message);
+    }
+  }
+
+  // Same message whether or not the nickname matched — avoids account
+  // enumeration via response timing/content.
+  return { success: t('forgotPassword.success') };
+}
+
+export async function updatePassword(
+  _prev: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const t = await getTranslations('auth');
+  const password = String(formData.get('password') ?? '');
+  const confirmPassword = String(formData.get('confirmPassword') ?? '');
+
+  if (!password || !confirmPassword) {
+    return { error: t('errors.fieldsRequired') };
+  }
+
+  if (password.length < 6) {
+    return { error: t('errors.passwordTooShort') };
+  }
+
+  if (password !== confirmPassword) {
+    return { error: t('errors.passwordMismatch') };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    if (error.name === 'AuthSessionMissingError') {
+      return { error: t('errors.sessionExpired') };
+    }
+    return { error: error.message };
+  }
+
+  // Password reset should outlive a stolen session — sign out every other
+  // active session now that the password has changed.
+  await supabase.auth.signOut({ scope: 'others' });
+
+  return { success: t('resetPassword.success') };
 }
 
 export async function signOut(): Promise<void> {
