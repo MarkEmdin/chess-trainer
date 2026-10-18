@@ -61,6 +61,15 @@ export default function AuthForm({ mode }: Props) {
           required
         />
 
+        {mode === 'login' && (
+          <Link
+            href="/forgot-password"
+            className="self-end text-sm text-muted-foreground hover:text-foreground"
+          >
+            {t('login.forgotPasswordLink')}
+          </Link>
+        )}
+
         {state?.error && (
           <p className="text-sm text-destructive" role="alert">
             {state.error}
