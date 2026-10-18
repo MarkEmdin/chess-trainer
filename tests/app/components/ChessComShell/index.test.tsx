@@ -2,7 +2,7 @@ import userEvent from '@testing-library/user-event';
 import { renderWithIntl, screen } from '@/tests/test-utils';
 import ChessComShell from '@/app/components/ChessComShell';
 import { useChessComGames } from '@/lib/chesscom/useChessComGames';
-import type { Game } from '@/lib/chesscom/types';
+import type { Game } from '@/lib/games/types';
 
 jest.mock('@/lib/chesscom/useChessComGames', () => ({
   useChessComGames: jest.fn(),

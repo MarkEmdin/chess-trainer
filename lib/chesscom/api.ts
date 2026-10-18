@@ -1,12 +1,10 @@
-import { PlayerNotFoundError } from './errors';
+import { PlayerNotFoundError } from '@/lib/games/errors';
 import type {
   ChessComArchivesResponse,
   ChessComMonthResponse,
   ChessComRawGame,
-  ClockSnapshot,
-  Game,
-  GameResult,
 } from './types';
+import type { ClockSnapshot, Game, GameResult } from '@/lib/games/types';
 
 const API_BASE = 'https://api.chess.com/pub';
 

@@ -1,8 +1,8 @@
 import userEvent from '@testing-library/user-event';
 import { renderWithIntl, screen } from '@/tests/test-utils';
 import LongThinkCard from '@/app/components/LongThinks/LongThinkCard';
-import type { LongThink } from '@/lib/chesscom/longThinks';
-import type { Game } from '@/lib/chesscom/types';
+import type { LongThink } from '@/lib/games/longThinks';
+import type { Game } from '@/lib/games/types';
 
 // react-chessboard pulls in DnD libraries that don't behave well in JSDOM
 // and the card's logic is unrelated to how the board renders — replace it

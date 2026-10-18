@@ -2,8 +2,8 @@
 
 import useSWR from 'swr';
 import { fetchLastGames } from './api';
-import { PlayerNotFoundError } from './errors';
-import type { Game } from './types';
+import { PlayerNotFoundError } from '@/lib/games/errors';
+import type { Game } from '@/lib/games/types';
 
 export type UseChessComGamesResult = {
   games: Game[] | null;

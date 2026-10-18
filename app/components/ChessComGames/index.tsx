@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
-import type { Game } from '@/lib/chesscom/types';
+import type { Game } from '@/lib/games/types';
 import ChessComShell from '@/app/components/ChessComShell';
 import GamesList from './GamesList';
 

@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useChessComGames } from '@/lib/chesscom/useChessComGames';
 import { useStoredUsername } from '@/lib/chesscom/useStoredUsername';
 import { updateChesscomUsername } from '@/lib/auth/profileActions';
-import type { Game } from '@/lib/chesscom/types';
+import type { Game } from '@/lib/games/types';
 import { Button } from '@/app/components/ui/button';
 import ChessComUsernameForm from '@/app/components/ChessComUsernameForm';
 

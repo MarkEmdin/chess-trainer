@@ -1,4 +1,4 @@
-import type { Game } from '@/lib/chesscom/types';
+import type { Game } from '@/lib/games/types';
 
 type Props = {
   game: Game;

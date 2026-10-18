@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import GameMatchup from '@/app/components/GameMatchup';
-import type { Game } from '@/lib/chesscom/types';
+import type { Game } from '@/lib/games/types';
 
 const baseGame: Game = {
   id: 'g1',
