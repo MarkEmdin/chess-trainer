@@ -1,5 +1,5 @@
 import userEvent from '@testing-library/user-event';
-import { renderWithIntl, screen } from '@/tests/test-utils';
+import { renderWithIntl, screen, fireEvent } from '@/tests/test-utils';
 import ForgotPasswordForm from '@/app/components/ForgotPasswordForm';
 import { requestPasswordReset } from '@/lib/auth/actions';
 
@@ -55,9 +55,9 @@ describe('<ForgotPasswordForm />', () => {
     mockedRequestPasswordReset.mockResolvedValue({
       error: 'All fields are required',
     });
-    const user = userEvent.setup();
-    renderWithIntl(<ForgotPasswordForm />);
-    await user.click(screen.getByRole('button', { name: /send reset link/i }));
+    const { container } = renderWithIntl(<ForgotPasswordForm />);
+    const form = container.querySelector('form');
+    fireEvent.submit(form!);
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'All fields are required',

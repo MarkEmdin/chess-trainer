@@ -30,7 +30,7 @@ export default function ForgotPasswordForm() {
           {state.success}
         </p>
       ) : (
-        <form action={formAction} className="flex flex-col gap-4" noValidate>
+        <form action={formAction} className="flex flex-col gap-4">
           <FormField
             label={t('nickname')}
             id="nickname"
