@@ -2,11 +2,12 @@ import { requestPasswordReset, updatePassword } from '@/lib/auth/actions';
 
 const resetPasswordForEmail = jest.fn();
 const updateUser = jest.fn();
+const signOut = jest.fn();
 const rpc = jest.fn();
 
 jest.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
-    auth: { resetPasswordForEmail, updateUser },
+    auth: { resetPasswordForEmail, updateUser, signOut },
   }),
 }));
 
@@ -33,6 +34,7 @@ function formData(entries: Record<string, string>) {
 describe('requestPasswordReset', () => {
   beforeEach(() => {
     resetPasswordForEmail.mockClear();
+    resetPasswordForEmail.mockResolvedValue({ error: null });
     rpc.mockClear();
   });
 
@@ -71,6 +73,8 @@ describe('requestPasswordReset', () => {
 describe('updatePassword', () => {
   beforeEach(() => {
     updateUser.mockClear();
+    signOut.mockClear();
+    signOut.mockResolvedValue({ error: null });
   });
 
   it('rejects mismatched passwords', async () => {
@@ -91,14 +95,27 @@ describe('updatePassword', () => {
     expect(updateUser).not.toHaveBeenCalled();
   });
 
-  it('updates the password and returns a success message', async () => {
+  it('updates the password, signs out other sessions, and returns a success message', async () => {
     updateUser.mockResolvedValue({ error: null });
     const result = await updatePassword(
       undefined,
       formData({ password: 'abcdef', confirmPassword: 'abcdef' }),
     );
     expect(updateUser).toHaveBeenCalledWith({ password: 'abcdef' });
+    expect(signOut).toHaveBeenCalledWith({ scope: 'others' });
     expect(result).toEqual({ success: 'auth.resetPassword.success' });
+  });
+
+  it('maps AuthSessionMissingError to the sessionExpired translation', async () => {
+    updateUser.mockResolvedValue({
+      error: { name: 'AuthSessionMissingError', message: 'Auth session missing!' },
+    });
+    const result = await updatePassword(
+      undefined,
+      formData({ password: 'abcdef', confirmPassword: 'abcdef' }),
+    );
+    expect(result).toEqual({ error: 'auth.errors.sessionExpired' });
+    expect(signOut).not.toHaveBeenCalled();
   });
 
   it('surfaces the Supabase error message on failure', async () => {

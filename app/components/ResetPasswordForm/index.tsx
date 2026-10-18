@@ -26,17 +26,9 @@ export default function ResetPasswordForm() {
       </header>
 
       {state && 'success' in state ? (
-        <div className="flex flex-col gap-4 text-center">
-          <p className="text-sm text-foreground" role="status">
-            {state.success}
-          </p>
-          <Link
-            href="/login"
-            className="text-foreground underline hover:no-underline"
-          >
-            {t('forgotPassword.backToLogin')}
-          </Link>
-        </div>
+        <p className="text-sm text-foreground text-center" role="status">
+          {state.success}
+        </p>
       ) : (
         <form action={formAction} className="flex flex-col gap-4">
           <FormField
@@ -70,6 +62,15 @@ export default function ResetPasswordForm() {
           </Button>
         </form>
       )}
+
+      <p className="text-sm text-muted-foreground text-center">
+        <Link
+          href="/login"
+          className="text-foreground underline hover:no-underline"
+        >
+          {t('forgotPassword.backToLogin')}
+        </Link>
+      </p>
     </div>
   );
 }

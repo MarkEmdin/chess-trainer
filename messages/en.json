@@ -42,7 +42,8 @@
       "registerSuggest": "Register?",
       "loginSuggest": "Login?",
       "passwordMismatch": "Passwords don't match.",
-      "passwordTooShort": "Password must be at least 6 characters."
+      "passwordTooShort": "Password must be at least 6 characters.",
+      "sessionExpired": "Your reset link has expired or was already used. Request a new one."
     },
     "forgotPassword": {
       "title": "Reset your password",

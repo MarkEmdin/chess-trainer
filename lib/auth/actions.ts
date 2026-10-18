@@ -131,9 +131,12 @@ export async function requestPasswordReset(
     const origin = (await headers()).get('origin');
     const next = encodeURIComponent(`/${locale}/reset-password`);
     const supabase = await createClient();
-    await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${origin}/${locale}/auth/confirm?next=${next}`,
     });
+    if (error) {
+      console.error('resetPasswordForEmail failed:', error.message);
+    }
   }
 
   // Same message whether or not the nickname matched — avoids account
@@ -165,8 +168,15 @@ export async function updatePassword(
   const { error } = await supabase.auth.updateUser({ password });
 
   if (error) {
+    if (error.name === 'AuthSessionMissingError') {
+      return { error: t('errors.sessionExpired') };
+    }
     return { error: error.message };
   }
+
+  // Password reset should outlive a stolen session — sign out every other
+  // active session now that the password has changed.
+  await supabase.auth.signOut({ scope: 'others' });
 
   return { success: t('resetPassword.success') };
 }
