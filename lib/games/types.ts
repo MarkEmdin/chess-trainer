@@ -40,3 +40,10 @@ export type Game = {
   // position with both clocks at the initial time control.
   clockSnapshots: ClockSnapshot[];
 };
+
+export type GamesPage = {
+  games: Game[];
+  // Opaque, platform-specific cursor for the next (older) page; null when
+  // there are no more games.
+  nextCursor: number | null;
+};

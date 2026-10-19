@@ -1,4 +1,4 @@
-import { fetchLastGames } from '@/lib/lichess/api';
+import { fetchGamesPage } from '@/lib/lichess/api';
 import { PlayerNotFoundError } from '@/lib/games/errors';
 import type { LichessGame } from '@/lib/lichess/types';
 
@@ -32,32 +32,36 @@ function ndjsonResponse(games: LichessGame[], status = 200) {
   };
 }
 
+// First page, old fetchLastGames shape — keeps the normalizer cases terse.
+const fetchGames = (username: string) =>
+  fetchGamesPage(username, null, 10).then((page) => page.games);
+
 function mockFetch(response: ReturnType<typeof ndjsonResponse>) {
   const mock = jest.fn().mockResolvedValue(response);
   global.fetch = mock as unknown as typeof fetch;
   return mock;
 }
 
-describe('fetchLastGames (Lichess)', () => {
+describe('fetchGamesPage (Lichess)', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
   it('throws PlayerNotFoundError on a 404', async () => {
     mockFetch(ndjsonResponse([], 404));
-    await expect(fetchLastGames('ghost')).rejects.toBeInstanceOf(
+    await expect(fetchGames('ghost')).rejects.toBeInstanceOf(
       PlayerNotFoundError,
     );
   });
 
   it('returns an empty list for an account with no games', async () => {
     mockFetch(ndjsonResponse([]));
-    await expect(fetchLastGames('newbie')).resolves.toEqual([]);
+    await expect(fetchGames('newbie')).resolves.toEqual([]);
   });
 
   it('normalizes a game where the requested user is white', async () => {
     mockFetch(ndjsonResponse([makeRawGame()]));
-    const [game] = await fetchLastGames('alice');
+    const [game] = await fetchGames('alice');
 
     expect(game.id).toBe('game1');
     expect(game.url).toBe('https://lichess.org/game1');
@@ -72,7 +76,7 @@ describe('fetchLastGames (Lichess)', () => {
 
   it('normalizes a game where the requested user is black and lost', async () => {
     mockFetch(ndjsonResponse([makeRawGame({ winner: 'white' })]));
-    const [game] = await fetchLastGames('bob');
+    const [game] = await fetchGames('bob');
 
     expect(game.userColor).toBe('black');
     expect(game.result).toBe('loss');
@@ -80,13 +84,13 @@ describe('fetchLastGames (Lichess)', () => {
 
   it('marks a drawn game (no winner) as a draw', async () => {
     mockFetch(ndjsonResponse([makeRawGame({ winner: undefined })]));
-    const [game] = await fetchLastGames('alice');
+    const [game] = await fetchGames('alice');
     expect(game.result).toBe('draw');
   });
 
   it('converts centisecond clocks to seconds in clockSnapshots', async () => {
     mockFetch(ndjsonResponse([makeRawGame()]));
-    const [game] = await fetchLastGames('alice');
+    const [game] = await fetchGames('alice');
 
     expect(game.clockSnapshots[0]).toEqual({
       whiteSeconds: 180,
@@ -102,7 +106,41 @@ describe('fetchLastGames (Lichess)', () => {
     mockFetch(
       ndjsonResponse([makeRawGame({ speed: 'correspondence', id: 'g2' })]),
     );
-    const [game] = await fetchLastGames('alice');
+    const [game] = await fetchGames('alice');
     expect(game.timeClass).toBe('daily');
+  });
+
+  it('omits until on the first page', async () => {
+    const mock = mockFetch(ndjsonResponse([makeRawGame()]));
+    await fetchGamesPage('alice', null, 10);
+    expect(mock.mock.calls[0][0]).not.toContain('until=');
+  });
+
+  it('passes until for later pages', async () => {
+    const mock = mockFetch(ndjsonResponse([makeRawGame()]));
+    await fetchGamesPage('alice', 1_700_000_000_000, 10);
+    expect(mock.mock.calls[0][0]).toContain('until=1700000000000');
+  });
+
+  it('returns nextCursor = last createdAt - 1 when the page is full', async () => {
+    mockFetch(
+      ndjsonResponse([
+        makeRawGame({ id: 'g1', createdAt: 2000 }),
+        makeRawGame({ id: 'g2', createdAt: 1000 }),
+      ]),
+    );
+    const page = await fetchGamesPage('alice', null, 2);
+    expect(page.nextCursor).toBe(999);
+  });
+
+  it('returns nextCursor null on a short page', async () => {
+    mockFetch(
+      ndjsonResponse([
+        makeRawGame({ id: 'g1', createdAt: 2000 }),
+        makeRawGame({ id: 'g2', createdAt: 1000 }),
+      ]),
+    );
+    const page = await fetchGamesPage('alice', null, 3);
+    expect(page.nextCursor).toBeNull();
   });
 });
