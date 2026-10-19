@@ -4,7 +4,12 @@ import type {
   ChessComMonthResponse,
   ChessComRawGame,
 } from './types';
-import type { ClockSnapshot, Game, GameResult } from '@/lib/games/types';
+import type {
+  ClockSnapshot,
+  Game,
+  GameResult,
+  GamesPage,
+} from '@/lib/games/types';
 
 const API_BASE = 'https://api.chess.com/pub';
 
@@ -147,13 +152,27 @@ function normalizeGame(raw: ChessComRawGame, username: string): Game {
   };
 }
 
-export async function fetchLastGames(
+// Archive URLs end in /YYYY/MM. Returned as a single comparable month index.
+function archiveMonth(url: string): number {
+  const [year, month] = url.split('/').slice(-2).map(Number);
+  return year * 12 + (month - 1);
+}
+
+// Cursor = end_time (ms) of the oldest game already shown. A later page skips
+// archive months entirely newer than the cursor, and inside the boundary month
+// keeps only games strictly older than it.
+export async function fetchGamesPage(
   username: string,
-  limit = 10,
+  cursor: number | null,
+  limit: number,
   signal?: AbortSignal,
-): Promise<Game[]> {
-  const archives = await fetchArchives(username, signal);
-  if (archives.length === 0) return [];
+): Promise<GamesPage> {
+  let archives = await fetchArchives(username, signal);
+  if (cursor !== null) {
+    const date = new Date(cursor);
+    const cursorMonth = date.getUTCFullYear() * 12 + date.getUTCMonth();
+    archives = archives.filter((url) => archiveMonth(url) <= cursorMonth);
+  }
 
   // Archives are sorted oldest-first; monthly games inside each archive are
   // also oldest-first. Walk backward, reversing within each month, until we
@@ -167,10 +186,24 @@ export async function fetchLastGames(
   ) {
     const monthGames = await fetchMonth(archives[i], signal);
     for (let j = monthGames.length - 1; j >= 0; j--) {
+      if (cursor !== null && monthGames[j].end_time * 1000 >= cursor) continue;
       collected.push(monthGames[j]);
       if (collected.length >= limit) break;
     }
   }
 
-  return collected.slice(0, limit).map((raw) => normalizeGame(raw, username));
+  const oldest = collected[collected.length - 1];
+  return {
+    games: collected.map((raw) => normalizeGame(raw, username)),
+    nextCursor:
+      collected.length === limit && oldest ? oldest.end_time * 1000 : null,
+  };
 }
+
+// Temporary: removed once the hooks move to fetchGamesPage.
+export const fetchLastGames = (
+  username: string,
+  limit = 10,
+  signal?: AbortSignal,
+): Promise<Game[]> =>
+  fetchGamesPage(username, null, limit, signal).then((page) => page.games);

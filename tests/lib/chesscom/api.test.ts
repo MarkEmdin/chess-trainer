@@ -1,4 +1,4 @@
-import { fetchLastGames } from '@/lib/chesscom/api';
+import { fetchGamesPage } from '@/lib/chesscom/api';
 import { PlayerNotFoundError } from '@/lib/games/errors';
 
 type RawGame = {
@@ -75,6 +75,10 @@ function jsonResponse(body: unknown, status = 200): FakeResponse {
   };
 }
 
+// First page, old fetchLastGames shape — keeps the normalizer cases terse.
+const fetchGames = (username: string, limit = 10) =>
+  fetchGamesPage(username, null, limit).then((page) => page.games);
+
 function mockFetchSequence(...responses: FakeResponse[]) {
   const mock = jest.fn();
   for (const r of responses) {
@@ -84,21 +88,21 @@ function mockFetchSequence(...responses: FakeResponse[]) {
   return mock;
 }
 
-describe('fetchLastGames', () => {
+describe('fetchGamesPage (Chess.com)', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
   it('throws PlayerNotFoundError when the archives endpoint returns 404', async () => {
     mockFetchSequence(jsonResponse(null, 404));
-    await expect(fetchLastGames('ghost-user')).rejects.toBeInstanceOf(
+    await expect(fetchGames('ghost-user')).rejects.toBeInstanceOf(
       PlayerNotFoundError,
     );
   });
 
   it('returns an empty list when the archives array is empty', async () => {
     mockFetchSequence(jsonResponse({ archives: [] }));
-    await expect(fetchLastGames('newbie')).resolves.toEqual([]);
+    await expect(fetchGames('newbie')).resolves.toEqual([]);
   });
 
   it('returns games from the most recent archive in newest-first order', async () => {
@@ -106,7 +110,7 @@ describe('fetchLastGames', () => {
     const games = [makeRawGame({ uuid: 'a' }), makeRawGame({ uuid: 'b' })];
     mockFetchSequence(jsonResponse({ archives }), jsonResponse({ games }));
 
-    const result = await fetchLastGames('alice');
+    const result = await fetchGames('alice');
 
     expect(result).toHaveLength(2);
     // Within the month games are reversed so the last one in the archive
@@ -128,7 +132,7 @@ describe('fetchLastGames', () => {
       }),
     );
 
-    const result = await fetchLastGames('alice', 3);
+    const result = await fetchGames('alice', 3);
 
     expect(result.map((g) => g.id)).toEqual(['may-1', 'apr-2', 'apr-1']);
   });
@@ -141,7 +145,7 @@ describe('fetchLastGames', () => {
       jsonResponse({ games: [makeRawGame()] }),
     );
 
-    const [game] = await fetchLastGames('ALICE');
+    const [game] = await fetchGames('ALICE');
 
     expect(game.userColor).toBe('white');
     expect(game.user.username).toBe('alice');
@@ -157,7 +161,7 @@ describe('fetchLastGames', () => {
       jsonResponse({ games: [makeRawGame()] }),
     );
 
-    const [game] = await fetchLastGames('bob');
+    const [game] = await fetchGames('bob');
 
     expect(game.userColor).toBe('black');
     expect(game.user.username).toBe('bob');
@@ -174,7 +178,7 @@ describe('fetchLastGames', () => {
       jsonResponse({ games: [makeRawGame({ time_control: '300+5' })] }),
     );
 
-    const [game] = await fetchLastGames('alice');
+    const [game] = await fetchGames('alice');
 
     expect(game.increment).toBe(5);
     expect(game.clockSnapshots[0]).toEqual({
@@ -197,7 +201,7 @@ describe('fetchLastGames', () => {
       }),
     );
 
-    const [game] = await fetchLastGames('alice');
+    const [game] = await fetchGames('alice');
 
     expect(game.opening).toBe('Sicilian Defense Najdorf Variation');
   });
@@ -210,8 +214,66 @@ describe('fetchLastGames', () => {
       jsonResponse({ games: [makeRawGame({ eco: undefined })] }),
     );
 
-    const [game] = await fetchLastGames('alice');
+    const [game] = await fetchGames('alice');
 
     expect(game.opening).toBeUndefined();
+  });
+
+  const MAY = 'https://api.chess.com/pub/player/alice/games/2026/05';
+  const APR = 'https://api.chess.com/pub/player/alice/games/2026/04';
+
+  it('returns nextCursor = oldest end_time in ms when the page is full', async () => {
+    mockFetchSequence(
+      jsonResponse({ archives: [MAY] }),
+      jsonResponse({
+        games: [
+          makeRawGame({ uuid: 'old', end_time: 100 }),
+          makeRawGame({ uuid: 'new', end_time: 200 }),
+        ],
+      }),
+    );
+    const page = await fetchGamesPage('alice', null, 2);
+    expect(page.nextCursor).toBe(100_000);
+  });
+
+  it('returns nextCursor null when archives are exhausted', async () => {
+    mockFetchSequence(
+      jsonResponse({ archives: [MAY] }),
+      jsonResponse({
+        games: [
+          makeRawGame({ uuid: 'a', end_time: 100 }),
+          makeRawGame({ uuid: 'b', end_time: 200 }),
+        ],
+      }),
+    );
+    const page = await fetchGamesPage('alice', null, 5);
+    expect(page.nextCursor).toBeNull();
+  });
+
+  it('skips games at or after the cursor inside the boundary month', async () => {
+    const cursor = Date.UTC(2026, 4, 20);
+    const sec = (ms: number) => ms / 1000;
+    mockFetchSequence(
+      jsonResponse({ archives: [MAY] }),
+      jsonResponse({
+        games: [
+          makeRawGame({ uuid: 'older', end_time: sec(cursor) - 60 }),
+          makeRawGame({ uuid: 'at', end_time: sec(cursor) }),
+          makeRawGame({ uuid: 'newer', end_time: sec(cursor) + 60 }),
+        ],
+      }),
+    );
+    const page = await fetchGamesPage('alice', cursor, 10);
+    expect(page.games.map((g) => g.id)).toEqual(['older']);
+  });
+
+  it('does not fetch months newer than the cursor', async () => {
+    const mock = mockFetchSequence(
+      jsonResponse({ archives: [APR, MAY] }),
+      jsonResponse({ games: [makeRawGame({ uuid: 'apr', end_time: 1 })] }),
+    );
+    await fetchGamesPage('alice', Date.UTC(2026, 3, 20), 10);
+    expect(mock).toHaveBeenCalledTimes(2);
+    expect(mock.mock.calls[1][0]).toBe(APR);
   });
 });
