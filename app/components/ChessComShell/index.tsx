@@ -8,7 +8,7 @@ import { useStoredUsername } from '@/lib/chesscom/useStoredUsername';
 import { updateChesscomUsername } from '@/lib/auth/profileActions';
 import type { Game } from '@/lib/games/types';
 import { Button } from '@/app/components/ui/button';
-import ChessComUsernameForm from '@/app/components/ChessComUsernameForm';
+import UsernameForm from '@/app/components/UsernameForm';
 
 type RenderProps = {
   games: Game[];
@@ -69,7 +69,7 @@ export default function ChessComShell({
   const tForm = useTranslations('games.usernameForm');
 
   if (!username) {
-    return <ChessComUsernameForm onSubmit={setUsername} />;
+    return <UsernameForm platform="chesscom" onSubmit={setUsername} />;
   }
 
   return (
