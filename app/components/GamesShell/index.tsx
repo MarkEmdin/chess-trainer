@@ -35,7 +35,7 @@ type Props = {
   children: (props: RenderProps) => React.ReactNode;
 };
 
-// Common scaffolding for any feature that consumes the user's last 10 games
+// Common scaffolding for any feature that consumes the user's last GAMES_LIMIT games
 // from either Chess.com or Lichess. Owns: platform selection, username
 // form, loading/error/no-games branches, the "change user" button, and the
 // status line. Consumers focus on what to render once games are in hand.

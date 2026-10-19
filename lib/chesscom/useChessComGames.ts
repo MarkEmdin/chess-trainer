@@ -3,6 +3,7 @@
 import useSWR from 'swr';
 import { fetchLastGames } from './api';
 import { PlayerNotFoundError } from '@/lib/games/errors';
+import { GAMES_LIMIT } from '@/lib/games/constants';
 import type { Game } from '@/lib/games/types';
 
 export type UseChessComGamesResult = {
@@ -14,7 +15,7 @@ export type UseChessComGamesResult = {
 
 type FetchKey = readonly ['chesscom-games', string];
 
-const fetcher = ([, username]: FetchKey) => fetchLastGames(username, 10);
+const fetcher = ([, username]: FetchKey) => fetchLastGames(username, GAMES_LIMIT);
 
 export function useChessComGames(
   username: string | null,

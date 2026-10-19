@@ -3,6 +3,7 @@
 import useSWR from 'swr';
 import { fetchLastGames } from './api';
 import { PlayerNotFoundError } from '@/lib/games/errors';
+import { GAMES_LIMIT } from '@/lib/games/constants';
 import type { Game } from '@/lib/games/types';
 
 export type UseLichessGamesResult = {
@@ -14,7 +15,7 @@ export type UseLichessGamesResult = {
 
 type FetchKey = readonly ['lichess-games', string];
 
-const fetcher = ([, username]: FetchKey) => fetchLastGames(username, 10);
+const fetcher = ([, username]: FetchKey) => fetchLastGames(username, GAMES_LIMIT);
 
 export function useLichessGames(username: string | null): UseLichessGamesResult {
   const key: FetchKey | null = username ? ['lichess-games', username] : null;
