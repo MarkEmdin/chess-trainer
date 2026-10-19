@@ -7,18 +7,20 @@ export default async function GamesPage() {
   const t = await getTranslations('games');
   const user = await getAuthedUser();
 
-  // Signed-in visitors get their chess.com username from user_profiles
-  // (the single source of truth, replacing localStorage). Guests get
-  // null and fall through to the localStorage flow in ChessComShell.
-  let initialUsername: string | null = null;
+  // Signed-in visitors get their saved usernames from user_profiles (the
+  // single source of truth, replacing localStorage). Guests get null and
+  // fall through to the localStorage flow in GamesShell.
+  let initialChesscomUsername: string | null = null;
+  let initialLichessUsername: string | null = null;
   if (user) {
     const supabase = await createClient();
     const { data } = await supabase
       .from('user_profiles')
-      .select('chesscom_username')
+      .select('chesscom_username, lichess_username')
       .eq('id', user.id)
       .single();
-    initialUsername = data?.chesscom_username ?? null;
+    initialChesscomUsername = data?.chesscom_username ?? null;
+    initialLichessUsername = data?.lichess_username ?? null;
   }
 
   return (
@@ -28,7 +30,8 @@ export default async function GamesPage() {
         <p className="text-muted-foreground mb-8">{t('subtitle')}</p>
         <ChessComGames
           isAuthenticated={!!user}
-          initialUsername={initialUsername}
+          initialChesscomUsername={initialChesscomUsername}
+          initialLichessUsername={initialLichessUsername}
         />
       </div>
     </div>

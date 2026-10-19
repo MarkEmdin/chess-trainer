@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import type { Game } from '@/lib/games/types';
-import ChessComShell from '@/app/components/ChessComShell';
+import GamesShell from '@/app/components/GamesShell';
 import GamesList from './GamesList';
 
 // GameModal pulls in chess.js + react-chessboard (~heavy). Defer until the
@@ -14,12 +14,14 @@ const GameModal = dynamic(() => import('./GameModal'), { ssr: false });
 
 type Props = {
   isAuthenticated: boolean;
-  initialUsername: string | null;
+  initialChesscomUsername: string | null;
+  initialLichessUsername: string | null;
 };
 
 export default function ChessComGames({
   isAuthenticated,
-  initialUsername,
+  initialChesscomUsername,
+  initialLichessUsername,
 }: Props) {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const t = useTranslations('games.list');
@@ -27,9 +29,10 @@ export default function ChessComGames({
 
   return (
     <>
-      <ChessComShell
+      <GamesShell
         isAuthenticated={isAuthenticated}
-        initialUsername={initialUsername}
+        initialChesscomUsername={initialChesscomUsername}
+        initialLichessUsername={initialLichessUsername}
         emptyMessage={tCommon('emptyGames')}
         renderStatus={({ games, username }) =>
           t('showing', { username, count: games.length })
@@ -38,7 +41,7 @@ export default function ChessComGames({
         {({ games }) => (
           <GamesList games={games} onSelect={setSelectedGame} />
         )}
-      </ChessComShell>
+      </GamesShell>
 
       {selectedGame && (
         <GameModal
