@@ -136,7 +136,7 @@
       "description": "История чемпионов мира из СССР."
     },
     "games": {
-      "title": "Партии с Chess.com",
+      "title": "Партии",
       "description": "Смотрите и переигрывайте недавние партии любого игрока Chess.com или Lichess."
     },
     "thinkTime": {
@@ -240,7 +240,7 @@
     "wrong": "Неверно, попробуйте ещё раз"
   },
   "games": {
-    "title": "Партии с Chess.com",
+    "title": "Партии",
     "subtitle": "Недавние партии на Chess.com или Lichess.",
     "usernameForm": {
       "chesscomLabel": "Ник на Chess.com",
