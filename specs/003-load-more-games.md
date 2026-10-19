@@ -1,6 +1,6 @@
 # Spec: Load more games
 
-Status: approved
+Status: done
 Branch: feature/load-more-games
 
 ## Problem
