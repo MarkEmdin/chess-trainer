@@ -103,3 +103,23 @@ export async function updateChesscomUsername(
     .update({ chesscom_username: trimmed || null })
     .eq('id', user.id);
 }
+
+// Lichess equivalent of updateChesscomUsername — same reasoning: mirrors a
+// value the user typed in the Lichess lookup form (validated loosely by the
+// platform's own 404 response), fire-and-forget, no-op for guests.
+export async function updateLichessUsername(
+  username: string | null,
+): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return;
+
+  const trimmed = username?.trim();
+  await supabase
+    .from('user_profiles')
+    .update({ lichess_username: trimmed || null })
+    .eq('id', user.id);
+}
