@@ -199,11 +199,3 @@ export async function fetchGamesPage(
       collected.length === limit && oldest ? oldest.end_time * 1000 : null,
   };
 }
-
-// Temporary: removed once the hooks move to fetchGamesPage.
-export const fetchLastGames = (
-  username: string,
-  limit = 10,
-  signal?: AbortSignal,
-): Promise<Game[]> =>
-  fetchGamesPage(username, null, limit, signal).then((page) => page.games);

@@ -75,7 +75,7 @@ function jsonResponse(body: unknown, status = 200): FakeResponse {
   };
 }
 
-// First page, old fetchLastGames shape — keeps the normalizer cases terse.
+// First page as a plain list — keeps the normalizer cases terse.
 const fetchGames = (username: string, limit = 10) =>
   fetchGamesPage(username, null, limit).then((page) => page.games);
 

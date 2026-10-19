@@ -24,7 +24,16 @@ const mockUseLichessGames = useLichessGames as jest.MockedFunction<
 >;
 
 function idleResult() {
-  return { games: null, error: null, isLoading: false, isNotFound: false };
+  return {
+    games: null,
+    error: null,
+    isLoading: false,
+    isNotFound: false,
+    hasMore: false,
+    isLoadingMore: false,
+    loadMoreError: null,
+    loadMore: jest.fn(),
+  };
 }
 
 const makeGame = (id: string): Game => ({
@@ -82,6 +91,7 @@ describe('<GamesShell />', () => {
   it('loads chess.com games directly with no toggle when only chesscom is saved', () => {
     localStorage.setItem('chesscom-username', 'alice');
     mockUseChessComGames.mockReturnValue({
+      ...idleResult(),
       games: [makeGame('a')],
       error: null,
       isLoading: false,
@@ -96,6 +106,7 @@ describe('<GamesShell />', () => {
   it('loads lichess games directly with no toggle when only lichess is saved', () => {
     localStorage.setItem('lichess-username', 'bob');
     mockUseLichessGames.mockReturnValue({
+      ...idleResult(),
       games: [makeGame('b')],
       error: null,
       isLoading: false,
@@ -110,6 +121,7 @@ describe('<GamesShell />', () => {
   it('shows the not-found error when the active platform reports isNotFound', () => {
     localStorage.setItem('chesscom-username', 'ghost');
     mockUseChessComGames.mockReturnValue({
+      ...idleResult(),
       games: null,
       error: new Error('fail'),
       isLoading: false,
@@ -122,6 +134,7 @@ describe('<GamesShell />', () => {
   it('shows a generic error for any other failure', () => {
     localStorage.setItem('lichess-username', 'alice');
     mockUseLichessGames.mockReturnValue({
+      ...idleResult(),
       games: null,
       error: new Error('fail'),
       isLoading: false,
@@ -135,12 +148,14 @@ describe('<GamesShell />', () => {
     localStorage.setItem('chesscom-username', 'alice');
     localStorage.setItem('lichess-username', 'bob');
     mockUseChessComGames.mockReturnValue({
+      ...idleResult(),
       games: [makeGame('a'), makeGame('a2')],
       error: null,
       isLoading: false,
       isNotFound: false,
     });
     mockUseLichessGames.mockReturnValue({
+      ...idleResult(),
       games: [makeGame('b')],
       error: null,
       isLoading: false,
@@ -157,6 +172,7 @@ describe('<GamesShell />', () => {
   it('clears the saved username for the active platform on change-user click', async () => {
     localStorage.setItem('chesscom-username', 'alice');
     mockUseChessComGames.mockReturnValue({
+      ...idleResult(),
       games: [makeGame('a')],
       error: null,
       isLoading: false,
@@ -172,6 +188,7 @@ describe('<GamesShell />', () => {
     localStorage.setItem('chesscom-username', 'alice');
     localStorage.setItem('lichess-username', 'bob');
     mockUseChessComGames.mockReturnValue({
+      ...idleResult(),
       games: [makeGame('a')],
       error: null,
       isLoading: false,
@@ -186,6 +203,7 @@ describe('<GamesShell />', () => {
   it('shows the lichess form after change-user when only lichess was saved', async () => {
     localStorage.setItem('lichess-username', 'bob');
     mockUseLichessGames.mockReturnValue({
+      ...idleResult(),
       games: [makeGame('b')],
       error: null,
       isLoading: false,

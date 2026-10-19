@@ -32,7 +32,7 @@ function ndjsonResponse(games: LichessGame[], status = 200) {
   };
 }
 
-// First page, old fetchLastGames shape — keeps the normalizer cases terse.
+// First page as a plain list — keeps the normalizer cases terse.
 const fetchGames = (username: string) =>
   fetchGamesPage(username, null, 10).then((page) => page.games);
 
