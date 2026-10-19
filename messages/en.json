@@ -137,7 +137,7 @@
     },
     "games": {
       "title": "Chess.com Games",
-      "description": "Browse and replay the last 10 games of any Chess.com player."
+      "description": "Browse and replay the last 50 games of any Chess.com or Lichess player."
     },
     "thinkTime": {
       "title": "Key Positions",
@@ -241,12 +241,17 @@
   },
   "games": {
     "title": "Chess.com Games",
-    "subtitle": "Browse the last 10 games of any Chess.com player.",
+    "subtitle": "Browse your last 50 games on Chess.com or Lichess.",
     "usernameForm": {
-      "label": "Chess.com username",
+      "chesscomLabel": "Chess.com username",
+      "lichessLabel": "Lichess username",
       "placeholder": "e.g. MarkEmdin",
       "submit": "Load games",
       "change": "Change user"
+    },
+    "platformToggle": {
+      "chesscom": "Chess.com",
+      "lichess": "Lichess"
     },
     "list": {
       "showing": "Showing the last {count} games of {username}"
@@ -273,13 +278,13 @@
       "lastMove": "Go to end",
       "lastMoveCaption": "Last move: {move}",
       "lastMoveWithDuration": "Last move: {move} — {duration}",
-      "viewOnChessCom": "View on Chess.com"
+      "viewGame": "View game"
     }
   },
   "thinkTime": {
     "title": "Key Positions",
     "subtitle": "Positions where you spent extra time thinking. Click a card to open the full game.",
-    "empty": "No moves crossed the {threshold}s threshold in your last 10 games.",
+    "empty": "No moves crossed the {threshold}s threshold in your last 50 games.",
     "showing": "{count, plural, one {# long think} other {# long thinks}} across {gameCount, plural, one {# game} other {# games}}",
     "thoughtFor": "Thought {duration}",
     "thresholdLabel": "Threshold",
@@ -296,7 +301,7 @@
       "dark": "Dark",
       "rose": "Rose"
     },
-    "chesscom": {
+    "games": {
       "loading": "Loading games…",
       "errorGeneric": "Could not load games. Try again.",
       "errorNotFound": "Player not found.",

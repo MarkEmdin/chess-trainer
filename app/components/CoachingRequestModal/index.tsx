@@ -17,8 +17,8 @@ import {
   createCoachingRequest,
   type CoachingRequestState,
 } from '@/lib/coaching/actions';
-import type { LongThink } from '@/lib/chesscom/longThinks';
-import type { Game } from '@/lib/chesscom/types';
+import type { LongThink } from '@/lib/games/longThinks';
+import type { Game } from '@/lib/games/types';
 import type { MyCoachingRequest } from '@/lib/coaching/useMyCoachingRequests';
 
 type Props = {

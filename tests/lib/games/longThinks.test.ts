@@ -1,5 +1,5 @@
-import { findLongThinks } from '@/lib/chesscom/longThinks';
-import type { Game } from '@/lib/chesscom/types';
+import { findLongThinks } from '@/lib/games/longThinks';
+import type { Game } from '@/lib/games/types';
 
 // Four half-moves, 3-minute time control, no increment unless overridden.
 // Clock evolution (white spends 5s on move 1, black 10s, white 7s, black 5s):

@@ -4,11 +4,11 @@ import { useDeferredValue, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { Loader2Icon } from 'lucide-react';
-import { findLongThinks, type LongThink } from '@/lib/chesscom/longThinks';
-import type { Game } from '@/lib/chesscom/types';
+import { findLongThinks, type LongThink } from '@/lib/games/longThinks';
+import type { Game } from '@/lib/games/types';
 import { useStoredThreshold } from '@/lib/chesscom/useStoredThreshold';
 import { useMyCoachingRequests } from '@/lib/coaching/useMyCoachingRequests';
-import ChessComShell from '@/app/components/ChessComShell';
+import GamesShell from '@/app/components/GamesShell';
 import LongThinkCard from './LongThinkCard';
 import ThresholdSelector from './ThresholdSelector';
 
@@ -39,12 +39,14 @@ function enrich(games: Game[], thresholdSec: number): EnrichedThink[] {
 
 type Props = {
   isAuthenticated: boolean;
-  initialUsername: string | null;
+  initialChesscomUsername: string | null;
+  initialLichessUsername: string | null;
 };
 
 export default function LongThinks({
   isAuthenticated,
-  initialUsername,
+  initialChesscomUsername,
+  initialLichessUsername,
 }: Props) {
   const [selected, setSelected] = useState<EnrichedThink | null>(null);
   const [coachingTarget, setCoachingTarget] =
@@ -65,9 +67,10 @@ export default function LongThinks({
 
   return (
     <>
-      <ChessComShell
+      <GamesShell
         isAuthenticated={isAuthenticated}
-        initialUsername={initialUsername}
+        initialChesscomUsername={initialChesscomUsername}
+        initialLichessUsername={initialLichessUsername}
         emptyMessage={t('empty', { threshold: deferredThreshold })}
         renderStatus={({ games }) =>
           t('showing', {
@@ -112,7 +115,7 @@ export default function LongThinks({
             </div>
           );
         }}
-      </ChessComShell>
+      </GamesShell>
 
       {selected && (
         <GameModal

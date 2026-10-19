@@ -1,7 +1,7 @@
 import userEvent from '@testing-library/user-event';
 import { renderWithIntl, screen } from '@/tests/test-utils';
 import GameTile from '@/app/components/ChessComGames/GameTile';
-import type { Game, GameResult } from '@/lib/chesscom/types';
+import type { Game, GameResult } from '@/lib/games/types';
 
 function makeGame(overrides: Partial<Game> = {}): Game {
   return {

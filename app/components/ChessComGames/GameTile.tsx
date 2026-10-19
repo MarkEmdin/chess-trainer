@@ -1,7 +1,7 @@
 'use client';
 
 import { useFormatter, useTranslations } from 'next-intl';
-import type { Game } from '@/lib/chesscom/types';
+import type { Game } from '@/lib/games/types';
 import { Card, CardContent } from '@/app/components/ui/card';
 import GameMatchup from '@/app/components/GameMatchup';
 

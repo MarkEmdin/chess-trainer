@@ -1,5 +1,5 @@
 import { fetchLastGames } from '@/lib/chesscom/api';
-import { PlayerNotFoundError } from '@/lib/chesscom/errors';
+import { PlayerNotFoundError } from '@/lib/games/errors';
 
 type RawGame = {
   url: string;

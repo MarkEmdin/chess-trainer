@@ -21,7 +21,7 @@ import {
 } from '@/app/components/ui/dialog';
 import { formatSeconds } from '@/lib/chesscom/format';
 import { sideToMove } from '@/lib/chess/fen';
-import type { Game, GameColor, GamePlayer } from '@/lib/chesscom/types';
+import type { Game, GameColor, GamePlayer } from '@/lib/games/types';
 import GameMatchup from '@/app/components/GameMatchup';
 import { cn } from '@/lib/utils';
 
@@ -290,7 +290,7 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
                 rel="noopener noreferrer"
               >
                 <ExternalLinkIcon className="size-4" />
-                {t('viewOnChessCom')}
+                {t('viewGame')}
               </a>
             </Button>
           </div>

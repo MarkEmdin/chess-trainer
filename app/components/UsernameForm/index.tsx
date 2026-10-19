@@ -4,12 +4,14 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
+import type { Platform } from '@/lib/games/types';
 
 type Props = {
+  platform: Platform;
   onSubmit: (username: string) => void;
 };
 
-export default function ChessComUsernameForm({ onSubmit }: Props) {
+export default function UsernameForm({ platform, onSubmit }: Props) {
   const t = useTranslations('games.usernameForm');
   const [input, setInput] = useState('');
 
@@ -20,17 +22,19 @@ export default function ChessComUsernameForm({ onSubmit }: Props) {
     onSubmit(trimmed);
   };
 
+  const labelKey = platform === 'chesscom' ? 'chesscomLabel' : 'lichessLabel';
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3 max-w-md">
       <label
-        htmlFor="chesscom-username"
+        htmlFor="platform-username"
         className="text-sm font-medium text-foreground"
       >
-        {t('label')}
+        {t(labelKey)}
       </label>
       <div className="flex gap-2">
         <Input
-          id="chesscom-username"
+          id="platform-username"
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}

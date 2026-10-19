@@ -8,17 +8,19 @@ export default async function ThinkTimePage() {
   const user = await getAuthedUser();
 
   // Same auth-aware seed as /games: signed-in users pull their saved
-  // chess.com handle from user_profiles, guests fall back to localStorage
-  // inside ChessComShell.
-  let initialUsername: string | null = null;
+  // usernames from user_profiles, guests fall back to localStorage inside
+  // GamesShell.
+  let initialChesscomUsername: string | null = null;
+  let initialLichessUsername: string | null = null;
   if (user) {
     const supabase = await createClient();
     const { data } = await supabase
       .from('user_profiles')
-      .select('chesscom_username')
+      .select('chesscom_username, lichess_username')
       .eq('id', user.id)
       .single();
-    initialUsername = data?.chesscom_username ?? null;
+    initialChesscomUsername = data?.chesscom_username ?? null;
+    initialLichessUsername = data?.lichess_username ?? null;
   }
 
   return (
@@ -28,7 +30,8 @@ export default async function ThinkTimePage() {
         <p className="text-muted-foreground mb-8">{t('subtitle')}</p>
         <LongThinks
           isAuthenticated={!!user}
-          initialUsername={initialUsername}
+          initialChesscomUsername={initialChesscomUsername}
+          initialLichessUsername={initialLichessUsername}
         />
       </div>
     </div>
