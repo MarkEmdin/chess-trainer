@@ -65,17 +65,26 @@ export default function GamesShell({
     : storedLichessUsername;
 
   const [platform, setPlatform] = useState<Platform>('chesscom');
+  // Platform whose username was just cleared via "change user". Pins the
+  // form to that platform even if the other one still has a saved username.
+  const [editingPlatform, setEditingPlatform] = useState<Platform | null>(
+    null,
+  );
 
   // When exactly one platform has a saved username, that one always wins —
   // no toggle, no stale state to reconcile. The toggle only matters when
   // both or neither are saved.
+  const neitherSaved = !chesscomUsername && !lichessUsername;
   const onlyLichessSaved = !chesscomUsername && !!lichessUsername;
   const onlyChesscomSaved = !!chesscomUsername && !lichessUsername;
-  const effectivePlatform: Platform = onlyLichessSaved
-    ? 'lichess'
-    : onlyChesscomSaved
-      ? 'chesscom'
-      : platform;
+  const effectivePlatform: Platform = neitherSaved
+    ? platform
+    : (editingPlatform ??
+      (onlyLichessSaved
+        ? 'lichess'
+        : onlyChesscomSaved
+          ? 'chesscom'
+          : platform));
   const showToggle =
     (!chesscomUsername && !lichessUsername) ||
     (!!chesscomUsername && !!lichessUsername);
@@ -84,6 +93,12 @@ export default function GamesShell({
     effectivePlatform === 'chesscom' ? chesscomUsername : lichessUsername;
 
   const setUsername = (next: string | null) => {
+    if (next === null) {
+      setPlatform(effectivePlatform);
+      setEditingPlatform(effectivePlatform);
+    } else {
+      setEditingPlatform(null);
+    }
     if (effectivePlatform === 'chesscom') {
       if (isAuthenticated) {
         setProfileChesscomUsername(next);

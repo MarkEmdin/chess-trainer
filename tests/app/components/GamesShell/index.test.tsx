@@ -167,4 +167,33 @@ describe('<GamesShell />', () => {
     await user.click(screen.getByRole('button', { name: /change user/i }));
     expect(localStorage.getItem('chesscom-username')).toBeNull();
   });
+
+  it('shows the chess.com form after change-user even when lichess is still saved', async () => {
+    localStorage.setItem('chesscom-username', 'alice');
+    localStorage.setItem('lichess-username', 'bob');
+    mockUseChessComGames.mockReturnValue({
+      games: [makeGame('a')],
+      error: null,
+      isLoading: false,
+      isNotFound: false,
+    });
+    const user = userEvent.setup();
+    shell();
+    await user.click(screen.getByRole('button', { name: /change user/i }));
+    expect(screen.getByLabelText(/chess\.com username/i)).toBeInTheDocument();
+  });
+
+  it('shows the lichess form after change-user when only lichess was saved', async () => {
+    localStorage.setItem('lichess-username', 'bob');
+    mockUseLichessGames.mockReturnValue({
+      games: [makeGame('b')],
+      error: null,
+      isLoading: false,
+      isNotFound: false,
+    });
+    const user = userEvent.setup();
+    shell();
+    await user.click(screen.getByRole('button', { name: /change user/i }));
+    expect(screen.getByLabelText(/lichess username/i)).toBeInTheDocument();
+  });
 });
