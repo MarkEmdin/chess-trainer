@@ -98,17 +98,32 @@ usable for this check.
 - New: a small platform-toggle sub-component, rendered only when both usernames exist for the current
   identity (signed-in profile row or guest's two localStorage keys).
 - `app/components/ChessComGames/` and `app/components/LongThinks/` consume `GamesShell` instead of
-  `ChessComShell` — their internal rendering (`GameTile`, `GameModal`, `LongThinkCard`,
-  `ThresholdSelector`) is unchanged, since they already only consume the normalized `Game`/`LongThink`
-  types.
+  `ChessComShell` — their internal rendering (`GameTile`, `LongThinkCard`, `ThresholdSelector`) is
+  unchanged, since they already only consume the normalized `Game`/`LongThink` types. `GameModal` needs
+  one copy change (see i18n below) — its "View on Chess.com" link must work for both platforms; the
+  link's `href` already comes from `game.url`, which both normalizers populate correctly (Chess.com's
+  own game page / `https://lichess.org/{id}` respectively), so only the link's **label text** needs to
+  become platform-neutral.
+- `app/components/ChessComUsernameForm/` → generalize into `app/components/UsernameForm/`, taking a
+  `platform: 'chesscom' | 'lichess'` prop that selects the label/placeholder translation key. When
+  neither username is saved (`GamesShell`'s empty state), render the same platform-toggle
+  sub-component above this form so the user picks which platform they're entering a username for,
+  defaulting to `'chesscom'`.
+- `app/[locale]/games/page.tsx` and `app/[locale]/think-time/page.tsx` currently `select('chesscom_username')`
+  only — change both to `select('chesscom_username, lichess_username')` and pass both down as
+  `initialChesscomUsername` / `initialLichessUsername` props.
 - New: `lib/lichess/useLichessGames.ts`, mirroring `lib/chesscom/useChessComGames.ts`'s shape and SWR
   settings (`revalidateOnFocus: false`, `revalidateOnReconnect: false`) exactly, with SWR key
   `['lichess-games', username]`.
 - New: `lib/lichess/useStoredLichessUsername.ts`, a copy of `lib/chesscom/useStoredUsername.ts` with
   storage key `lichess-username` and its own same-tab event name (so the two don't collide).
-- `lib/auth/profileActions.ts` already has `updateLichessUsername`-equivalent logic bundled into the
-  single profile-update action (confirmed: `lichess_username` is already a field on that form/action) —
-  reuse as-is, no new server action needed.
+- `lib/auth/profileActions.ts` already updates `lichess_username` through the full `/profile` form
+  (`updateExternalUsernames`) — reused as-is for that page. But `GamesShell`'s inline "change username"
+  flow (used directly on `/games`/`/key-positions`, not the profile page) calls the narrower
+  fire-and-forget `updateChesscomUsername(username)`. **Correction found during planning: there is no
+  Lichess equivalent of that function.** Add `updateLichessUsername(username: string | null): Promise<void>`
+  to `lib/auth/profileActions.ts`, mirroring `updateChesscomUsername` exactly (same no-validation
+  reasoning, same guest no-op).
 
 ## i18n
 
@@ -118,14 +133,25 @@ the platform toggle rather than inventing a new one):
 ```
 games.platformToggle.chesscom   // "Chess.com"
 games.platformToggle.lichess    // "Lichess"
+games.usernameForm.chesscomLabel  // was games.usernameForm.label — rename, Chess.com-specific text
+games.usernameForm.lichessLabel   // "Lichess username"
+games.modal.viewGame              // was games.modal.viewOnChessCom ("View on Chess.com") — generic
+                                   // "View game" text; the link target itself (game.url) already
+                                   // resolves correctly per-platform, only the label changes
 ```
 
-No other new user-facing copy — rename the existing `common.chesscom` namespace (4 keys: `loading`,
-`errorGeneric`, `errorNotFound`, `emptyGames`) to `common.games` in both `messages/en.json` and
-`messages/ru.json`, since it's now shared by both platforms. Confirmed call sites to update (all via
-`useTranslations('common.chesscom')` → `useTranslations('common.games')`, same key names underneath):
-`app/components/ChessComShell/index.tsx` (→ `GamesShell`) uses `loading`, `errorNotFound`,
-`errorGeneric`; `app/components/ChessComGames/index.tsx` uses `emptyGames`.
+Rename the existing `common.chesscom` namespace (4 keys: `loading`, `errorGeneric`, `errorNotFound`,
+`emptyGames`) to `common.games` in both `messages/en.json` and `messages/ru.json`, since it's now
+shared by both platforms. Confirmed call sites to update (all via `useTranslations('common.chesscom')`
+→ `useTranslations('common.games')`, same key names underneath): `app/components/ChessComShell/index.tsx`
+(→ `GamesShell`) uses `loading`, `errorNotFound`, `errorGeneric`; `app/components/ChessComGames/index.tsx`
+uses `emptyGames`.
+
+Also genericize the page-level copy that's currently Chess.com-specific text (not structural, just
+values — key paths stay the same): `games.title` ("Chess.com Games" → "Games"), `games.subtitle`
+("Browse the last 10 games of any Chess.com player." → "Browse your last 10 games on Chess.com or
+Lichess."). Checked `thinkTime.title`/`subtitle` ("Key Positions" / "Positions where you spent extra
+time thinking...") — already platform-neutral, no change needed there.
 
 ## Supabase config
 
