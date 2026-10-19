@@ -137,7 +137,7 @@
     },
     "games": {
       "title": "Партии с Chess.com",
-      "description": "Смотрите и переигрывайте 50 последних партий любого игрока Chess.com или Lichess."
+      "description": "Смотрите и переигрывайте недавние партии любого игрока Chess.com или Lichess."
     },
     "thinkTime": {
       "title": "Важные позиции из партий",
@@ -241,7 +241,7 @@
   },
   "games": {
     "title": "Партии с Chess.com",
-    "subtitle": "Последние 50 партий на Chess.com или Lichess.",
+    "subtitle": "Недавние партии на Chess.com или Lichess.",
     "usernameForm": {
       "chesscomLabel": "Ник на Chess.com",
       "lichessLabel": "Ник на Lichess",
@@ -279,12 +279,17 @@
       "lastMoveCaption": "Последний ход: {move}",
       "lastMoveWithDuration": "Последний ход: {move} — {duration}",
       "viewGame": "Открыть партию"
+    },
+    "loadMore": {
+      "button": "Загрузить ещё партии",
+      "error": "Не удалось загрузить ещё партии.",
+      "retry": "Повторить"
     }
   },
   "thinkTime": {
     "title": "Важные позиции из партий",
     "subtitle": "Позиции, над которыми вы думали дольше обычного. Кликните по карточке, чтобы открыть партию целиком.",
-    "empty": "В последних 50 партиях нет ходов с думой от {threshold} с.",
+    "empty": "В загруженных партиях нет ходов с думой от {threshold} с.",
     "showing": "{count, plural, one {# долгий ход} few {# долгих хода} many {# долгих ходов} other {# долгих ходов}} из {gameCount, plural, one {# партии} few {# партий} many {# партий} other {# партий}}",
     "thoughtFor": "Думал/а {duration}",
     "thresholdLabel": "Порог",

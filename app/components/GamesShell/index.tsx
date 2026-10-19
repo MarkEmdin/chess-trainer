@@ -35,7 +35,7 @@ type Props = {
   children: (props: RenderProps) => React.ReactNode;
 };
 
-// Common scaffolding for any feature that consumes the user's last GAMES_LIMIT games
+// Common scaffolding for any feature that consumes the user's recent games
 // from either Chess.com or Lichess. Owns: platform selection, username
 // form, loading/error/no-games branches, the "change user" button, and the
 // status line. Consumers focus on what to render once games are in hand.
@@ -124,11 +124,20 @@ export default function GamesShell({
   const lichessResult = useLichessGames(
     effectivePlatform === 'lichess' ? username : null,
   );
-  const { games, error, isLoading, isNotFound } =
-    effectivePlatform === 'chesscom' ? chesscomResult : lichessResult;
+  const {
+    games,
+    error,
+    isLoading,
+    isNotFound,
+    hasMore,
+    isLoadingMore,
+    loadMoreError,
+    loadMore,
+  } = effectivePlatform === 'chesscom' ? chesscomResult : lichessResult;
 
   const tCommon = useTranslations('common.games');
   const tForm = useTranslations('games.usernameForm');
+  const tLoadMore = useTranslations('games.loadMore');
 
   if (!username) {
     return (
@@ -186,6 +195,27 @@ export default function GamesShell({
       )}
 
       {games && games.length > 0 && children({ games, username })}
+
+      {games && games.length > 0 && loadMoreError && (
+        <div className="flex items-center gap-3 flex-wrap">
+          <p className="text-destructive">{tLoadMore('error')}</p>
+          <Button variant="outline" size="sm" onClick={loadMore}>
+            {tLoadMore('retry')}
+          </Button>
+        </div>
+      )}
+
+      {games && games.length > 0 && hasMore && !loadMoreError && (
+        <Button
+          variant="outline"
+          className="w-full sm:w-auto sm:self-center"
+          disabled={isLoadingMore}
+          onClick={loadMore}
+        >
+          {isLoadingMore && <Loader2Icon className="size-4 animate-spin" />}
+          {tLoadMore('button')}
+        </Button>
+      )}
     </div>
   );
 }

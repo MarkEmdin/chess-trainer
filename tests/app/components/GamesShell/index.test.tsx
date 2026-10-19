@@ -4,6 +4,7 @@ import GamesShell from '@/app/components/GamesShell';
 import { useChessComGames } from '@/lib/chesscom/useChessComGames';
 import { useLichessGames } from '@/lib/lichess/useLichessGames';
 import type { Game } from '@/lib/games/types';
+import type { UseGamesResult } from '@/lib/games/useGamesPages';
 
 jest.mock('@/lib/chesscom/useChessComGames', () => ({
   useChessComGames: jest.fn(),
@@ -23,7 +24,7 @@ const mockUseLichessGames = useLichessGames as jest.MockedFunction<
   typeof useLichessGames
 >;
 
-function idleResult() {
+function idleResult(): UseGamesResult {
   return {
     games: null,
     error: null,
@@ -52,7 +53,11 @@ const makeGame = (id: string): Game => ({
   clockSnapshots: [],
 });
 
-function shell() {
+function shell(
+  children: () => React.ReactNode = () => (
+    <div data-testid="children">CONTENT</div>
+  ),
+) {
   return renderWithIntl(
     <GamesShell
       isAuthenticated={false}
@@ -61,7 +66,7 @@ function shell() {
       emptyMessage="no-games-here"
       renderStatus={({ games }) => `status-${games.length}`}
     >
-      {() => <div data-testid="children">CONTENT</div>}
+      {children}
     </GamesShell>,
   );
 }
@@ -213,5 +218,69 @@ describe('<GamesShell />', () => {
     shell();
     await user.click(screen.getByRole('button', { name: /change user/i }));
     expect(screen.getByLabelText(/lichess username/i)).toBeInTheDocument();
+  });
+
+  describe('load more', () => {
+    function loaded(overrides: Partial<UseGamesResult> = {}) {
+      localStorage.setItem('chesscom-username', 'alice');
+      const result = {
+        ...idleResult(),
+        games: [makeGame('a')],
+        ...overrides,
+      };
+      mockUseChessComGames.mockReturnValue(result);
+      return result;
+    }
+
+    it('shows load more when hasMore and calls loadMore on click', async () => {
+      const result = loaded({ hasMore: true });
+      const user = userEvent.setup();
+      shell();
+      await user.click(screen.getByRole('button', { name: /load more games/i }));
+      expect(result.loadMore).toHaveBeenCalled();
+    });
+
+    it('hides load more when hasMore is false', () => {
+      loaded({ hasMore: false });
+      shell();
+      expect(
+        screen.queryByRole('button', { name: /load more games/i }),
+      ).not.toBeInTheDocument();
+    });
+
+    it('disables load more while loading more', () => {
+      loaded({ hasMore: true, isLoadingMore: true });
+      shell();
+      expect(
+        screen.getByRole('button', { name: /load more games/i }),
+      ).toBeDisabled();
+    });
+
+    it('shows the load-more error with retry and hides the button', async () => {
+      const result = loaded({ hasMore: true, loadMoreError: new Error('x') });
+      const user = userEvent.setup();
+      shell();
+      expect(screen.getByText(/couldn't load more games/i)).toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: /load more games/i }),
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId('children')).toBeInTheDocument();
+      await user.click(screen.getByRole('button', { name: /retry/i }));
+      expect(result.loadMore).toHaveBeenCalled();
+    });
+
+    it('shows load more even when children render nothing', () => {
+      loaded({ hasMore: true });
+      shell(() => null);
+      expect(
+        screen.getByRole('button', { name: /load more games/i }),
+      ).toBeInTheDocument();
+    });
+
+    it('status line counts all loaded games', () => {
+      loaded({ games: [makeGame('a'), makeGame('b'), makeGame('c')] });
+      shell();
+      expect(screen.getByText('status-3')).toBeInTheDocument();
+    });
   });
 });

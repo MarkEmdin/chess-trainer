@@ -1,3 +1,2 @@
-// How many recent games /games and /think-time load per platform. Copy in
-// messages/{en,ru}.json states this number literally — keep them in sync.
+// How many games each page of /games and /think-time loads per platform.
 export const GAMES_LIMIT = 50;
