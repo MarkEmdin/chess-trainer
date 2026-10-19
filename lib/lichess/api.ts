@@ -1,6 +1,12 @@
 import { Chess } from 'chess.js';
 import { PlayerNotFoundError } from '@/lib/games/errors';
-import type { ClockSnapshot, Game, GameResult, TimeClass } from '@/lib/games/types';
+import type {
+  ClockSnapshot,
+  Game,
+  GameResult,
+  GamesPage,
+  TimeClass,
+} from '@/lib/games/types';
 import type { LichessGame, LichessSpeed } from './types';
 
 const API_BASE = 'https://lichess.org/api';
@@ -16,10 +22,12 @@ const SPEED_TO_TIME_CLASS: Record<LichessSpeed, TimeClass> = {
 
 async function fetchGamesNdjson(
   username: string,
+  cursor: number | null,
   limit: number,
   signal?: AbortSignal,
 ): Promise<string> {
-  const url = `${API_BASE}/games/user/${encodeURIComponent(username)}?max=${limit}&clocks=true&opening=true&pgnInJson=true`;
+  const until = cursor === null ? '' : `&until=${cursor}`;
+  const url = `${API_BASE}/games/user/${encodeURIComponent(username)}?max=${limit}${until}&clocks=true&opening=true&pgnInJson=true`;
   const res = await fetch(url, {
     signal,
     headers: { Accept: 'application/x-ndjson' },
@@ -112,12 +120,20 @@ function normalizeGame(raw: LichessGame, username: string): Game {
   };
 }
 
-export async function fetchLastGames(
+// Lichess's `until` filters by createdAt and may be inclusive, so the next
+// cursor sits 1 ms before the oldest game to keep it from repeating.
+export async function fetchGamesPage(
   username: string,
-  limit = 10,
+  cursor: number | null,
+  limit: number,
   signal?: AbortSignal,
-): Promise<Game[]> {
-  const text = await fetchGamesNdjson(username, limit, signal);
+): Promise<GamesPage> {
+  const text = await fetchGamesNdjson(username, cursor, limit, signal);
   const rawGames = parseNdjson(text);
-  return rawGames.map((raw) => normalizeGame(raw, username));
+  const oldest = rawGames[rawGames.length - 1];
+  return {
+    games: rawGames.map((raw) => normalizeGame(raw, username)),
+    nextCursor:
+      rawGames.length === limit && oldest ? oldest.createdAt - 1 : null,
+  };
 }
