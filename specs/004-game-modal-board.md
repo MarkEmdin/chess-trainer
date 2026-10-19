@@ -1,6 +1,6 @@
 # Spec: Readable game modal board
 
-Status: approved
+Status: done
 Branch: feature/game-modal-board
 
 ## Problem
