@@ -192,8 +192,9 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
 
         <div className="flex flex-col gap-3">
           {/* Board as large as the screen allows: up to 720px, but never taller
-              than the viewport minus header, player rows and controls. */}
-          <div className="mx-auto w-full max-w-[min(720px,calc(100dvh-260px))] flex flex-col gap-1.5">
+              than the viewport minus header, player rows and controls (but never
+              below 280px — short landscape screens scroll instead). */}
+          <div className="mx-auto w-full max-w-[max(280px,min(720px,calc(100dvh-310px)))] flex flex-col gap-1.5">
             <PlayerRow
               player={game.opponent}
               pieceColor={topColor}
@@ -259,17 +260,18 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
             </Button>
           </div>
 
-          <div className="h-5 text-xs text-muted-foreground text-center">
-            {lastMoveLabel &&
-              (lastMoveDuration
-                ? t('lastMoveWithDuration', {
-                    move: lastMoveLabel,
-                    duration: lastMoveDuration,
-                  })
-                : t('lastMoveCaption', { move: lastMoveLabel }))}
-          </div>
-
-          <div className="flex justify-center">
+          {/* Caption and link share one row to keep vertical chrome small —
+              every pixel saved here goes to the board on short laptops. */}
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <span className="min-h-5 text-xs text-muted-foreground">
+              {lastMoveLabel &&
+                (lastMoveDuration
+                  ? t('lastMoveWithDuration', {
+                      move: lastMoveLabel,
+                      duration: lastMoveDuration,
+                    })
+                  : t('lastMoveCaption', { move: lastMoveLabel }))}
+            </span>
             <Button variant="outline" size="sm" asChild>
               <a
                 href={game.url}
