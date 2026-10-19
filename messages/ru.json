@@ -278,7 +278,10 @@
       "lastMove": "В конец",
       "lastMoveCaption": "Последний ход: {move}",
       "lastMoveWithDuration": "Последний ход: {move} — {duration}",
-      "viewGame": "Открыть партию"
+      "viewGame": "Открыть партию",
+      "white": "Белые",
+      "black": "Чёрные",
+      "toMove": "Ходит"
     },
     "loadMore": {
       "button": "Загрузить ещё партии",
