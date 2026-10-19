@@ -241,12 +241,17 @@
   },
   "games": {
     "title": "Партии с Chess.com",
-    "subtitle": "Последние 10 партий любого игрока Chess.com.",
+    "subtitle": "Последние 10 партий на Chess.com или Lichess.",
     "usernameForm": {
-      "label": "Ник на Chess.com",
+      "chesscomLabel": "Ник на Chess.com",
+      "lichessLabel": "Ник на Lichess",
       "placeholder": "например, MarkEmdin",
       "submit": "Загрузить партии",
       "change": "Сменить пользователя"
+    },
+    "platformToggle": {
+      "chesscom": "Chess.com",
+      "lichess": "Lichess"
     },
     "list": {
       "showing": "Последние {count} партий пользователя {username}"
@@ -273,7 +278,7 @@
       "lastMove": "В конец",
       "lastMoveCaption": "Последний ход: {move}",
       "lastMoveWithDuration": "Последний ход: {move} — {duration}",
-      "viewOnChessCom": "Открыть на Chess.com"
+      "viewGame": "Открыть партию"
     }
   },
   "thinkTime": {
@@ -296,7 +301,7 @@
       "dark": "Тёмная",
       "rose": "Розовая"
     },
-    "chesscom": {
+    "games": {
       "loading": "Загружаем партии…",
       "errorGeneric": "Не удалось загрузить партии. Попробуйте ещё раз.",
       "errorNotFound": "Пользователь не найден.",

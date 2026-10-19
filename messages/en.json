@@ -241,12 +241,17 @@
   },
   "games": {
     "title": "Chess.com Games",
-    "subtitle": "Browse the last 10 games of any Chess.com player.",
+    "subtitle": "Browse your last 10 games on Chess.com or Lichess.",
     "usernameForm": {
-      "label": "Chess.com username",
+      "chesscomLabel": "Chess.com username",
+      "lichessLabel": "Lichess username",
       "placeholder": "e.g. MarkEmdin",
       "submit": "Load games",
       "change": "Change user"
+    },
+    "platformToggle": {
+      "chesscom": "Chess.com",
+      "lichess": "Lichess"
     },
     "list": {
       "showing": "Showing the last {count} games of {username}"
@@ -273,7 +278,7 @@
       "lastMove": "Go to end",
       "lastMoveCaption": "Last move: {move}",
       "lastMoveWithDuration": "Last move: {move} — {duration}",
-      "viewOnChessCom": "View on Chess.com"
+      "viewGame": "View game"
     }
   },
   "thinkTime": {
@@ -296,7 +301,7 @@
       "dark": "Dark",
       "rose": "Rose"
     },
-    "chesscom": {
+    "games": {
       "loading": "Loading games…",
       "errorGeneric": "Could not load games. Try again.",
       "errorNotFound": "Player not found.",

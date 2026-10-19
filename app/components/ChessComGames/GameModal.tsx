@@ -290,7 +290,7 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
                 rel="noopener noreferrer"
               >
                 <ExternalLinkIcon className="size-4" />
-                {t('viewOnChessCom')}
+                {t('viewGame')}
               </a>
             </Button>
           </div>

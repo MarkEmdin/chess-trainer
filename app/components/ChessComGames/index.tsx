@@ -23,7 +23,7 @@ export default function ChessComGames({
 }: Props) {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const t = useTranslations('games.list');
-  const tCommon = useTranslations('common.chesscom');
+  const tCommon = useTranslations('common.games');
 
   return (
     <>

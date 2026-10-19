@@ -26,7 +26,7 @@ export default function ChessComUsernameForm({ onSubmit }: Props) {
         htmlFor="chesscom-username"
         className="text-sm font-medium text-foreground"
       >
-        {t('label')}
+        {t('chesscomLabel')}
       </label>
       <div className="flex gap-2">
         <Input

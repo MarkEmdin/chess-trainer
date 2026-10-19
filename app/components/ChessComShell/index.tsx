@@ -65,7 +65,7 @@ export default function ChessComShell({
   };
 
   const { games, error, isLoading, isNotFound } = useChessComGames(username);
-  const tCommon = useTranslations('common.chesscom');
+  const tCommon = useTranslations('common.games');
   const tForm = useTranslations('games.usernameForm');
 
   if (!username) {
