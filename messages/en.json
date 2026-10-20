@@ -66,6 +66,7 @@
   "coaching": {
     "askCoach": "Ask coach",
     "viewThread": "View thread",
+    "open": "Open",
     "askTitle": "Ask the coach",
     "threadTitle": "Coaching thread",
     "bodyLabel": "What were you thinking in this position?",
@@ -109,7 +110,8 @@
     "responsePlaceholder": "Walk through the key ideas — what they missed, what to play, why.",
     "send": "Send reply",
     "sending": "Sending…",
-    "sent": "Reply sent."
+    "sent": "Reply sent.",
+    "reply": "Reply"
   },
   "coachingPage": {
     "title": "My coaching",

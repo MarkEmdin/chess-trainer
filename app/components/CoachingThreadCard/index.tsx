@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useFormatter, useTranslations } from 'next-intl';
 import { ExternalLinkIcon } from 'lucide-react';
 import { Card, CardContent } from '@/app/components/ui/card';
@@ -7,15 +9,18 @@ import { Button } from '@/app/components/ui/button';
 import ChessboardContainer from '@/app/components/ChessboardContainer';
 import SectionLabel from '@/app/components/SectionLabel';
 import { sideToMove } from '@/lib/chess/fen';
+import { formatVariation, playVariation } from '@/lib/chess/variation';
+import type { CoachingMessage, CoachingThreadData } from '@/lib/coaching/types';
 
-export type CoachingThread = {
-  id: string;
+// The modal pulls in chess.js and the interactive board; load it only when
+// the card is opened.
+const CoachingModal = dynamic(() => import('@/app/components/CoachingModal'), {
+  ssr: false,
+});
+
+export type CoachingThread = CoachingThreadData & {
   game_url: string;
-  fen: string;
   move_san: string;
-  body: string;
-  created_at: string;
-  responses: { body: string; created_at: string }[];
 };
 
 type Props = {
@@ -25,6 +30,7 @@ type Props = {
 export default function CoachingThreadCard({ thread }: Props) {
   const t = useTranslations('coaching');
   const format = useFormatter();
+  const [open, setOpen] = useState(false);
   const createdAt = format.dateTime(new Date(thread.created_at), {
     dateStyle: 'medium',
   });
@@ -43,15 +49,11 @@ export default function CoachingThreadCard({ thread }: Props) {
               <span className="font-semibold text-foreground">
                 {thread.move_san}
               </span>
-              <span className="text-xs text-muted-foreground">
-                {createdAt}
-              </span>
+              <span className="text-xs text-muted-foreground">{createdAt}</span>
             </div>
 
             <SectionLabel label={t('yourQuestion')}>
-              <p className="text-sm text-foreground whitespace-pre-wrap">
-                {thread.body}
-              </p>
+              <MessagePreview fen={thread.fen} message={thread} />
             </SectionLabel>
 
             <SectionLabel label={t('coachResponse')}>
@@ -61,29 +63,67 @@ export default function CoachingThreadCard({ thread }: Props) {
                 </p>
               ) : (
                 thread.responses.map((r, i) => (
-                  <p
-                    key={i}
-                    className="text-sm text-foreground whitespace-pre-wrap"
-                  >
-                    {r.body}
-                  </p>
+                  <MessagePreview key={i} fen={thread.fen} message={r} />
                 ))
               )}
             </SectionLabel>
 
-            <Button variant="outline" size="sm" asChild className="self-start">
-              <a
-                href={thread.game_url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <ExternalLinkIcon className="size-4" />
-                {t('viewOnChessCom')}
-              </a>
-            </Button>
+            <div className="flex gap-2 flex-wrap">
+              <Button size="sm" onClick={() => setOpen(true)}>
+                {t('open')}
+              </Button>
+              <Button variant="outline" size="sm" asChild>
+                <a
+                  href={thread.game_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <ExternalLinkIcon className="size-4" />
+                  {t('viewOnChessCom')}
+                </a>
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>
+
+      {open && (
+        <CoachingModal
+          mode="student"
+          fen={thread.fen}
+          orientation={sideToMove(thread.fen)}
+          moveLabel={thread.move_san}
+          subtitle={createdAt}
+          thread={thread}
+          onClose={() => setOpen(false)}
+        />
+      )}
     </Card>
+  );
+}
+
+// Message text plus its variation as one notation line. Stepping through the
+// line happens in the modal.
+export function MessagePreview({
+  fen,
+  message,
+}: {
+  fen: string;
+  message: CoachingMessage;
+}) {
+  const played = message.variation
+    ? playVariation(fen, message.variation)
+    : null;
+  return (
+    <div className="flex flex-col gap-1">
+      <p className="text-sm text-foreground whitespace-pre-wrap">
+        {message.body}
+      </p>
+      {played && played.moves.length > 0 && (
+        <p className="text-sm font-mono text-muted-foreground">
+          {formatVariation(played.moves)}
+        </p>
+      )}
+    </div>
   );
 }
