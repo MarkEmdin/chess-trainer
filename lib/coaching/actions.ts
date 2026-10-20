@@ -4,18 +4,27 @@ import { revalidatePath } from 'next/cache';
 import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthedUser } from '@/lib/auth/getUser';
+import { parseVariationField, playVariation } from '@/lib/chess/variation';
 
 export type CoachingRequestState =
   | { error: string }
   | { success: true; requestId: string }
   | undefined;
 
-export type RespondState =
-  | { error: string }
-  | { success: true }
-  | undefined;
+export type RespondState = { error: string } | { success: true } | undefined;
 
 const MAX_BODY_LENGTH = 4000;
+
+// Optional `variation` field: null when absent, the SAN list when it is a
+// legal line from `fen`, 'invalid' otherwise (bad JSON or an illegal move).
+function readVariation(
+  formData: FormData,
+  fen: string,
+): string[] | null | 'invalid' {
+  const parsed = parseVariationField(formData.get('variation'));
+  if (parsed === null || parsed === 'invalid') return parsed;
+  return playVariation(fen, parsed) ? parsed : 'invalid';
+}
 
 // User-side: submit a question about a specific long-think position. The
 // unique (user_id, fen) constraint at the DB level enforces "one per
@@ -33,12 +42,23 @@ export async function createCoachingRequest(
   const move_san = String(formData.get('move_san') ?? '').trim();
   const body = String(formData.get('body') ?? '').trim();
 
-  if (!game_url || !fen || !move_san || !body || !Number.isInteger(move_index)) {
+  if (
+    !game_url ||
+    !fen ||
+    !move_san ||
+    !body ||
+    !Number.isInteger(move_index)
+  ) {
     return { error: t('missingFields') };
   }
 
   if (body.length > MAX_BODY_LENGTH) {
     return { error: t('bodyTooLong', { max: MAX_BODY_LENGTH }) };
+  }
+
+  const variation = readVariation(formData, fen);
+  if (variation === 'invalid') {
+    return { error: t('invalidVariation') };
   }
 
   const supabase = await createClient();
@@ -59,6 +79,7 @@ export async function createCoachingRequest(
       move_index,
       move_san,
       body,
+      variation,
     })
     .select('id')
     .single();
@@ -94,8 +115,8 @@ export async function respondToRequest(
     return { error: t('missingFields') };
   }
 
-  if (body.length > 4000) {
-    return { error: t('bodyTooLong', { max: 4000 }) };
+  if (body.length > MAX_BODY_LENGTH) {
+    return { error: t('bodyTooLong', { max: MAX_BODY_LENGTH }) };
   }
 
   const user = await getAuthedUser();
@@ -104,6 +125,22 @@ export async function respondToRequest(
   }
 
   const supabase = await createClient();
+
+  // The answer's variation starts from the question's position.
+  const { data: request } = await supabase
+    .from('coaching_requests')
+    .select('fen')
+    .eq('id', request_id)
+    .single();
+
+  if (!request) {
+    return { error: t('missingFields') };
+  }
+
+  const variation = readVariation(formData, request.fen);
+  if (variation === 'invalid') {
+    return { error: t('invalidVariation') };
+  }
 
   const { data: existing } = await supabase
     .from('coaching_responses')
@@ -117,13 +154,15 @@ export async function respondToRequest(
 
   const { error } = await supabase
     .from('coaching_responses')
-    .insert({ request_id, body });
+    .insert({ request_id, body, variation });
 
   if (error) {
     return { error: error.message };
   }
 
-  // Refresh the admin dashboard so the form swaps to read-only mode.
+  // Refresh the admin dashboard so the form swaps to read-only mode, and the
+  // student's thread list so the answer shows up there.
   revalidatePath('/[locale]/admin', 'page');
+  revalidatePath('/[locale]/coaching', 'page');
   return { success: true };
 }

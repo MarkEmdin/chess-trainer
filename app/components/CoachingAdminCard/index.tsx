@@ -1,23 +1,25 @@
 'use client';
 
+import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useFormatter, useTranslations } from 'next-intl';
 import { ExternalLinkIcon } from 'lucide-react';
 import { Card, CardContent } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
 import ChessboardContainer from '@/app/components/ChessboardContainer';
-import CoachingResponseForm from '@/app/components/CoachingResponseForm';
+import { MessagePreview } from '@/app/components/CoachingThreadCard';
 import SectionLabel from '@/app/components/SectionLabel';
 import { sideToMove } from '@/lib/chess/fen';
+import type { CoachingThreadData } from '@/lib/coaching/types';
 
-export type AdminCoachingRequest = {
-  id: string;
+const CoachingModal = dynamic(() => import('@/app/components/CoachingModal'), {
+  ssr: false,
+});
+
+export type AdminCoachingRequest = CoachingThreadData & {
   user_nickname: string;
   game_url: string;
-  fen: string;
   move_san: string;
-  body: string;
-  created_at: string;
-  response: { body: string; created_at: string } | null;
 };
 
 type Props = {
@@ -28,9 +30,11 @@ export default function CoachingAdminCard({ request }: Props) {
   const t = useTranslations('coachingAdmin');
   const tCoaching = useTranslations('coaching');
   const format = useFormatter();
+  const [open, setOpen] = useState(false);
   const askedAt = format.dateTime(new Date(request.created_at), {
     dateStyle: 'medium',
   });
+  const answered = request.responses.length > 0;
 
   return (
     <Card>
@@ -49,40 +53,51 @@ export default function CoachingAdminCard({ request }: Props) {
               <span className="text-sm text-muted-foreground">
                 {t('askedBy', { nickname: request.user_nickname })}
               </span>
-              <span className="text-xs text-muted-foreground">
-                {askedAt}
-              </span>
+              <span className="text-xs text-muted-foreground">{askedAt}</span>
             </div>
 
             <SectionLabel label={t('question')}>
-              <p className="text-sm text-foreground whitespace-pre-wrap">
-                {request.body}
-              </p>
+              <MessagePreview fen={request.fen} message={request} />
             </SectionLabel>
 
-            {request.response ? (
+            {answered && (
               <SectionLabel label={t('yourResponse')}>
-                <p className="text-sm text-foreground whitespace-pre-wrap">
-                  {request.response.body}
-                </p>
+                {request.responses.map((r, i) => (
+                  <MessagePreview key={i} fen={request.fen} message={r} />
+                ))}
               </SectionLabel>
-            ) : (
-              <CoachingResponseForm requestId={request.id} />
             )}
 
-            <Button variant="outline" size="sm" asChild className="self-start">
-              <a
-                href={request.game_url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <ExternalLinkIcon className="size-4" />
-                {tCoaching('viewOnChessCom')}
-              </a>
-            </Button>
+            <div className="flex gap-2 flex-wrap">
+              <Button size="sm" onClick={() => setOpen(true)}>
+                {answered ? tCoaching('open') : t('reply')}
+              </Button>
+              <Button variant="outline" size="sm" asChild>
+                <a
+                  href={request.game_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <ExternalLinkIcon className="size-4" />
+                  {tCoaching('viewOnChessCom')}
+                </a>
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>
+
+      {open && (
+        <CoachingModal
+          mode="coach"
+          fen={request.fen}
+          orientation={sideToMove(request.fen)}
+          moveLabel={request.move_san}
+          subtitle={t('askedBy', { nickname: request.user_nickname })}
+          thread={request}
+          onClose={() => setOpen(false)}
+        />
+      )}
     </Card>
   );
 }

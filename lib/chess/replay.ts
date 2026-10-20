@@ -1,4 +1,4 @@
-import { Chess } from 'chess.js';
+import { Chess, type Move } from 'chess.js';
 
 export type ReplayMove = {
   san: string;
@@ -31,15 +31,19 @@ export function buildReplay(
   const moves: ReplayMove[] = [];
   for (const move of history) {
     positions.push(move.after);
-    moves.push({
-      san: move.san,
-      color: move.color === 'w' ? 'white' : 'black',
-      fullMoveNumber: Number(move.before.split(' ')[5]),
-      from: move.from,
-      to: move.to,
-    });
+    moves.push(toReplayMove(move));
   }
   return { positions, moves };
+}
+
+export function toReplayMove(move: Move): ReplayMove {
+  return {
+    san: move.san,
+    color: move.color === 'w' ? 'white' : 'black',
+    fullMoveNumber: Number(move.before.split(' ')[5]),
+    from: move.from,
+    to: move.to,
+  };
 }
 
 export function formatMoveLabel(move: ReplayMove): string {

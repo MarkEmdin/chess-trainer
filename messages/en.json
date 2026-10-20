@@ -66,6 +66,7 @@
   "coaching": {
     "askCoach": "Ask coach",
     "viewThread": "View thread",
+    "open": "Open",
     "askTitle": "Ask the coach",
     "threadTitle": "Coaching thread",
     "bodyLabel": "What were you thinking in this position?",
@@ -77,13 +78,26 @@
     "coachResponse": "Coach's response",
     "awaitingReply": "Awaiting reply.",
     "viewOnChessCom": "View on Chess.com",
+    "variation": {
+      "record": "Record variation",
+      "recording": "Recording variation",
+      "undo": "Undo move",
+      "clear": "Clear",
+      "done": "Done",
+      "edit": "Edit",
+      "remove": "Remove",
+      "view": "View variation",
+      "backToPosition": "Back to position",
+      "attached": "Variation"
+    },
     "errors": {
       "missingFields": "Position data is missing — try reopening the modal.",
       "bodyTooLong": "Keep it under {max} characters.",
       "notAuthenticated": "You must be signed in.",
       "alreadyAsked": "You've already asked about this position.",
       "notAdmin": "Only the coach can reply.",
-      "alreadyResponded": "You've already responded to this question."
+      "alreadyResponded": "You've already responded to this question.",
+      "invalidVariation": "This variation can't be saved. Try recording it again."
     }
   },
   "coachingAdmin": {
@@ -95,7 +109,9 @@
     "yourResponse": "Your response",
     "responsePlaceholder": "Walk through the key ideas — what they missed, what to play, why.",
     "send": "Send reply",
-    "sending": "Sending…"
+    "sending": "Sending…",
+    "sent": "Reply sent.",
+    "reply": "Reply"
   },
   "coachingPage": {
     "title": "My coaching",

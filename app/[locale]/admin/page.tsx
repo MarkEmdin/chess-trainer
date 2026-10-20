@@ -34,7 +34,8 @@ export default async function AdminPage() {
         move_san,
         body,
         created_at,
-        coaching_responses (body, created_at)
+        variation,
+        coaching_responses (body, created_at, variation)
       `,
     )
     .order('created_at', { ascending: false });
@@ -59,7 +60,8 @@ export default async function AdminPage() {
     move_san: r.move_san,
     body: r.body,
     created_at: r.created_at,
-    response: r.coaching_responses?.[0] ?? null,
+    variation: r.variation,
+    responses: r.coaching_responses ?? [],
   }));
 
   return (
