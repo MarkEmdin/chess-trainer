@@ -77,6 +77,18 @@
     "coachResponse": "Coach's response",
     "awaitingReply": "Awaiting reply.",
     "viewOnChessCom": "View on Chess.com",
+    "variation": {
+      "record": "Record variation",
+      "recording": "Recording variation",
+      "undo": "Undo move",
+      "clear": "Clear",
+      "done": "Done",
+      "edit": "Edit",
+      "remove": "Remove",
+      "view": "View variation",
+      "backToPosition": "Back to position",
+      "attached": "Variation"
+    },
     "errors": {
       "missingFields": "Position data is missing — try reopening the modal.",
       "bodyTooLong": "Keep it under {max} characters.",

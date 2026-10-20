@@ -1,6 +1,6 @@
 'use client';
 
-import { Chessboard } from 'react-chessboard';
+import { Chessboard, type ChessboardOptions } from 'react-chessboard';
 
 // react-chessboard renders rank/file labels inside the squares' corners,
 // which gets unreadable on the small boards we use in cards and modals.
@@ -14,12 +14,19 @@ type Props = {
   position: string;
   boardOrientation: 'white' | 'black';
   squareStyles?: Record<string, React.CSSProperties>;
+  // Interaction is off unless a caller opts in (the variation recorder).
+  allowDragging?: boolean;
+  onPieceDrop?: ChessboardOptions['onPieceDrop'];
+  onSquareClick?: ChessboardOptions['onSquareClick'];
 };
 
 export default function ChessboardWithNotation({
   position,
   boardOrientation,
   squareStyles,
+  allowDragging = false,
+  onPieceDrop,
+  onSquareClick,
 }: Props) {
   // Flip the label order when the board is viewed from black.
   const files = boardOrientation === 'white' ? FILES : [...FILES].reverse();
@@ -48,10 +55,12 @@ export default function ChessboardWithNotation({
           options={{
             position,
             boardOrientation,
-            allowDragging: false,
+            allowDragging,
             showNotation: false,
             showAnimations: false,
             squareStyles,
+            onPieceDrop,
+            onSquareClick,
           }}
         />
       </div>

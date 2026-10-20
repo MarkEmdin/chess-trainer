@@ -77,6 +77,18 @@
     "coachResponse": "Ответ тренера",
     "awaitingReply": "Ожидание ответа.",
     "viewOnChessCom": "Открыть на Chess.com",
+    "variation": {
+      "record": "Записать вариант",
+      "recording": "Запись варианта",
+      "undo": "Отменить ход",
+      "clear": "Очистить",
+      "done": "Готово",
+      "edit": "Изменить",
+      "remove": "Удалить",
+      "view": "Посмотреть вариант",
+      "backToPosition": "Назад к позиции",
+      "attached": "Вариант"
+    },
     "errors": {
       "missingFields": "Не хватает данных о позиции — переоткройте окно.",
       "bodyTooLong": "Не более {max} символов.",

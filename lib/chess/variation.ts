@@ -32,12 +32,14 @@ export function playVariation(
 
 // "3… Nf6 4. Nc3 Bc5": a black move only carries its number when it opens
 // the line.
+export function variationLabels(moves: ReplayMove[]): string[] {
+  return moves.map((move, i) =>
+    i === 0 || move.color === 'white' ? formatMoveLabel(move) : move.san,
+  );
+}
+
 export function formatVariation(moves: ReplayMove[]): string {
-  return moves
-    .map((move, i) =>
-      i === 0 || move.color === 'white' ? formatMoveLabel(move) : move.san,
-    )
-    .join(' ');
+  return variationLabels(moves).join(' ');
 }
 
 // Shape check for the `variation` form field (a JSON array of SAN strings).
