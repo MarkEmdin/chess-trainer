@@ -108,7 +108,8 @@
     "yourResponse": "Your response",
     "responsePlaceholder": "Walk through the key ideas — what they missed, what to play, why.",
     "send": "Send reply",
-    "sending": "Sending…"
+    "sending": "Sending…",
+    "sent": "Reply sent."
   },
   "coachingPage": {
     "title": "My coaching",

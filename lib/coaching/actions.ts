@@ -11,10 +11,7 @@ export type CoachingRequestState =
   | { success: true; requestId: string }
   | undefined;
 
-export type RespondState =
-  | { error: string }
-  | { success: true }
-  | undefined;
+export type RespondState = { error: string } | { success: true } | undefined;
 
 const MAX_BODY_LENGTH = 4000;
 
@@ -45,7 +42,13 @@ export async function createCoachingRequest(
   const move_san = String(formData.get('move_san') ?? '').trim();
   const body = String(formData.get('body') ?? '').trim();
 
-  if (!game_url || !fen || !move_san || !body || !Number.isInteger(move_index)) {
+  if (
+    !game_url ||
+    !fen ||
+    !move_san ||
+    !body ||
+    !Number.isInteger(move_index)
+  ) {
     return { error: t('missingFields') };
   }
 

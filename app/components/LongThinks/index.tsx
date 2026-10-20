@@ -1,7 +1,7 @@
 'use client';
 
 import { useDeferredValue, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { Loader2Icon } from 'lucide-react';
 import { findLongThinks, type LongThink } from '@/lib/games/longThinks';
@@ -22,12 +22,17 @@ const GameModal = dynamic(
 // Coaching modal pulls in react-chessboard too but only mounts when a
 // signed-in user clicks "Ask coach" — defer to keep it out of the
 // first render budget.
-const CoachingRequestModal = dynamic(
-  () => import('@/app/components/CoachingRequestModal'),
-  { ssr: false },
-);
+const CoachingModal = dynamic(() => import('@/app/components/CoachingModal'), {
+  ssr: false,
+});
 
 type EnrichedThink = { think: LongThink; game: Game };
+
+function formatThinkMove(think: LongThink): string {
+  return think.color === 'white'
+    ? `${think.fullMoveNumber}. ${think.san}`
+    : `${think.fullMoveNumber}… ${think.san}`;
+}
 
 function enrich(games: Game[], thresholdSec: number): EnrichedThink[] {
   return games
@@ -49,8 +54,9 @@ export default function LongThinks({
   initialLichessUsername,
 }: Props) {
   const [selected, setSelected] = useState<EnrichedThink | null>(null);
-  const [coachingTarget, setCoachingTarget] =
-    useState<EnrichedThink | null>(null);
+  const [coachingTarget, setCoachingTarget] = useState<EnrichedThink | null>(
+    null,
+  );
   const [threshold, setThreshold] = useStoredThreshold();
   // Only fetched when signed in (the hook handles the gating). Map is
   // keyed by fen so each card can do an O(1) "do I have a thread for
@@ -64,6 +70,7 @@ export default function LongThinks({
   const deferredThreshold = useDeferredValue(threshold);
   const isPending = threshold !== deferredThreshold;
   const t = useTranslations('thinkTime');
+  const format = useFormatter();
 
   return (
     <>
@@ -86,10 +93,7 @@ export default function LongThinks({
               <ThresholdSelector value={threshold} onChange={setThreshold} />
               {isPending ? (
                 <div className="flex items-center justify-center py-12 text-muted-foreground">
-                  <Loader2Icon
-                    aria-hidden
-                    className="size-6 animate-spin"
-                  />
+                  <Loader2Icon aria-hidden className="size-6 animate-spin" />
                 </div>
               ) : enriched.length === 0 ? (
                 <p className="text-muted-foreground">
@@ -104,9 +108,7 @@ export default function LongThinks({
                       game={game}
                       onClick={() => setSelected({ think, game })}
                       showCoachingButton={isAuthenticated}
-                      existingThread={
-                        !!requestsByFen?.[think.fenBefore]
-                      }
+                      existingThread={!!requestsByFen?.[think.fenBefore]}
                       onAskCoach={() => setCoachingTarget({ think, game })}
                     />
                   ))}
@@ -126,12 +128,21 @@ export default function LongThinks({
       )}
 
       {coachingTarget && (
-        <CoachingRequestModal
-          think={coachingTarget.think}
-          game={coachingTarget.game}
-          existingRequest={requestsByFen?.[coachingTarget.think.fenBefore]}
+        <CoachingModal
+          mode="student"
+          fen={coachingTarget.think.fenBefore}
+          orientation={coachingTarget.game.userColor}
+          moveLabel={formatThinkMove(coachingTarget.think)}
+          subtitle={format.dateTime(coachingTarget.game.endTime, {
+            dateStyle: 'medium',
+          })}
+          thread={requestsByFen?.[coachingTarget.think.fenBefore]}
+          ask={{
+            gameUrl: coachingTarget.game.url,
+            moveIndex: coachingTarget.think.moveIndex,
+          }}
           onClose={() => setCoachingTarget(null)}
-          onSubmitted={() => refreshRequests()}
+          onSubmitted={refreshRequests}
         />
       )}
     </>

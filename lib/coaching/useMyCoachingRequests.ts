@@ -2,19 +2,9 @@
 
 import useSWR from 'swr';
 import { createClient } from '@/lib/supabase/client';
+import type { CoachingThreadData } from '@/lib/coaching/types';
 
-export type CoachingResponse = {
-  body: string;
-  created_at: string;
-};
-
-export type MyCoachingRequest = {
-  id: string;
-  fen: string;
-  body: string;
-  created_at: string;
-  responses: CoachingResponse[];
-};
+export type MyCoachingRequest = CoachingThreadData;
 
 // Keyed by fen so each LongThinkCard can answer "do I have a request
 // for this position?" with a single hash lookup.
@@ -32,9 +22,11 @@ const fetcher = async (): Promise<CoachingRequestsByFen> => {
         fen,
         body,
         created_at,
+        variation,
         coaching_responses (
           body,
-          created_at
+          created_at,
+          variation
         )
       `,
     )
@@ -50,6 +42,7 @@ const fetcher = async (): Promise<CoachingRequestsByFen> => {
         fen: r.fen,
         body: r.body,
         created_at: r.created_at,
+        variation: r.variation,
         responses: r.coaching_responses ?? [],
       },
     ]),
