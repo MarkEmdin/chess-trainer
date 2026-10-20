@@ -1,0 +1,10 @@
+<!-- Pasted by hand into Supabase → Authentication → Emails → Templates on prod. -->
+<div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; color: #1c1917;">
+  <h2 style="margin: 0 0 16px;">Confirm your email</h2>
+  <p style="margin: 0 0 24px; line-height: 1.5;">Thanks for signing up for Chess Trainer. Confirm your email address to finish creating your account.</p>
+  <p style="margin: 0 0 24px;">
+    <a href="{{ .SiteURL }}/en/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/en/email-confirmed"
+       style="display: inline-block; background: #1c1917; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none;">Confirm email</a>
+  </p>
+  <p style="margin: 0; font-size: 13px; color: #78716c;">If you didn't request this, you can ignore this email.</p>
+</div>

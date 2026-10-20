@@ -221,6 +221,27 @@ describe('signUp', () => {
   });
 });
 
+describe('signUp with an email that already has an account', () => {
+  beforeEach(() => {
+    rpc.mockReset();
+    rpc.mockResolvedValue({ data: null });
+    cookieSet.mockReset();
+    jest.mocked(redirect).mockClear();
+  });
+
+  it('shows the same check-email screen instead of revealing the account', async () => {
+    authSignUp.mockResolvedValue({
+      error: { code: 'user_already_exists', message: 'User already registered' },
+    });
+    const result = await signUp(
+      undefined,
+      formData({ email: 'taken@example.com', nickname: 'newbie', password: 'abcdef' }),
+    );
+    expect(result).toBeUndefined();
+    expect(redirect).toHaveBeenCalledWith({ href: '/check-email', locale: 'en' });
+  });
+});
+
 describe('signIn', () => {
   beforeEach(() => {
     signInWithPassword.mockReset();

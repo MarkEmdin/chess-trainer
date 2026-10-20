@@ -111,13 +111,15 @@ export async function signUp(
     options: { data: { nickname, preferred_locale: currentLocale } },
   });
 
-  if (error) {
+  // An already-registered email gets the same check-email screen as a new
+  // one (no email is sent), so the form never reveals which addresses have
+  // accounts. Depending on settings Supabase reports it either as success
+  // or as user_already_exists.
+  if (error && error.code !== 'user_already_exists') {
     return { error: error.message };
   }
 
-  // With confirmations on there is no session yet. An already-registered
-  // email also lands here (Supabase answers success without sending), so
-  // the response never reveals which addresses have accounts.
+  // With confirmations on there is no session yet.
   await setPendingEmail(email);
   redirect({ href: '/check-email', locale: currentLocale });
 }

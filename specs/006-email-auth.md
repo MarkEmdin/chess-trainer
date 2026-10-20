@@ -1,6 +1,6 @@
 # Spec: Email confirmation and password reset by nickname or email
 
-Status: approved
+Status: done
 Branch: feature/email-auth
 
 ## Problem
@@ -97,11 +97,11 @@ These manual steps belong in the PR checklist. They are done by the user in the 
 
 ## Acceptance criteria
 
-- [ ] Register → check-email screen → link opened in another browser → logged in, sees "Email confirmed."
-- [ ] Unconfirmed login shows "Confirm your email first." and Resend works.
-- [ ] Forgot password works with a nickname, with an email, and with an unknown value. The message is identical in all three cases.
-- [ ] Register with an already-used email shows the check-email screen and sends no email.
-- [ ] Expired or used link lands on `/login` with the expired message.
-- [ ] Existing users (created before confirmations) still log in.
-- [ ] Tests under `tests/` for the changed actions, the confirm route, and the check-email page.
-- [ ] `npm test`, `npm run lint`, `npm run build` pass.
+- [x] Register → check-email screen → link opened in another browser → logged in, sees "Email confirmed."
+- [x] Unconfirmed login shows "Confirm your email first." and Resend works.
+- [x] Forgot password works with a nickname, with an email, and with an unknown value. The message is identical in all three cases.
+- [x] Register with an already-used email shows the check-email screen and sends no email.
+- [x] Expired or used link lands on `/login` with the expired message.
+- [x] Existing users (created before confirmations) still log in.
+- [x] Tests under `tests/` for the changed actions, the confirm route, and the check-email page.
+- [x] `npm test`, `npm run lint`, `npm run build` pass.
