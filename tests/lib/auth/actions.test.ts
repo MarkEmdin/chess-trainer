@@ -60,6 +60,19 @@ describe('requestPasswordReset', () => {
     rpc.mockClear();
   });
 
+  it('sends the reset straight to a typed email, normalised', async () => {
+    const result = await requestPasswordReset(
+      undefined,
+      formData({ identifier: ' User@Example.com ' }),
+    );
+    expect(rpc).not.toHaveBeenCalled();
+    expect(resetPasswordForEmail).toHaveBeenCalledWith(
+      'user@example.com',
+      expect.anything(),
+    );
+    expect(result).toEqual({ success: 'auth.forgotPassword.success' });
+  });
+
   it('returns an error when nickname is missing', async () => {
     const result = await requestPasswordReset(undefined, formData({}));
     expect(result).toEqual({ error: 'auth.errors.fieldsRequired' });
@@ -70,7 +83,7 @@ describe('requestPasswordReset', () => {
     rpc.mockResolvedValue({ data: 'user@example.com' });
     const result = await requestPasswordReset(
       undefined,
-      formData({ nickname: 'alice' }),
+      formData({ identifier: 'alice' }),
     );
     expect(resetPasswordForEmail).toHaveBeenCalledWith(
       'user@example.com',
@@ -85,7 +98,7 @@ describe('requestPasswordReset', () => {
     rpc.mockResolvedValue({ data: null });
     const result = await requestPasswordReset(
       undefined,
-      formData({ nickname: 'ghost' }),
+      formData({ identifier: 'ghost' }),
     );
     expect(resetPasswordForEmail).not.toHaveBeenCalled();
     expect(result).toEqual({ success: 'auth.forgotPassword.success' });

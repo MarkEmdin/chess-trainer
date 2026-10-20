@@ -128,16 +128,17 @@ export async function requestPasswordReset(
 ): Promise<AuthFormState> {
   const t = await getTranslations('auth');
   const locale = await getLocale();
-  const nickname = String(formData.get('nickname') ?? '').trim();
+  const identifier = String(formData.get('identifier') ?? '').trim();
 
-  if (!nickname) {
+  if (!identifier) {
     return { error: t('errors.fieldsRequired') };
   }
 
-  const admin = createAdminClient();
-  const { data: email } = await admin.rpc('lookup_email_by_nickname', {
-    p_nickname: nickname,
-  });
+  // Nicknames can't contain "@", so its presence means an email. Supabase
+  // stays silent for unknown addresses, so no lookup is needed for those.
+  const email = identifier.includes('@')
+    ? identifier.toLowerCase()
+    : await lookupEmail(identifier);
 
   if (email) {
     const origin = (await headers()).get('origin');
@@ -175,6 +176,14 @@ export async function resendConfirmation(): Promise<AuthFormState> {
   // Same message whether or not anything was sent — the account may
   // already be confirmed, or the address may belong to someone else.
   return { success: t('checkEmail.resent') };
+}
+
+async function lookupEmail(nickname: string): Promise<string | null> {
+  const admin = createAdminClient();
+  const { data } = await admin.rpc('lookup_email_by_nickname', {
+    p_nickname: nickname,
+  });
+  return data ?? null;
 }
 
 export async function updatePassword(

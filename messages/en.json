@@ -51,11 +51,12 @@
     },
     "forgotPassword": {
       "title": "Reset your password",
-      "subtitle": "Enter your nickname and we'll email you a reset link.",
+      "subtitle": "Enter your nickname or email and we'll send you a reset link.",
       "submit": "Send reset link",
       "pending": "Sending…",
       "success": "If that account exists, a reset email was sent.",
-      "backToLogin": "Back to login"
+      "backToLogin": "Back to login",
+      "identifier": "Nickname or email"
     },
     "resetPassword": {
       "title": "Set a new password",
