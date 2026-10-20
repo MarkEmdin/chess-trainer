@@ -243,6 +243,14 @@ function Viewer({
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      // The reply textarea sits next to the board: keys typed there belong
+      // to the text, not the variation.
+      if (
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLInputElement
+      ) {
+        return;
+      }
       if (e.key === 'ArrowLeft') setIndex((i) => Math.max(0, i - 1));
       else if (e.key === 'ArrowRight') setIndex((i) => Math.min(total, i + 1));
       else if (e.key === 'Home') setIndex(0);

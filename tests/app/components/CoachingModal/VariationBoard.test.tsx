@@ -118,6 +118,23 @@ describe('VariationBoard', () => {
     expect(props.onDraftChange).toHaveBeenCalledWith(null);
   });
 
+  it('leaves keys alone while the user types in a text field', () => {
+    setup({ canRecord: false, viewing: ['e4', 'e5'] });
+    const textarea = document.createElement('textarea');
+    document.body.appendChild(textarea);
+    const home = new KeyboardEvent('keydown', {
+      key: 'End',
+      bubbles: true,
+      cancelable: true,
+    });
+    act(() => {
+      textarea.dispatchEvent(home);
+    });
+    expect(home.defaultPrevented).toBe(false);
+    expect(screen.getByTestId('board')).toHaveAttribute('data-position', START);
+    textarea.remove();
+  });
+
   it('steps through a viewed variation', () => {
     const { props } = setup({ canRecord: false, viewing: ['e4', 'e5'] });
     const position = () =>
