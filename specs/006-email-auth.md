@@ -34,7 +34,7 @@ The app is about to be announced publicly. Until now auth emails went through Su
    - "We sent a confirmation link to `a***@gmail.com`."
    - A **Resend email** button.
    - A link back to login.
-3. They click the link in the email and land in the app logged in, with a toast "Email confirmed."
+3. They click the link in the email and land, logged in, on an "Email confirmed" page with a button into the app. The app has no toast system, and a page is simpler. The page switches to the user's saved language.
 4. Registering with an email that already has an account shows the same "Check your email" screen. Supabase sends no email in that case, so the response does not reveal which emails are registered.
 
 ### Login before confirming
@@ -61,9 +61,9 @@ The app is about to be announced publicly. Until now auth emails went through Su
 - Existing users were created while confirmations were off. Supabase auto-confirmed them (`email_confirmed_at` is set). They keep logging in.
   - Verify this locally before enabling on prod.
 - Server actions in `lib/auth/actions.ts`:
-  - `signUp`: on success, redirect to the check-email screen instead of `/`. Pass the masked email along. Never put the raw email in the URL.
-  - `signIn`: map Supabase's `email_not_confirmed` error to the new message and add `suggest: 'resend'`.
-  - `resendConfirmation(formData)`: new action. Takes a nickname (login screen) or an email (check-email screen) and calls `supabase.auth.resend({ type: 'signup', email })`. Returns a neutral success message either way.
+  - `signUp`: on success, store the email in a short-lived httpOnly cookie `pending_email` (1 h) and redirect to `/check-email`. That page masks the email, and the resend action reads it from the cookie. The email never goes in the URL.
+  - `signIn`: map Supabase's `email_not_confirmed` error to the new message, set the same cookie, and add `suggest: 'resend'`. The form then links to `/check-email`. Supabase checks the password before it checks confirmation, so the cookie is only set for the account's owner.
+  - `resendConfirmation()`: new action. Reads `pending_email` and calls `supabase.auth.resend({ type: 'signup', email })`. Returns a neutral success message, or `resendTooSoon` on Supabase's rate-limit error.
   - `requestPasswordReset`: accept `identifier`. `@` means email, otherwise the nickname is looked up. The rest is unchanged.
 - `app/[locale]/auth/confirm/route.ts`: also accept `?token_hash=…&type=…` and call `supabase.auth.verifyOtp({ token_hash, type })`. This works on any device because it needs no PKCE cookie. Keep the `?code=` branch for links already sitting in inboxes.
 - Email templates use the token-hash link: `{{ .SiteURL }}/en/auth/confirm?token_hash={{ .TokenHash }}&type=…&next=…`.
@@ -83,7 +83,7 @@ New or changed keys in `messages/{en,ru}.json` (the two files stay structurally 
 
 - `auth.checkEmail.{title, body, resend, resendPending, resent, backToLogin}`
 - `auth.errors.{emailNotConfirmed, linkExpired, resendTooSoon}`
-- `auth.emailConfirmed` (toast after confirming)
+- `auth.emailConfirmed.{title, body, cta}` (page after confirming)
 - `auth.forgotPassword.{subtitle, identifier}` (changed copy)
 
 ## Prod rollout
