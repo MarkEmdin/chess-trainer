@@ -43,7 +43,8 @@
       "loginSuggest": "Login?",
       "passwordMismatch": "Passwords don't match.",
       "passwordTooShort": "Password must be at least 6 characters.",
-      "sessionExpired": "Your reset link has expired or was already used. Request a new one."
+      "sessionExpired": "Your reset link has expired or was already used. Request a new one.",
+      "resendTooSoon": "Please wait a minute before requesting another email."
     },
     "forgotPassword": {
       "title": "Reset your password",
@@ -61,6 +62,9 @@
       "submit": "Update password",
       "pending": "Updating…",
       "success": "Password updated. You can now log in."
+    },
+    "checkEmail": {
+      "resent": "If the account needs confirming, a new email was sent."
     }
   },
   "coaching": {

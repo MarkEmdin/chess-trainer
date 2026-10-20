@@ -5,6 +5,7 @@ import { redirect } from '@/i18n/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getPendingEmail } from '@/lib/auth/pendingEmail';
 
 export type AuthFormState =
   | { error: string; suggest?: 'register' | 'login' }
@@ -142,6 +143,29 @@ export async function requestPasswordReset(
   // Same message whether or not the nickname matched — avoids account
   // enumeration via response timing/content.
   return { success: t('forgotPassword.success') };
+}
+
+export async function resendConfirmation(
+  _prev: AuthFormState,
+  _formData: FormData,
+): Promise<AuthFormState> {
+  const t = await getTranslations('auth');
+  const email = await getPendingEmail();
+
+  if (email) {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.resend({ type: 'signup', email });
+    if (error?.code === 'over_email_send_rate_limit') {
+      return { error: t('errors.resendTooSoon') };
+    }
+    if (error) {
+      console.error('resend confirmation failed:', error.message);
+    }
+  }
+
+  // Same message whether or not anything was sent — the account may
+  // already be confirmed, or the address may belong to someone else.
+  return { success: t('checkEmail.resent') };
 }
 
 export async function updatePassword(

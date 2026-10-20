@@ -1,13 +1,20 @@
-import { requestPasswordReset, updatePassword } from '@/lib/auth/actions';
+import {
+  requestPasswordReset,
+  resendConfirmation,
+  updatePassword,
+} from '@/lib/auth/actions';
 
 const resetPasswordForEmail = jest.fn();
 const updateUser = jest.fn();
 const signOut = jest.fn();
+const resend = jest.fn();
 const rpc = jest.fn();
+const cookieGet = jest.fn();
+const cookieSet = jest.fn();
 
 jest.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
-    auth: { resetPasswordForEmail, updateUser, signOut },
+    auth: { resetPasswordForEmail, updateUser, signOut, resend },
   }),
 }));
 
@@ -17,6 +24,7 @@ jest.mock('@/lib/supabase/admin', () => ({
 
 jest.mock('next/headers', () => ({
   headers: async () => new Map([['origin', 'https://example.com']]),
+  cookies: async () => ({ get: cookieGet, set: cookieSet }),
 }));
 
 jest.mock('next-intl/server', () => ({
@@ -125,5 +133,39 @@ describe('updatePassword', () => {
       formData({ password: 'abcdef', confirmPassword: 'abcdef' }),
     );
     expect(result).toEqual({ error: 'Session expired' });
+  });
+});
+
+describe('resendConfirmation', () => {
+  beforeEach(() => {
+    resend.mockReset();
+    resend.mockResolvedValue({ error: null });
+    cookieGet.mockReset();
+  });
+
+  it('resends the signup email to the pending address', async () => {
+    cookieGet.mockReturnValue({ value: 'user@example.com' });
+    const result = await resendConfirmation(undefined, formData({}));
+    expect(resend).toHaveBeenCalledWith({
+      type: 'signup',
+      email: 'user@example.com',
+    });
+    expect(result).toEqual({ success: 'auth.checkEmail.resent' });
+  });
+
+  it('returns the neutral message without sending when no address is pending', async () => {
+    cookieGet.mockReturnValue(undefined);
+    const result = await resendConfirmation(undefined, formData({}));
+    expect(resend).not.toHaveBeenCalled();
+    expect(result).toEqual({ success: 'auth.checkEmail.resent' });
+  });
+
+  it('asks the user to wait when Supabase rate-limits the resend', async () => {
+    cookieGet.mockReturnValue({ value: 'user@example.com' });
+    resend.mockResolvedValue({
+      error: { code: 'over_email_send_rate_limit', message: 'slow down' },
+    });
+    const result = await resendConfirmation(undefined, formData({}));
+    expect(result).toEqual({ error: 'auth.errors.resendTooSoon' });
   });
 });
