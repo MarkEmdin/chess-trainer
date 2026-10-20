@@ -278,7 +278,10 @@
       "lastMove": "Go to end",
       "lastMoveCaption": "Last move: {move}",
       "lastMoveWithDuration": "Last move: {move} — {duration}",
-      "viewGame": "View game"
+      "viewGame": "View game",
+      "white": "White",
+      "black": "Black",
+      "toMove": "To move"
     },
     "loadMore": {
       "button": "Load more games",

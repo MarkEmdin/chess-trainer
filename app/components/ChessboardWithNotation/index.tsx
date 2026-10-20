@@ -36,7 +36,7 @@ export default function ChessboardWithNotation({
         gridTemplateRows: '1fr auto',
       }}
     >
-      <div className="grid grid-rows-8 text-xs text-muted-foreground">
+      <div className="grid grid-rows-8 text-sm text-muted-foreground">
         {ranks.map((r) => (
           <span key={r} className="flex items-center justify-end pr-1.5">
             {r}
@@ -56,7 +56,7 @@ export default function ChessboardWithNotation({
         />
       </div>
       <div />
-      <div className="grid grid-cols-8 text-xs text-muted-foreground pt-1">
+      <div className="grid grid-cols-8 text-sm text-muted-foreground pt-1">
         {files.map((f) => (
           <span key={f} className="text-center">
             {f}
