@@ -1,26 +1,40 @@
 import {
   requestPasswordReset,
   resendConfirmation,
+  signIn,
+  signUp,
   updatePassword,
 } from '@/lib/auth/actions';
+import { redirect } from '@/i18n/navigation';
 
 const resetPasswordForEmail = jest.fn();
 const updateUser = jest.fn();
 const signOut = jest.fn();
 const resend = jest.fn();
+const authSignUp = jest.fn();
+const signInWithPassword = jest.fn();
 const rpc = jest.fn();
 const cookieGet = jest.fn();
 const cookieSet = jest.fn();
 
 jest.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
-    auth: { resetPasswordForEmail, updateUser, signOut, resend },
+    auth: {
+      resetPasswordForEmail,
+      updateUser,
+      signOut,
+      resend,
+      signUp: authSignUp,
+      signInWithPassword,
+    },
   }),
 }));
 
 jest.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => ({ rpc }),
 }));
+
+jest.mock('@/i18n/navigation', () => ({ redirect: jest.fn() }));
 
 jest.mock('next/headers', () => ({
   headers: async () => new Map([['origin', 'https://example.com']]),
@@ -145,7 +159,7 @@ describe('resendConfirmation', () => {
 
   it('resends the signup email to the pending address', async () => {
     cookieGet.mockReturnValue({ value: 'user@example.com' });
-    const result = await resendConfirmation(undefined, formData({}));
+    const result = await resendConfirmation();
     expect(resend).toHaveBeenCalledWith({
       type: 'signup',
       email: 'user@example.com',
@@ -155,7 +169,7 @@ describe('resendConfirmation', () => {
 
   it('returns the neutral message without sending when no address is pending', async () => {
     cookieGet.mockReturnValue(undefined);
-    const result = await resendConfirmation(undefined, formData({}));
+    const result = await resendConfirmation();
     expect(resend).not.toHaveBeenCalled();
     expect(result).toEqual({ success: 'auth.checkEmail.resent' });
   });
@@ -165,7 +179,73 @@ describe('resendConfirmation', () => {
     resend.mockResolvedValue({
       error: { code: 'over_email_send_rate_limit', message: 'slow down' },
     });
-    const result = await resendConfirmation(undefined, formData({}));
+    const result = await resendConfirmation();
     expect(result).toEqual({ error: 'auth.errors.resendTooSoon' });
+  });
+});
+
+describe('signUp', () => {
+  beforeEach(() => {
+    authSignUp.mockReset();
+    authSignUp.mockResolvedValue({ error: null });
+    rpc.mockReset();
+    rpc.mockResolvedValue({ data: null });
+    cookieSet.mockReset();
+    jest.mocked(redirect).mockClear();
+  });
+
+  it('remembers the address and sends the user to check their email', async () => {
+    await signUp(
+      undefined,
+      formData({ email: 'new@example.com', nickname: 'newbie', password: 'abcdef' }),
+    );
+    expect(cookieSet).toHaveBeenCalledWith(
+      'pending_email',
+      'new@example.com',
+      expect.objectContaining({ httpOnly: true }),
+    );
+    expect(redirect).toHaveBeenCalledWith({ href: '/check-email', locale: 'en' });
+  });
+});
+
+describe('signIn', () => {
+  beforeEach(() => {
+    signInWithPassword.mockReset();
+    rpc.mockReset();
+    rpc.mockResolvedValue({ data: 'user@example.com' });
+    cookieSet.mockReset();
+  });
+
+  it('asks an unconfirmed user to confirm and remembers their address', async () => {
+    signInWithPassword.mockResolvedValue({
+      error: { code: 'email_not_confirmed', message: 'Email not confirmed' },
+      data: { user: null },
+    });
+    const result = await signIn(
+      undefined,
+      formData({ nickname: 'alice', password: 'abcdef' }),
+    );
+    expect(result).toEqual({
+      error: 'auth.errors.emailNotConfirmed',
+      suggest: 'resend',
+    });
+    expect(cookieSet).toHaveBeenCalledWith(
+      'pending_email',
+      'user@example.com',
+      expect.anything(),
+    );
+  });
+
+  it('keeps reporting a wrong password without touching confirmation state', async () => {
+    signInWithPassword.mockResolvedValue({
+      error: { code: 'invalid_credentials', message: 'Invalid login' },
+      data: { user: null },
+    });
+    const result = await signIn(
+      undefined,
+      formData({ nickname: 'alice', password: 'wrong1' }),
+    );
+    expect(result).toEqual({ error: 'auth.errors.wrongPassword' });
+    expect(cookieSet).not.toHaveBeenCalled();
   });
 });

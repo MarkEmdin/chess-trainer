@@ -5,10 +5,10 @@ import { redirect } from '@/i18n/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getPendingEmail } from '@/lib/auth/pendingEmail';
+import { getPendingEmail, setPendingEmail } from '@/lib/auth/pendingEmail';
 
 export type AuthFormState =
-  | { error: string; suggest?: 'register' | 'login' }
+  | { error: string; suggest?: 'register' | 'login' | 'resend' }
   | { success: string }
   | undefined;
 
@@ -45,6 +45,13 @@ export async function signIn(
     email,
     password,
   });
+
+  // Supabase checks the password before confirmation, so only the account's
+  // owner gets here — safe to remember the address for /check-email.
+  if (error?.code === 'email_not_confirmed') {
+    await setPendingEmail(email);
+    return { error: t('emailNotConfirmed'), suggest: 'resend' };
+  }
 
   if (error || !data.user) {
     return { error: t('wrongPassword') };
@@ -108,7 +115,11 @@ export async function signUp(
     return { error: error.message };
   }
 
-  redirect({ href: '/', locale: currentLocale });
+  // With confirmations on there is no session yet. An already-registered
+  // email also lands here (Supabase answers success without sending), so
+  // the response never reveals which addresses have accounts.
+  await setPendingEmail(email);
+  redirect({ href: '/check-email', locale: currentLocale });
 }
 
 export async function requestPasswordReset(
@@ -145,10 +156,8 @@ export async function requestPasswordReset(
   return { success: t('forgotPassword.success') };
 }
 
-export async function resendConfirmation(
-  _prev: AuthFormState,
-  _formData: FormData,
-): Promise<AuthFormState> {
+// No inputs: the address comes from the pending_email cookie.
+export async function resendConfirmation(): Promise<AuthFormState> {
   const t = await getTranslations('auth');
   const email = await getPendingEmail();
 
