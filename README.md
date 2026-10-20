@@ -33,3 +33,7 @@ The project combines my background as a former competitive chess player and coac
 - Jest + React Testing Library
 - Vercel hosting, GitHub Actions CI
 - Built with Claude Code (AI-assisted development)
+
+## Transactional email
+
+Auth emails (sign-up confirmation, password reset) are sent from `chesstrainer.notify@gmail.com`.
