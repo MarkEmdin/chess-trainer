@@ -5,9 +5,10 @@ import { redirect } from '@/i18n/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getPendingEmail, setPendingEmail } from '@/lib/auth/pendingEmail';
 
 export type AuthFormState =
-  | { error: string; suggest?: 'register' | 'login' }
+  | { error: string; suggest?: 'register' | 'login' | 'resend' }
   | { success: string }
   | undefined;
 
@@ -44,6 +45,13 @@ export async function signIn(
     email,
     password,
   });
+
+  // Supabase checks the password before confirmation, so only the account's
+  // owner gets here — safe to remember the address for /check-email.
+  if (error?.code === 'email_not_confirmed') {
+    await setPendingEmail(email);
+    return { error: t('emailNotConfirmed'), suggest: 'resend' };
+  }
 
   if (error || !data.user) {
     return { error: t('wrongPassword') };
@@ -103,11 +111,17 @@ export async function signUp(
     options: { data: { nickname, preferred_locale: currentLocale } },
   });
 
-  if (error) {
+  // An already-registered email gets the same check-email screen as a new
+  // one (no email is sent), so the form never reveals which addresses have
+  // accounts. Depending on settings Supabase reports it either as success
+  // or as user_already_exists.
+  if (error && error.code !== 'user_already_exists') {
     return { error: error.message };
   }
 
-  redirect({ href: '/', locale: currentLocale });
+  // With confirmations on there is no session yet.
+  await setPendingEmail(email);
+  redirect({ href: '/check-email', locale: currentLocale });
 }
 
 export async function requestPasswordReset(
@@ -116,16 +130,17 @@ export async function requestPasswordReset(
 ): Promise<AuthFormState> {
   const t = await getTranslations('auth');
   const locale = await getLocale();
-  const nickname = String(formData.get('nickname') ?? '').trim();
+  const identifier = String(formData.get('identifier') ?? '').trim();
 
-  if (!nickname) {
+  if (!identifier) {
     return { error: t('errors.fieldsRequired') };
   }
 
-  const admin = createAdminClient();
-  const { data: email } = await admin.rpc('lookup_email_by_nickname', {
-    p_nickname: nickname,
-  });
+  // Nicknames can't contain "@", so its presence means an email. Supabase
+  // stays silent for unknown addresses, so no lookup is needed for those.
+  const email = identifier.includes('@')
+    ? identifier.toLowerCase()
+    : await lookupEmail(identifier);
 
   if (email) {
     const origin = (await headers()).get('origin');
@@ -142,6 +157,35 @@ export async function requestPasswordReset(
   // Same message whether or not the nickname matched — avoids account
   // enumeration via response timing/content.
   return { success: t('forgotPassword.success') };
+}
+
+// No inputs: the address comes from the pending_email cookie.
+export async function resendConfirmation(): Promise<AuthFormState> {
+  const t = await getTranslations('auth');
+  const email = await getPendingEmail();
+
+  if (email) {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.resend({ type: 'signup', email });
+    if (error?.code === 'over_email_send_rate_limit') {
+      return { error: t('errors.resendTooSoon') };
+    }
+    if (error) {
+      console.error('resend confirmation failed:', error.message);
+    }
+  }
+
+  // Same message whether or not anything was sent — the account may
+  // already be confirmed, or the address may belong to someone else.
+  return { success: t('checkEmail.resent') };
+}
+
+async function lookupEmail(nickname: string): Promise<string | null> {
+  const admin = createAdminClient();
+  const { data } = await admin.rpc('lookup_email_by_nickname', {
+    p_nickname: nickname,
+  });
+  return data ?? null;
 }
 
 export async function updatePassword(

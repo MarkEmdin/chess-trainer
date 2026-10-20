@@ -32,9 +32,9 @@ export default function ForgotPasswordForm() {
       ) : (
         <form action={formAction} className="flex flex-col gap-4">
           <FormField
-            label={t('nickname')}
-            id="nickname"
-            name="nickname"
+            label={t('forgotPassword.identifier')}
+            id="identifier"
+            name="identifier"
             type="text"
             autoComplete="username"
             required

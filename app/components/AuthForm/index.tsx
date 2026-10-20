@@ -9,9 +9,11 @@ import { signIn, signUp, type AuthFormState } from '@/lib/auth/actions';
 
 type Props = {
   mode: 'login' | 'register';
+  // Message from the page itself, e.g. an expired confirmation link.
+  notice?: string;
 };
 
-export default function AuthForm({ mode }: Props) {
+export default function AuthForm({ mode, notice }: Props) {
   const t = useTranslations('auth');
   const action = mode === 'login' ? signIn : signUp;
   const [state, formAction, pending] = useActionState<AuthFormState, FormData>(
@@ -29,6 +31,12 @@ export default function AuthForm({ mode }: Props) {
         </h1>
         <p className="text-sm text-muted-foreground">{t(`${mode}.subtitle`)}</p>
       </header>
+
+      {notice && (
+        <p className="text-sm text-foreground text-center" role="status">
+          {notice}
+        </p>
+      )}
 
       <form action={formAction} className="flex flex-col gap-4">
         {mode === 'register' && (
@@ -92,6 +100,17 @@ export default function AuthForm({ mode }: Props) {
                   className="text-foreground underline hover:no-underline"
                 >
                   {t('errors.loginSuggest')}
+                </Link>
+              </>
+            )}
+            {state.suggest === 'resend' && (
+              <>
+                {' '}
+                <Link
+                  href="/check-email"
+                  className="text-foreground underline hover:no-underline"
+                >
+                  {t('errors.resendSuggest')}
                 </Link>
               </>
             )}

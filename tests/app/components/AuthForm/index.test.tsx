@@ -35,4 +35,9 @@ describe('<AuthForm />', () => {
       screen.queryByRole('link', { name: /forgot password/i }),
     ).not.toBeInTheDocument();
   });
+
+  it('shows a notice passed in by the page', () => {
+    renderWithIntl(<AuthForm mode="login" notice="Link expired." />);
+    expect(screen.getByRole('status')).toHaveTextContent('Link expired.');
+  });
 });

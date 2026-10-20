@@ -43,15 +43,20 @@
       "loginSuggest": "Login?",
       "passwordMismatch": "Passwords don't match.",
       "passwordTooShort": "Password must be at least 6 characters.",
-      "sessionExpired": "Your reset link has expired or was already used. Request a new one."
+      "sessionExpired": "Your reset link has expired or was already used. Request a new one.",
+      "resendTooSoon": "Please wait a minute before requesting another email.",
+      "emailNotConfirmed": "Confirm your email first.",
+      "resendSuggest": "Resend email?",
+      "linkExpired": "This link has expired. Log in to get a new one."
     },
     "forgotPassword": {
       "title": "Reset your password",
-      "subtitle": "Enter your nickname and we'll email you a reset link.",
+      "subtitle": "Enter your nickname or email and we'll send you a reset link.",
       "submit": "Send reset link",
       "pending": "Sending…",
       "success": "If that account exists, a reset email was sent.",
-      "backToLogin": "Back to login"
+      "backToLogin": "Back to login",
+      "identifier": "Nickname or email"
     },
     "resetPassword": {
       "title": "Set a new password",
@@ -61,6 +66,19 @@
       "submit": "Update password",
       "pending": "Updating…",
       "success": "Password updated. You can now log in."
+    },
+    "checkEmail": {
+      "resent": "If the account needs confirming, a new email was sent.",
+      "title": "Check your email",
+      "body": "We sent a confirmation link to {email}. Open it to finish creating your account.",
+      "resend": "Resend email",
+      "resendPending": "Sending…",
+      "backToLogin": "Back to login"
+    },
+    "emailConfirmed": {
+      "title": "Email confirmed",
+      "body": "You're logged in. Welcome!",
+      "cta": "Start learning"
     }
   },
   "coaching": {
