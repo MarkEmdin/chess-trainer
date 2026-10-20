@@ -83,7 +83,8 @@
       "notAuthenticated": "You must be signed in.",
       "alreadyAsked": "You've already asked about this position.",
       "notAdmin": "Only the coach can reply.",
-      "alreadyResponded": "You've already responded to this question."
+      "alreadyResponded": "You've already responded to this question.",
+      "invalidVariation": "This variation can't be saved. Try recording it again."
     }
   },
   "coachingAdmin": {

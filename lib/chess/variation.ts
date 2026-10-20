@@ -13,19 +13,21 @@ export function playVariation(
   fen: string,
   sans: string[],
 ): { positions: string[]; moves: ReplayMove[] } | null {
-  const chess = new Chess(fen);
-  const positions = [chess.fen()];
-  const moves: ReplayMove[] = [];
-  for (const san of sans) {
-    try {
+  // chess.js throws on a malformed FEN as well as on an illegal move, and the
+  // FEN can come from form data.
+  try {
+    const chess = new Chess(fen);
+    const positions = [chess.fen()];
+    const moves: ReplayMove[] = [];
+    for (const san of sans) {
       const move = chess.move(san);
       positions.push(move.after);
       moves.push(toReplayMove(move));
-    } catch {
-      return null;
     }
+    return { positions, moves };
+  } catch {
+    return null;
   }
-  return { positions, moves };
 }
 
 // "3… Nf6 4. Nc3 Bc5": a black move only carries its number when it opens

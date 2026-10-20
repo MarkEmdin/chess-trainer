@@ -28,6 +28,10 @@ describe('playVariation', () => {
     expect(playVariation(START, ['e4', 'e4'])).toBeNull();
   });
 
+  it('returns null for an invalid FEN', () => {
+    expect(playVariation('not a fen', ['e4'])).toBeNull();
+  });
+
   it('handles an empty line', () => {
     expect(playVariation(START, [])).toEqual({ positions: [START], moves: [] });
   });
