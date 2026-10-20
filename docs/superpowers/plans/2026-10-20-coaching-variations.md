@@ -107,7 +107,7 @@
 - [ ] **Step 1: Write failing tests** (`renderHook` + `act`)
   - `records legal moves`: `tryMove('e2','e4')` → `true`, `moves` `['e4']`, `fen` reflects it, `lastMove` `{from:'e2',to:'e4'}`.
   - `rejects illegal moves`: `tryMove('e2','e5')` → `false`, `moves` unchanged.
-  - `auto-promotes to a queen`: FEN `8/P6k/8/8/8/8/8/K7 w - - 0 1`, `tryMove('a7','a8')` → `moves` `['a8=Q+']`.
+  - `auto-promotes to a queen`: FEN `8/P6k/8/8/8/8/8/K7 w - - 0 1`, `tryMove('a7','a8')` → `moves` `['a8=Q']`.
   - `tap-tap`: `clickSquare('g1')` → `selected 'g1'`; `clickSquare('f3')` → `moves` `['Nf3']`, `selected null`. Tapping an empty square or an opponent piece with nothing selected → `selected null`. Tapping another own piece while selected → reselects.
   - `undo / clear`: after two moves `undo` → one move; `clear` → `[]`, `fen === startFen`.
   - `continues from initial`: `useVariationRecorder(start, ['e4'])` → `fen` after e4, next `tryMove('e7','e5')` → `['e4','e5']`.
