@@ -1,6 +1,6 @@
 # Spec: Coaching variations and larger Q&A modal
 
-Status: approved
+Status: done
 Branch: feature/coaching-variations
 
 ## Problem
