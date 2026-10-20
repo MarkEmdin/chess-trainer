@@ -74,6 +74,11 @@
       "resend": "Resend email",
       "resendPending": "Sending…",
       "backToLogin": "Back to login"
+    },
+    "emailConfirmed": {
+      "title": "Email confirmed",
+      "body": "You're logged in. Welcome!",
+      "cta": "Start learning"
     }
   },
   "coaching": {

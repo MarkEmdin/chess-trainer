@@ -5,6 +5,7 @@ export type AuthedUser = {
   email: string;
   nickname: string;
   role: 'user' | 'admin';
+  preferredLocale: string | null;
 };
 
 // Returns the authenticated user (with profile fields joined) or null.
@@ -19,7 +20,7 @@ export async function getAuthedUser(): Promise<AuthedUser | null> {
 
   const { data: profile } = await supabase
     .from('user_profiles')
-    .select('role, nickname')
+    .select('role, nickname, preferred_locale')
     .eq('id', user.id)
     .single();
 
@@ -28,5 +29,6 @@ export async function getAuthedUser(): Promise<AuthedUser | null> {
     email: user.email ?? '',
     nickname: profile?.nickname ?? '',
     role: profile?.role ?? 'user',
+    preferredLocale: profile?.preferred_locale ?? null,
   };
 }
