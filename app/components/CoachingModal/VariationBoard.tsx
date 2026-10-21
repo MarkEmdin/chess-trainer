@@ -102,12 +102,14 @@ export default function VariationBoard(props: Props) {
         />
       </Frame>
       {game && (
-        <GameBrowser
+        <GameNav
           game={game}
           boardIndex={boardIndex}
           onChange={props.onBoardIndexChange}
         />
       )}
+      {/* Recording sits right under the board controls: it's the main action
+          at the key position, so the long move list goes last. */}
       {props.canRecord && (
         <DraftControls
           fen={props.fen}
@@ -117,11 +119,19 @@ export default function VariationBoard(props: Props) {
           onRemove={() => props.onDraftChange(null)}
         />
       )}
+      {game && (
+        <GameMoveList
+          moves={game.moves}
+          keyIndex={game.keyIndex}
+          boardIndex={boardIndex}
+          onSelect={props.onBoardIndexChange}
+        />
+      )}
     </div>
   );
 }
 
-function GameBrowser({
+function GameNav({
   game,
   boardIndex,
   onChange,
@@ -133,7 +143,7 @@ function GameBrowser({
   const t = useTranslations('coaching.game');
   const atKey = boardIndex === game.keyIndex;
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-wrap items-center justify-center gap-2">
       <StepControls
         index={boardIndex}
         total={game.positions.length - 1}
@@ -143,18 +153,11 @@ function GameBrowser({
         type="button"
         variant={atKey ? 'outline' : 'default'}
         size="sm"
-        className="self-start"
         disabled={atKey}
         onClick={() => onChange(game.keyIndex)}
       >
         {t('backToKey')}
       </Button>
-      <GameMoveList
-        moves={game.moves}
-        keyIndex={game.keyIndex}
-        boardIndex={boardIndex}
-        onSelect={onChange}
-      />
     </div>
   );
 }

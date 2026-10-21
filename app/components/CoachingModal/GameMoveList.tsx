@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { formatMoveLabel, type ReplayMove } from '@/lib/chess/replay';
 import { cn } from '@/lib/utils';
 
@@ -22,6 +23,14 @@ export default function GameMoveList({
   onSelect,
 }: Props) {
   const current = boardIndex === keyIndex ? keyIndex : boardIndex - 1;
+  const currentRef = useRef<HTMLButtonElement>(null);
+
+  // The list scrolls inside a short box; keep the highlighted move (on open,
+  // the key move) visible without scrolling the dialog itself.
+  useEffect(() => {
+    currentRef.current?.scrollIntoView?.({ block: 'nearest' });
+  }, [current]);
+
   return (
     <p className="flex flex-wrap gap-x-1.5 gap-y-1 text-sm font-mono max-h-32 overflow-y-auto">
       {moves.map((move, i) => {
@@ -29,6 +38,7 @@ export default function GameMoveList({
         return (
           <button
             key={i}
+            ref={current === i ? currentRef : undefined}
             type="button"
             onClick={() => onSelect(isKey ? keyIndex : i + 1)}
             aria-current={current === i ? 'step' : undefined}

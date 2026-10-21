@@ -392,6 +392,37 @@ describe('CoachingModal game browsing', () => {
     );
   });
 
+  it('scrolls the current move into view', () => {
+    const scrolled: Element[] = [];
+    // jsdom has no scrollIntoView; record the calls instead.
+    const original = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = function (this: Element) {
+      scrolled.push(this);
+    };
+    try {
+      renderAsking();
+      expect(scrolled).toContain(
+        screen.getByRole('button', { name: /3\. Bb5 ★/ }),
+      );
+      fireEvent.click(screen.getByRole('button', { name: '4. Ba4' }));
+      expect(scrolled[scrolled.length - 1]).toBe(
+        screen.getByRole('button', { name: '4. Ba4' }),
+      );
+    } finally {
+      Element.prototype.scrollIntoView = original;
+    }
+  });
+
+  it('keeps Record variation above the move list', () => {
+    renderAsking();
+    const record = screen.getByRole('button', { name: 'Record variation' });
+    const firstMove = screen.getByRole('button', { name: '1. e4' });
+    expect(
+      record.compareDocumentPosition(firstMove) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it('sends the pgn with a new question', async () => {
     renderAsking();
     fireEvent.change(screen.getByRole('textbox'), {
