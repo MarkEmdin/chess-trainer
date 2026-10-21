@@ -40,6 +40,10 @@ function setup(overrides: Partial<Parameters<typeof VariationBoard>[0]> = {}) {
     viewing: null,
     onStopViewing: jest.fn(),
     onRecordingChange: jest.fn(),
+    game: null,
+    boardIndex: 0,
+    onBoardIndexChange: jest.fn(),
+    locked: false,
     ...overrides,
   };
   const utils = renderWithIntl(<VariationBoard {...props} />);

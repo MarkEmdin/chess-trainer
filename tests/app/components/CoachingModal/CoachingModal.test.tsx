@@ -253,3 +253,177 @@ describe('CoachingModal', () => {
     ).toBeDisabled();
   });
 });
+
+describe('CoachingModal game browsing', () => {
+  const GAME_PGN = '1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6';
+  // Key position: before half-move 5 (3. Bb5), white to move.
+  const KEY_FEN = (() => {
+    const chess = new Chess();
+    ['e4', 'e5', 'Nf3', 'Nc6'].forEach((m) => chess.move(m));
+    return chess.fen();
+  })();
+
+  const gameProps = {
+    ...baseProps,
+    fen: KEY_FEN,
+    orientation: 'white' as const,
+    moveLabel: '3. Bb5',
+    game: { pgn: GAME_PGN, moveIndex: 5 },
+  };
+
+  function renderAsking() {
+    return renderWithIntl(
+      <CoachingModal
+        {...gameProps}
+        mode="student"
+        thread={undefined}
+        ask={{ gameUrl: 'https://lichess.org/abc', moveIndex: 5 }}
+      />,
+    );
+  }
+
+  const banner = () => screen.queryByText(/On the board now/);
+
+  it('opens on the key position with the key move starred', () => {
+    renderAsking();
+    expect(screen.getByTestId('board')).toHaveAttribute(
+      'data-position',
+      KEY_FEN,
+    );
+    expect(screen.getByRole('button', { name: /3\. Bb5 ★/ })).toHaveAttribute(
+      'aria-current',
+      'step',
+    );
+    expect(banner()).not.toBeInTheDocument();
+  });
+
+  it('locks writing away from the key position and keeps the text', () => {
+    renderAsking();
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: 'idea' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Previous move' }));
+    // The key board is after 2… Nc6; one step back shows it after 2. Nf3.
+    expect(banner()).toHaveTextContent('2. Nf3');
+    expect(banner()).toHaveTextContent('3. Bb5');
+    expect(screen.getByRole('textbox')).toBeDisabled();
+    expect(screen.getByRole('textbox')).toHaveValue('idea');
+    expect(
+      screen.getByRole('button', { name: 'Record variation' }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Send to coach' }),
+    ).toBeDisabled();
+  });
+
+  it('back to key position unlocks', () => {
+    renderAsking();
+    fireEvent.click(screen.getByRole('button', { name: 'Previous move' }));
+    const backButtons = screen.getAllByRole('button', {
+      name: 'Back to key position',
+    });
+    fireEvent.click(backButtons[backButtons.length - 1]);
+    expect(banner()).not.toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toBeEnabled();
+    expect(screen.getByTestId('board')).toHaveAttribute(
+      'data-position',
+      KEY_FEN,
+    );
+  });
+
+  it('clicking the starred move returns to the key position', () => {
+    renderAsking();
+    fireEvent.click(screen.getByRole('button', { name: '4. Ba4' }));
+    expect(banner()).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /3\. Bb5 ★/ }));
+    expect(banner()).not.toBeInTheDocument();
+    expect(screen.getByTestId('board')).toHaveAttribute(
+      'data-position',
+      KEY_FEN,
+    );
+  });
+
+  it('ignores arrow keys typed in the comment', () => {
+    renderAsking();
+    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'ArrowLeft' });
+    expect(screen.getByTestId('board')).toHaveAttribute(
+      'data-position',
+      KEY_FEN,
+    );
+  });
+
+  it('steps through the game with arrow keys', () => {
+    renderAsking();
+    fireEvent.keyDown(document, { key: 'ArrowRight' });
+    expect(banner()).toHaveTextContent('3. Bb5');
+    expect(screen.getByTestId('board')).not.toHaveAttribute(
+      'data-position',
+      KEY_FEN,
+    );
+  });
+
+  it('returns to the key position after viewing a variation', () => {
+    renderWithIntl(
+      <CoachingModal
+        {...gameProps}
+        mode="student"
+        thread={thread({
+          fen: KEY_FEN,
+          responses: [
+            {
+              body: 'Try this',
+              created_at: '2026-10-21T10:00:00Z',
+              variation: ['Bc4'],
+            },
+          ],
+        })}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Previous move' }));
+    fireEvent.click(screen.getByRole('button', { name: 'View variation' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Back to position' }));
+    expect(screen.getByTestId('board')).toHaveAttribute(
+      'data-position',
+      KEY_FEN,
+    );
+    expect(screen.getByRole('button', { name: /3\. Bb5 ★/ })).toHaveAttribute(
+      'aria-current',
+      'step',
+    );
+  });
+
+  it('sends the pgn with a new question', async () => {
+    renderAsking();
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: 'Why Bb5?' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Send to coach' }));
+    await waitFor(() => expect(createCoachingRequest).toHaveBeenCalled());
+    expect(submittedForm(createCoachingRequest).get('pgn')).toBe(GAME_PGN);
+  });
+
+  it('hides game navigation while recording', () => {
+    renderAsking();
+    fireEvent.click(screen.getByRole('button', { name: 'Record variation' }));
+    expect(
+      screen.queryByRole('button', { name: 'Previous move' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows no game navigation without a pgn', () => {
+    renderWithIntl(
+      <CoachingModal
+        {...baseProps}
+        mode="student"
+        thread={undefined}
+        ask={{ gameUrl: 'https://lichess.org/abc', moveIndex: 5 }}
+      />,
+    );
+    expect(
+      screen.queryByRole('button', { name: 'Back to key position' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Previous move' }),
+    ).not.toBeInTheDocument();
+  });
+});

@@ -109,6 +109,11 @@
       "backToPosition": "Back to position",
       "attached": "Variation"
     },
+    "game": {
+      "backToKey": "Back to key position",
+      "lockedBanner": "On the board now: {move}. You can write and record variations only at the key position {keyMove}.",
+      "startPosition": "starting position"
+    },
     "errors": {
       "missingFields": "Position data is missing — try reopening the modal.",
       "bodyTooLong": "Keep it under {max} characters.",
