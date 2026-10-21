@@ -1,6 +1,6 @@
 # Spec: Landing page
 
-Status: in-progress
+Status: done
 Branch: feature/landing-page
 
 ## Problem
@@ -77,11 +77,11 @@ Also update `metadata.description` (both locales) to match the new pitch.
 
 ## Acceptance criteria
 
-- [ ] `/en` and `/ru` show hero, how-it-works, four feature cards, coming-soon block
-- [ ] Primary CTA links to `/think-time`, secondary to `/lessons`; cards link to `/think-time`, `/games`, `/coaching`, `/lessons`
-- [ ] Layout has no horizontal scroll at 375px width; looks right in light, dark, rose
-- [ ] `messages/en.json` and `messages/ru.json` have identical key trees (test enforces it)
-- [ ] Tests under `tests/app/page.test.tsx` and `tests/messages.test.ts`
-- [ ] `npm run lint` passes with zero warnings
-- [ ] `npm test` passes
-- [ ] `npm run build` passes
+- [x] `/en` and `/ru` show hero, how-it-works, four feature cards, coming-soon block
+- [x] Primary CTA links to `/think-time`, secondary to `/lessons`; cards link to `/think-time`, `/games`, `/coaching`, `/lessons`
+- [x] Layout has no horizontal scroll at 375px width; looks right in light, dark, rose
+- [x] `messages/en.json` and `messages/ru.json` have identical key trees (test enforces it)
+- [x] Tests under `tests/app/page.test.tsx` and `tests/messages.test.ts`
+- [x] `npm run lint` passes with zero warnings
+- [x] `npm test` passes
+- [x] `npm run build` passes
