@@ -1,5 +1,9 @@
 import { Chess } from 'chess.js';
-import { buildReplay, formatMoveLabel } from '@/lib/chess/replay';
+import {
+  buildReplay,
+  formatMoveLabel,
+  replayAroundKey,
+} from '@/lib/chess/replay';
 
 const START = new Chess().fen();
 const FALLBACK = '8/8/8/8/8/8/8/K6k w - - 0 1';
@@ -54,8 +58,35 @@ describe('buildReplay', () => {
   });
 
   it('keeps promotions in the after FEN', () => {
-    const pgn = '[SetUp "1"]\n[FEN "8/P6k/8/8/8/8/8/K7 w - - 0 1"]\n\n1. a8=Q *';
+    const pgn =
+      '[SetUp "1"]\n[FEN "8/P6k/8/8/8/8/8/K7 w - - 0 1"]\n\n1. a8=Q *';
     const { positions } = buildReplay(pgn, FALLBACK);
     expect(positions[positions.length - 1].startsWith('Q')).toBe(true);
+  });
+});
+
+describe('replayAroundKey', () => {
+  const PGN = '1. e4 e5 2. Nf3 Nc6 3. Bb5 a6';
+  // Position before half-move 5 (3. Bb5).
+  const KEY_FEN = buildReplay(PGN, FALLBACK).positions[4];
+
+  it('returns positions, moves and the key index', () => {
+    const replay = replayAroundKey(PGN, KEY_FEN, 5);
+    expect(replay?.keyIndex).toBe(4);
+    expect(replay?.moves[4].san).toBe('Bb5');
+    expect(replay?.positions[4]).toBe(KEY_FEN);
+  });
+
+  it('returns null when the fen does not match moveIndex', () => {
+    expect(replayAroundKey(PGN, KEY_FEN, 3)).toBeNull();
+  });
+
+  it('returns null when moveIndex points past the last move', () => {
+    const finalFen = buildReplay(PGN, FALLBACK).positions[6];
+    expect(replayAroundKey(PGN, finalFen, 7)).toBeNull();
+  });
+
+  it('returns null for an unparsable pgn', () => {
+    expect(replayAroundKey('garbage', START, 1)).toBeNull();
   });
 });

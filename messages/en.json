@@ -89,13 +89,14 @@
     "threadTitle": "Coaching thread",
     "bodyLabel": "What were you thinking in this position?",
     "bodyPlaceholder": "Describe your thoughts, the candidate moves you considered, what made you hesitate…",
+    "charCount": "{count} / {max}",
     "submit": "Send to coach",
     "submitting": "Sending…",
     "submitted": "Your question is on its way.",
     "yourQuestion": "Your question",
     "coachResponse": "Coach's response",
     "awaitingReply": "Awaiting reply.",
-    "viewOnChessCom": "View on Chess.com",
+    "openGame": "Open game",
     "variation": {
       "record": "Record variation",
       "recording": "Recording variation",
@@ -107,6 +108,11 @@
       "view": "View variation",
       "backToPosition": "Back to position",
       "attached": "Variation"
+    },
+    "game": {
+      "backToKey": "Back to key position",
+      "lockedBanner": "On the board now: {move}. You can write and record variations only at the key position {keyMove}.",
+      "startPosition": "starting position"
     },
     "errors": {
       "missingFields": "Position data is missing — try reopening the modal.",

@@ -9,5 +9,9 @@ export type CoachingMessage = {
 export type CoachingThreadData = CoachingMessage & {
   id: string;
   fen: string;
+  // 1-based half-move played from `fen`; locates the key position in `pgn`.
+  move_index: number;
+  // Whole game, when it was saved with the question (null for older ones).
+  pgn: string | null;
   responses: CoachingMessage[];
 };

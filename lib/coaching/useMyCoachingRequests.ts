@@ -23,6 +23,8 @@ const fetcher = async (): Promise<CoachingRequestsByFen> => {
         body,
         created_at,
         variation,
+        move_index,
+        pgn,
         coaching_responses (
           body,
           created_at,
@@ -43,6 +45,8 @@ const fetcher = async (): Promise<CoachingRequestsByFen> => {
         body: r.body,
         created_at: r.created_at,
         variation: r.variation,
+        move_index: r.move_index,
+        pgn: r.pgn,
         responses: r.coaching_responses ?? [],
       },
     ]),

@@ -1,7 +1,8 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { ExternalLinkIcon } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import { Textarea } from '@/app/components/ui/textarea';
 import SectionLabel from '@/app/components/SectionLabel';
@@ -18,7 +19,10 @@ import {
   type CoachingRequestState,
   type RespondState,
 } from '@/lib/coaching/actions';
+import { formatMoveLabel, replayAroundKey } from '@/lib/chess/replay';
 import { playVariation } from '@/lib/chess/variation';
+import { MAX_BODY_LENGTH, normalizeBody } from '@/lib/coaching/body';
+import { cn } from '@/lib/utils';
 import type { CoachingMessage, CoachingThreadData } from '@/lib/coaching/types';
 import VariationBoard from './VariationBoard';
 import VariationLine from './VariationLine';
@@ -34,6 +38,11 @@ type Props = {
   thread: CoachingThreadData | undefined;
   // Required when a student asks a new question.
   ask?: { gameUrl: string; moveIndex: number };
+  // The whole game, when known: browsable around the key position `fen`
+  // (before half-move `moveIndex`, 1-based). Sent with a new question.
+  game?: { pgn: string; moveIndex: number };
+  // Link to the game on its platform; works for older questions too.
+  gameUrl?: string;
   onClose: () => void;
   onSubmitted?: () => void;
 };
@@ -52,6 +61,8 @@ export default function CoachingModal({
   subtitle,
   thread,
   ask,
+  game,
+  gameUrl,
   onClose,
   onSubmitted,
 }: Props) {
@@ -60,6 +71,20 @@ export default function CoachingModal({
   const [draft, setDraft] = useState<string[] | null>(null);
   const [recording, setRecording] = useState(false);
   const [viewTarget, setViewTarget] = useState<ViewTarget>(null);
+  const replay = useMemo(
+    () => (game ? replayAroundKey(game.pgn, fen, game.moveIndex) : null),
+    [game, fen],
+  );
+  const keyIndex = replay?.keyIndex ?? 0;
+  const [boardIndex, setBoardIndex] = useState(keyIndex);
+  // Writing and recording are tied to the key position: everything the
+  // student or coach writes is about that one board.
+  const atKey = !replay || boardIndex === keyIndex;
+  // Controlled on purpose: React resets uncontrolled fields after every form
+  // action, errors included, which would wipe a long comment.
+  const [body, setBody] = useState('');
+  const bodyLength = normalizeBody(body).length;
+  const tooLong = bodyLength > MAX_BODY_LENGTH;
 
   const [askState, askAction, askPending] = useActionState<
     CoachingRequestState,
@@ -82,6 +107,13 @@ export default function CoachingModal({
   const canWrite =
     !justSubmitted &&
     (mode === 'student' ? !thread : thread?.responses.length === 0);
+
+  // A sent variation starts from the key position, so viewing one (and
+  // leaving it) puts the game board back there.
+  function view(target: ViewTarget) {
+    setBoardIndex(keyIndex);
+    setViewTarget(target);
+  }
 
   const viewing =
     viewTarget === 'question'
@@ -111,6 +143,17 @@ export default function CoachingModal({
             {moveLabel}
             {subtitle && ` · ${subtitle}`}
           </DialogDescription>
+          {gameUrl && (
+            <a
+              href={gameUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 self-start text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+            >
+              <ExternalLinkIcon className="size-4" />
+              {t('openGame')}
+            </a>
+          )}
         </DialogHeader>
 
         <div className="flex flex-col lg:flex-row gap-4">
@@ -124,11 +167,15 @@ export default function CoachingModal({
               draft={draft}
               onDraftChange={setDraft}
               viewing={viewing}
-              onStopViewing={() => setViewTarget(null)}
+              onStopViewing={() => view(null)}
               onRecordingChange={(next) => {
                 setRecording(next);
                 if (next) setViewTarget(null);
               }}
+              game={replay}
+              boardIndex={boardIndex}
+              onBoardIndexChange={setBoardIndex}
+              locked={!atKey}
             />
           </div>
 
@@ -139,7 +186,7 @@ export default function CoachingModal({
                 message={thread}
                 fen={fen}
                 viewDisabled={recording}
-                onView={() => setViewTarget('question')}
+                onView={() => view('question')}
               />
             )}
 
@@ -156,7 +203,7 @@ export default function CoachingModal({
                       message={response}
                       fen={fen}
                       viewDisabled={recording}
-                      onView={() => setViewTarget(i)}
+                      onView={() => view(i)}
                     />
                   ))
                 )}
@@ -167,6 +214,31 @@ export default function CoachingModal({
               <p className="text-sm text-muted-foreground" role="status">
                 {mode === 'student' ? t('submitted') : tAdmin('sent')}
               </p>
+            )}
+
+            {canWrite && replay && !atKey && (
+              <div
+                role="status"
+                className="flex flex-col gap-2 rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm text-foreground"
+              >
+                <p>
+                  {t('game.lockedBanner', {
+                    move:
+                      boardIndex > 0
+                        ? formatMoveLabel(replay.moves[boardIndex - 1])
+                        : t('game.startPosition'),
+                    keyMove: formatMoveLabel(replay.moves[keyIndex]),
+                  })}
+                </p>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="self-start"
+                  onClick={() => setBoardIndex(keyIndex)}
+                >
+                  {t('game.backToKey')}
+                </Button>
+              </div>
             )}
 
             {canWrite && (
@@ -188,6 +260,9 @@ export default function CoachingModal({
                       value={ask?.moveIndex ?? ''}
                     />
                     <input type="hidden" name="move_san" value={moveLabel} />
+                    {replay && game && (
+                      <input type="hidden" name="pgn" value={game.pgn} />
+                    )}
                   </>
                 ) : (
                   <input type="hidden" name="request_id" value={thread?.id} />
@@ -212,7 +287,9 @@ export default function CoachingModal({
                   rows={6}
                   required
                   minLength={1}
-                  maxLength={4000}
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  disabled={!atKey}
                   className="resize-y sm:min-h-60"
                   placeholder={
                     mode === 'student'
@@ -220,6 +297,17 @@ export default function CoachingModal({
                       : tAdmin('responsePlaceholder')
                   }
                 />
+                <p
+                  className={cn(
+                    'self-end text-xs text-muted-foreground',
+                    tooLong && 'text-destructive',
+                  )}
+                >
+                  {t('charCount', {
+                    count: bodyLength,
+                    max: MAX_BODY_LENGTH,
+                  })}
+                </p>
 
                 {state && 'error' in state && (
                   <p className="text-sm text-destructive" role="alert">
@@ -229,11 +317,17 @@ export default function CoachingModal({
 
                 <div className="flex justify-end">
                   {mode === 'student' ? (
-                    <Button type="submit" disabled={askPending || recording}>
+                    <Button
+                      type="submit"
+                      disabled={askPending || recording || tooLong || !atKey}
+                    >
                       {askPending ? t('submitting') : t('submit')}
                     </Button>
                   ) : (
-                    <Button type="submit" disabled={replyPending || recording}>
+                    <Button
+                      type="submit"
+                      disabled={replyPending || recording || tooLong || !atKey}
+                    >
                       {replyPending ? tAdmin('sending') : tAdmin('send')}
                     </Button>
                   )}

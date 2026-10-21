@@ -6,8 +6,20 @@ import CoachingThreadCard, {
 jest.mock(
   'next/dynamic',
   () => () =>
-    function CoachingModalStub(props: { mode: string }) {
-      return <div data-testid="coaching-modal" data-mode={props.mode} />;
+    function CoachingModalStub(props: {
+      mode: string;
+      game?: { pgn: string; moveIndex: number };
+      gameUrl?: string;
+    }) {
+      return (
+        <div
+          data-testid="coaching-modal"
+          data-mode={props.mode}
+          data-pgn={props.game?.pgn ?? ''}
+          data-move-index={props.game?.moveIndex ?? ''}
+          data-game-url={props.gameUrl ?? ''}
+        />
+      );
     },
 );
 jest.mock('@/app/components/ChessboardContainer', () => ({
@@ -25,6 +37,8 @@ const thread: CoachingThread = {
   body: 'What now?',
   created_at: '2026-10-20T10:00:00Z',
   variation: null,
+  move_index: 5,
+  pgn: null,
   responses: [
     { body: 'Play Nf6', created_at: '2026-10-21', variation: ['Nf6'] },
   ],
@@ -37,6 +51,36 @@ describe('CoachingThreadCard', () => {
     expect(screen.getByTestId('coaching-modal')).toHaveAttribute(
       'data-mode',
       'student',
+    );
+  });
+
+  it('links to the game on its platform', () => {
+    renderWithIntl(<CoachingThreadCard thread={{ ...thread, ...{} }} />);
+    expect(screen.getByRole('link', { name: 'Open game' })).toHaveAttribute(
+      'href',
+      'https://lichess.org/abc',
+    );
+  });
+
+  it('passes the saved game and its link to the modal', () => {
+    renderWithIntl(
+      <CoachingThreadCard
+        thread={{ ...thread, ...{ pgn: '1. e4 e5 2. Nf3 Nc6 3. Bb5 a6' } }}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Open' }));
+    const modal = screen.getByTestId('coaching-modal');
+    expect(modal).toHaveAttribute('data-pgn', '1. e4 e5 2. Nf3 Nc6 3. Bb5 a6');
+    expect(modal).toHaveAttribute('data-move-index', '5');
+    expect(modal).toHaveAttribute('data-game-url', 'https://lichess.org/abc');
+  });
+
+  it('passes no game when none was saved', () => {
+    renderWithIntl(<CoachingThreadCard thread={{ ...thread, ...{} }} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Open' }));
+    expect(screen.getByTestId('coaching-modal')).toHaveAttribute(
+      'data-pgn',
+      '',
     );
   });
 

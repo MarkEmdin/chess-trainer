@@ -10,8 +10,10 @@ import {
 } from 'lucide-react';
 import ChessboardWithNotation from '@/app/components/ChessboardWithNotation';
 import { Button } from '@/app/components/ui/button';
+import type { ReplayMove } from '@/lib/chess/replay';
 import { playVariation } from '@/lib/chess/variation';
 import { cn } from '@/lib/utils';
+import GameMoveList from './GameMoveList';
 import VariationLine from './VariationLine';
 import { useVariationRecorder } from './useVariationRecorder';
 
@@ -32,6 +34,20 @@ type Props = {
   viewing: string[] | null;
   onStopViewing: () => void;
   onRecordingChange: (recording: boolean) => void;
+  // The whole game around `fen` (= positions[keyIndex]), when it was saved.
+  game: GameReplay | null;
+  // Board position while browsing `game`; the parent owns it so the form
+  // can lock away from the key position.
+  boardIndex: number;
+  onBoardIndexChange: (index: number) => void;
+  // Away from the key position: draft controls stay visible but disabled.
+  locked: boolean;
+};
+
+export type GameReplay = {
+  positions: string[];
+  moves: ReplayMove[];
+  keyIndex: number;
 };
 
 export default function VariationBoard(props: Props) {
@@ -69,22 +85,160 @@ export default function VariationBoard(props: Props) {
     );
   }
 
+  const { game, boardIndex } = props;
+  const last = game && boardIndex > 0 ? game.moves[boardIndex - 1] : undefined;
+
   return (
     <div className="flex flex-col gap-2">
       <Frame>
         <ChessboardWithNotation
-          position={props.fen}
+          position={game ? game.positions[boardIndex] : props.fen}
           boardOrientation={props.orientation}
+          squareStyles={
+            last
+              ? { [last.from]: HIGHLIGHT_STYLE, [last.to]: HIGHLIGHT_STYLE }
+              : undefined
+          }
         />
       </Frame>
+      {game && (
+        <GameNav
+          game={game}
+          boardIndex={boardIndex}
+          onChange={props.onBoardIndexChange}
+        />
+      )}
+      {/* Recording sits right under the board controls: it's the main action
+          at the key position, so the long move list goes last. */}
       {props.canRecord && (
         <DraftControls
           fen={props.fen}
           draft={props.draft}
+          disabled={props.locked}
           onRecord={() => setRecordingAndNotify(true)}
           onRemove={() => props.onDraftChange(null)}
         />
       )}
+      {game && (
+        <GameMoveList
+          moves={game.moves}
+          keyIndex={game.keyIndex}
+          boardIndex={boardIndex}
+          onSelect={props.onBoardIndexChange}
+        />
+      )}
+    </div>
+  );
+}
+
+function GameNav({
+  game,
+  boardIndex,
+  onChange,
+}: {
+  game: GameReplay;
+  boardIndex: number;
+  onChange: (index: number) => void;
+}) {
+  const t = useTranslations('coaching.game');
+  const atKey = boardIndex === game.keyIndex;
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-2">
+      <StepControls
+        index={boardIndex}
+        total={game.positions.length - 1}
+        onChange={onChange}
+      />
+      <Button
+        type="button"
+        variant={atKey ? 'outline' : 'default'}
+        size="sm"
+        disabled={atKey}
+        onClick={() => onChange(game.keyIndex)}
+      >
+        {t('backToKey')}
+      </Button>
+    </div>
+  );
+}
+
+// ⏮ ◀ ▶ ⏭ plus ← → Home End. Mounted only while its board is shown, so the
+// keys never drive a board that's out of view.
+function StepControls({
+  index,
+  total,
+  onChange,
+}: {
+  index: number;
+  total: number;
+  onChange: (index: number) => void;
+}) {
+  const tNav = useTranslations('games.modal');
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      // The reply textarea sits next to the board: keys typed there belong
+      // to the text, not the board.
+      if (
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLInputElement
+      ) {
+        return;
+      }
+      if (e.key === 'ArrowLeft') onChange(Math.max(0, index - 1));
+      else if (e.key === 'ArrowRight') onChange(Math.min(total, index + 1));
+      else if (e.key === 'Home') onChange(0);
+      else if (e.key === 'End') onChange(total);
+      else return;
+      // Home/End would otherwise also scroll the dialog.
+      e.preventDefault();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [index, total, onChange]);
+
+  return (
+    <div className="flex items-center justify-center gap-1">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label={tNav('firstMove')}
+        onClick={() => onChange(0)}
+        disabled={index === 0}
+      >
+        <ChevronFirstIcon />
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label={tNav('prevMove')}
+        onClick={() => onChange(Math.max(0, index - 1))}
+        disabled={index === 0}
+      >
+        <ChevronLeftIcon />
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label={tNav('nextMove')}
+        onClick={() => onChange(Math.min(total, index + 1))}
+        disabled={index === total}
+      >
+        <ChevronRightIcon />
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label={tNav('lastMove')}
+        onClick={() => onChange(total)}
+        disabled={index === total}
+      >
+        <ChevronLastIcon />
+      </Button>
     </div>
   );
 }
@@ -113,11 +267,13 @@ function Frame({
 function DraftControls({
   fen,
   draft,
+  disabled,
   onRecord,
   onRemove,
 }: {
   fen: string;
   draft: string[] | null;
+  disabled: boolean;
   onRecord: () => void;
   onRemove: () => void;
 }) {
@@ -131,6 +287,7 @@ function DraftControls({
         variant="outline"
         size="sm"
         className="self-start"
+        disabled={disabled}
         onClick={onRecord}
       >
         {t('record')}
@@ -143,10 +300,22 @@ function DraftControls({
       <span className="text-xs text-muted-foreground">{t('attached')}</span>
       <VariationLine moves={played.moves} />
       <div className="flex gap-2">
-        <Button type="button" variant="outline" size="sm" onClick={onRecord}>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={disabled}
+          onClick={onRecord}
+        >
           {t('edit')}
         </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={onRemove}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          disabled={disabled}
+          onClick={onRemove}
+        >
           {t('remove')}
         </Button>
       </div>
@@ -235,33 +404,10 @@ function Viewer({
   onBack: () => void;
 }) {
   const t = useTranslations('coaching.variation');
-  const tNav = useTranslations('games.modal');
   // Lines are validated on save; an unplayable one shows just the start.
   const played = playVariation(fen, sans) ?? { positions: [fen], moves: [] };
   const total = played.moves.length;
   const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      // The reply textarea sits next to the board: keys typed there belong
-      // to the text, not the variation.
-      if (
-        e.target instanceof HTMLTextAreaElement ||
-        e.target instanceof HTMLInputElement
-      ) {
-        return;
-      }
-      if (e.key === 'ArrowLeft') setIndex((i) => Math.max(0, i - 1));
-      else if (e.key === 'ArrowRight') setIndex((i) => Math.min(total, i + 1));
-      else if (e.key === 'Home') setIndex(0);
-      else if (e.key === 'End') setIndex(total);
-      else return;
-      // Home/End would otherwise also scroll the dialog.
-      e.preventDefault();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [total]);
 
   const last = index > 0 ? played.moves[index - 1] : undefined;
   const squareStyles = last
@@ -277,48 +423,7 @@ function Viewer({
           squareStyles={squareStyles}
         />
       </Frame>
-      <div className="flex items-center justify-center gap-1">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label={tNav('firstMove')}
-          onClick={() => setIndex(0)}
-          disabled={index === 0}
-        >
-          <ChevronFirstIcon />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label={tNav('prevMove')}
-          onClick={() => setIndex((i) => Math.max(0, i - 1))}
-          disabled={index === 0}
-        >
-          <ChevronLeftIcon />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label={tNav('nextMove')}
-          onClick={() => setIndex((i) => Math.min(total, i + 1))}
-          disabled={index === total}
-        >
-          <ChevronRightIcon />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label={tNav('lastMove')}
-          onClick={() => setIndex(total)}
-          disabled={index === total}
-        >
-          <ChevronLastIcon />
-        </Button>
-      </div>
+      <StepControls index={index} total={total} onChange={setIndex} />
       <VariationLine moves={played.moves} current={index} onSelect={setIndex} />
       <Button
         type="button"

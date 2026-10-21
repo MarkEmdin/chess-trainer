@@ -4,7 +4,9 @@ import { revalidatePath } from 'next/cache';
 import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthedUser } from '@/lib/auth/getUser';
+import { replayAroundKey } from '@/lib/chess/replay';
 import { parseVariationField, playVariation } from '@/lib/chess/variation';
+import { MAX_BODY_LENGTH, normalizeBody } from './body';
 
 export type CoachingRequestState =
   | { error: string }
@@ -12,8 +14,6 @@ export type CoachingRequestState =
   | undefined;
 
 export type RespondState = { error: string } | { success: true } | undefined;
-
-const MAX_BODY_LENGTH = 4000;
 
 // Optional `variation` field: null when absent, the SAN list when it is a
 // legal line from `fen`, 'invalid' otherwise (bad JSON or an illegal move).
@@ -24,6 +24,21 @@ function readVariation(
   const parsed = parseVariationField(formData.get('variation'));
   if (parsed === null || parsed === 'invalid') return parsed;
   return playVariation(fen, parsed) ? parsed : 'invalid';
+}
+
+const MAX_PGN_LENGTH = 100_000;
+
+// Optional `pgn` field: kept only when it replays to `fen` before move
+// `moveIndex`. Anything else is dropped to null: a broken PGN must never
+// block the question itself.
+function readPgn(
+  formData: FormData,
+  fen: string,
+  moveIndex: number,
+): string | null {
+  const pgn = String(formData.get('pgn') ?? '');
+  if (!pgn || pgn.length > MAX_PGN_LENGTH) return null;
+  return replayAroundKey(pgn, fen, moveIndex) ? pgn : null;
 }
 
 // User-side: submit a question about a specific long-think position. The
@@ -40,7 +55,7 @@ export async function createCoachingRequest(
   const fen = String(formData.get('fen') ?? '').trim();
   const move_index = Number(formData.get('move_index'));
   const move_san = String(formData.get('move_san') ?? '').trim();
-  const body = String(formData.get('body') ?? '').trim();
+  const body = normalizeBody(String(formData.get('body') ?? '')).trim();
 
   if (
     !game_url ||
@@ -61,6 +76,8 @@ export async function createCoachingRequest(
     return { error: t('invalidVariation') };
   }
 
+  const pgn = readPgn(formData, fen, move_index);
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -80,6 +97,7 @@ export async function createCoachingRequest(
       move_san,
       body,
       variation,
+      pgn,
     })
     .select('id')
     .single();
@@ -109,7 +127,7 @@ export async function respondToRequest(
   const t = await getTranslations('coaching.errors');
 
   const request_id = String(formData.get('request_id') ?? '').trim();
-  const body = String(formData.get('body') ?? '').trim();
+  const body = normalizeBody(String(formData.get('body') ?? '')).trim();
 
   if (!request_id || !body) {
     return { error: t('missingFields') };

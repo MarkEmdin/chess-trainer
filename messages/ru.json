@@ -89,13 +89,14 @@
     "threadTitle": "Переписка с тренером",
     "bodyLabel": "Что вы думали в этой позиции?",
     "bodyPlaceholder": "Опишите свои размышления, какие ходы рассматривали, что вызвало сомнения…",
+    "charCount": "{count} / {max}",
     "submit": "Отправить тренеру",
     "submitting": "Отправка…",
     "submitted": "Вопрос отправлен.",
     "yourQuestion": "Ваш вопрос",
     "coachResponse": "Ответ тренера",
     "awaitingReply": "Ожидание ответа.",
-    "viewOnChessCom": "Открыть на Chess.com",
+    "openGame": "Открыть партию",
     "variation": {
       "record": "Записать вариант",
       "recording": "Запись варианта",
@@ -107,6 +108,11 @@
       "view": "Посмотреть вариант",
       "backToPosition": "Назад к позиции",
       "attached": "Вариант"
+    },
+    "game": {
+      "backToKey": "К ключевой позиции",
+      "lockedBanner": "Сейчас на доске: {move}. Писать ответ и записывать варианты можно только в ключевой позиции {keyMove}.",
+      "startPosition": "начальная позиция"
     },
     "errors": {
       "missingFields": "Не хватает данных о позиции — переоткройте окно.",

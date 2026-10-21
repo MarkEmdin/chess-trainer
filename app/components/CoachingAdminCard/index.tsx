@@ -79,7 +79,7 @@ export default function CoachingAdminCard({ request }: Props) {
                   rel="noopener noreferrer"
                 >
                   <ExternalLinkIcon className="size-4" />
-                  {tCoaching('viewOnChessCom')}
+                  {tCoaching('openGame')}
                 </a>
               </Button>
             </div>
@@ -95,6 +95,12 @@ export default function CoachingAdminCard({ request }: Props) {
           moveLabel={request.move_san}
           subtitle={t('askedBy', { nickname: request.user_nickname })}
           thread={request}
+          game={
+            request.pgn
+              ? { pgn: request.pgn, moveIndex: request.move_index }
+              : undefined
+          }
+          gameUrl={request.game_url}
           onClose={() => setOpen(false)}
         />
       )}

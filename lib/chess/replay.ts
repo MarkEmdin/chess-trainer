@@ -36,6 +36,21 @@ export function buildReplay(
   return { positions, moves };
 }
 
+// Replays a game around its key position: the board before half-move
+// `moveIndex` (1-based, as on LongThink). Null unless that position really is
+// `keyFen` and the key move exists, so a mismatched or unparsable PGN never
+// shows the wrong game.
+export function replayAroundKey(
+  pgn: string,
+  keyFen: string,
+  moveIndex: number,
+): { positions: string[]; moves: ReplayMove[]; keyIndex: number } | null {
+  const { positions, moves } = buildReplay(pgn, keyFen);
+  const keyIndex = moveIndex - 1;
+  if (positions[keyIndex] !== keyFen || !moves[keyIndex]) return null;
+  return { positions, moves, keyIndex };
+}
+
 export function toReplayMove(move: Move): ReplayMove {
   return {
     san: move.san,
