@@ -74,6 +74,13 @@ function replyForm(extra: Record<string, string> = {}) {
   return fd;
 }
 
+// 4000 characters once line breaks count as one, 4200 as sent by a browser.
+const LONG_CRLF_BODY = ('x'.repeat(19) + '\r\n').repeat(200);
+
+function insertedBody(): string {
+  return (insert.mock.calls[0][1] as { body: string }).body;
+}
+
 beforeEach(() => {
   insert.mockClear();
   requestRow = { fen: BLACK_TO_MOVE };
@@ -100,6 +107,15 @@ describe('createCoachingRequest', () => {
       'coaching_requests',
       expect.objectContaining({ variation: null }),
     );
+  });
+
+  it('accepts a 4000-character question sent with CRLF line breaks', async () => {
+    const result = await createCoachingRequest(
+      undefined,
+      askForm({ body: LONG_CRLF_BODY }),
+    );
+    expect(result).toEqual({ success: true, requestId: 'new-id' });
+    expect(insertedBody()).not.toContain('\r');
   });
 
   it.each(['nope', '[]', '["Ke8xe1"]'])(
@@ -136,6 +152,15 @@ describe('respondToRequest', () => {
     );
     expect(result).toEqual({ error: 'coaching.errors.invalidVariation' });
     expect(insert).not.toHaveBeenCalled();
+  });
+
+  it('accepts a 4000-character reply sent with CRLF line breaks', async () => {
+    const result = await respondToRequest(
+      undefined,
+      replyForm({ body: LONG_CRLF_BODY }),
+    );
+    expect(result).toEqual({ success: true });
+    expect(insertedBody()).not.toContain('\r');
   });
 
   it('reports a missing request', async () => {

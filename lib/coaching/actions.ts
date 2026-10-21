@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthedUser } from '@/lib/auth/getUser';
 import { parseVariationField, playVariation } from '@/lib/chess/variation';
+import { MAX_BODY_LENGTH, normalizeBody } from './body';
 
 export type CoachingRequestState =
   | { error: string }
@@ -40,7 +41,7 @@ export async function createCoachingRequest(
   const fen = String(formData.get('fen') ?? '').trim();
   const move_index = Number(formData.get('move_index'));
   const move_san = String(formData.get('move_san') ?? '').trim();
-  const body = String(formData.get('body') ?? '').trim();
+  const body = normalizeBody(String(formData.get('body') ?? '')).trim();
 
   if (
     !game_url ||
@@ -109,7 +110,7 @@ export async function respondToRequest(
   const t = await getTranslations('coaching.errors');
 
   const request_id = String(formData.get('request_id') ?? '').trim();
-  const body = String(formData.get('body') ?? '').trim();
+  const body = normalizeBody(String(formData.get('body') ?? '')).trim();
 
   if (!request_id || !body) {
     return { error: t('missingFields') };
