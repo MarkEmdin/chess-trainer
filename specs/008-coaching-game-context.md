@@ -1,6 +1,6 @@
 # Spec: Game context in the coaching modal + long-comment fix
 
-Status: in-progress
+Status: done
 Branch: feature/coaching-game-context
 
 ## Problem
@@ -102,14 +102,14 @@ coaching.charCount                // "{count} / {max}"
 
 ## Acceptance criteria
 
-- [ ] A 3900-character comment with 200 line breaks submits successfully (server test with `\r\n` input).
-- [ ] When the server action returns an error, the textarea keeps its text and the draft variation is kept.
-- [ ] Counter shows normalized length; submit is disabled over 4000.
-- [ ] New question from Key Positions stores `pgn`; mismatched/invalid PGN stores `null` without failing the question.
-- [ ] Modal with a PGN: navigation over the whole game, ★ on the key move, starts at the key position.
-- [ ] Away from the key position: banner visible, textarea + record + submit disabled, text kept; "Back to key position" restores.
-- [ ] Recording disables game navigation.
-- [ ] Modal without a PGN behaves as before (existing CoachingModal tests stay green).
-- [ ] "Open game" link in the modal and cards, with neutral label.
-- [ ] `messages` parity test passes; `npm run lint` zero warnings; `npm test`; `npm run build`.
-- [ ] Migration applied locally; prod rollout note in the PR (apply migration before deploy).
+- [x] A 3900-character comment with 200 line breaks submits successfully (server test with `\r\n` input).
+- [x] When the server action returns an error, the textarea keeps its text and the draft variation is kept.
+- [x] Counter shows normalized length; submit is disabled over 4000.
+- [x] New question from Key Positions stores `pgn`; mismatched/invalid PGN stores `null` without failing the question.
+- [x] Modal with a PGN: navigation over the whole game, ★ on the key move, starts at the key position.
+- [x] Away from the key position: banner visible, textarea + record + submit disabled, text kept; "Back to key position" restores.
+- [x] Recording disables game navigation.
+- [x] Modal without a PGN behaves as before (existing CoachingModal tests stay green).
+- [x] "Open game" link in the modal and cards, with neutral label.
+- [x] `messages` parity test passes; `npm run lint` zero warnings; `npm test`; `npm run build`.
+- [x] Migration applied locally; prod rollout note in the PR (apply migration before deploy).
