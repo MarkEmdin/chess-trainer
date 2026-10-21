@@ -19,6 +19,8 @@ import {
   type RespondState,
 } from '@/lib/coaching/actions';
 import { playVariation } from '@/lib/chess/variation';
+import { MAX_BODY_LENGTH, normalizeBody } from '@/lib/coaching/body';
+import { cn } from '@/lib/utils';
 import type { CoachingMessage, CoachingThreadData } from '@/lib/coaching/types';
 import VariationBoard from './VariationBoard';
 import VariationLine from './VariationLine';
@@ -60,6 +62,11 @@ export default function CoachingModal({
   const [draft, setDraft] = useState<string[] | null>(null);
   const [recording, setRecording] = useState(false);
   const [viewTarget, setViewTarget] = useState<ViewTarget>(null);
+  // Controlled on purpose: React resets uncontrolled fields after every form
+  // action, errors included, which would wipe a long comment.
+  const [body, setBody] = useState('');
+  const bodyLength = normalizeBody(body).length;
+  const tooLong = bodyLength > MAX_BODY_LENGTH;
 
   const [askState, askAction, askPending] = useActionState<
     CoachingRequestState,
@@ -212,7 +219,8 @@ export default function CoachingModal({
                   rows={6}
                   required
                   minLength={1}
-                  maxLength={4000}
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
                   className="resize-y sm:min-h-60"
                   placeholder={
                     mode === 'student'
@@ -220,6 +228,17 @@ export default function CoachingModal({
                       : tAdmin('responsePlaceholder')
                   }
                 />
+                <p
+                  className={cn(
+                    'self-end text-xs text-muted-foreground',
+                    tooLong && 'text-destructive',
+                  )}
+                >
+                  {t('charCount', {
+                    count: bodyLength,
+                    max: MAX_BODY_LENGTH,
+                  })}
+                </p>
 
                 {state && 'error' in state && (
                   <p className="text-sm text-destructive" role="alert">
@@ -229,11 +248,17 @@ export default function CoachingModal({
 
                 <div className="flex justify-end">
                   {mode === 'student' ? (
-                    <Button type="submit" disabled={askPending || recording}>
+                    <Button
+                      type="submit"
+                      disabled={askPending || recording || tooLong}
+                    >
                       {askPending ? t('submitting') : t('submit')}
                     </Button>
                   ) : (
-                    <Button type="submit" disabled={replyPending || recording}>
+                    <Button
+                      type="submit"
+                      disabled={replyPending || recording || tooLong}
+                    >
                       {replyPending ? tAdmin('sending') : tAdmin('send')}
                     </Button>
                   )}

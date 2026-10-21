@@ -89,6 +89,7 @@
     "threadTitle": "Coaching thread",
     "bodyLabel": "What were you thinking in this position?",
     "bodyPlaceholder": "Describe your thoughts, the candidate moves you considered, what made you hesitate…",
+    "charCount": "{count} / {max}",
     "submit": "Send to coach",
     "submitting": "Sending…",
     "submitted": "Your question is on its way.",

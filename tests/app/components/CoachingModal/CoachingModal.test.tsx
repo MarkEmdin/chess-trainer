@@ -120,6 +120,46 @@ describe('CoachingModal', () => {
     expect(submittedForm(createCoachingRequest).has('variation')).toBe(false);
   });
 
+  it('keeps the text and variation when the server returns an error', async () => {
+    createCoachingRequest.mockResolvedValue({ error: 'boom' });
+    renderWithIntl(
+      <CoachingModal
+        {...baseProps}
+        mode="student"
+        thread={undefined}
+        ask={{ gameUrl: 'https://lichess.org/abc', moveIndex: 5 }}
+      />,
+    );
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: 'My idea' },
+    });
+    recordNf6();
+    fireEvent.click(screen.getByRole('button', { name: 'Send to coach' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('boom');
+    expect(screen.getByRole('textbox')).toHaveValue('My idea');
+    expect(screen.getByText('Variation')).toBeInTheDocument();
+  });
+
+  it('counts characters and blocks sending over the limit', () => {
+    renderWithIntl(
+      <CoachingModal
+        {...baseProps}
+        mode="student"
+        thread={undefined}
+        ask={{ gameUrl: 'https://lichess.org/abc', moveIndex: 5 }}
+      />,
+    );
+    const textbox = screen.getByRole('textbox');
+    fireEvent.change(textbox, { target: { value: 'a'.repeat(4001) } });
+    expect(screen.getByText('4001 / 4000')).toHaveClass('text-destructive');
+    expect(
+      screen.getByRole('button', { name: 'Send to coach' }),
+    ).toBeDisabled();
+    fireEvent.change(textbox, { target: { value: 'a\r\nb' } });
+    expect(screen.getByText('3 / 4000')).not.toHaveClass('text-destructive');
+    expect(screen.getByRole('button', { name: 'Send to coach' })).toBeEnabled();
+  });
+
   it("shows the coach the question's variation and sends a reply with one", async () => {
     renderWithIntl(
       <CoachingModal
