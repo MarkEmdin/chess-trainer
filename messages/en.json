@@ -151,9 +151,48 @@
     }
   },
   "home": {
-    "subtitle": "Master the basics — pieces, moves, and core strategies.",
-    "description": "The idea behind this project is to help players analyze positions on their own. The Key Positions section surfaces positions where you spent a long time thinking. You can send your own analysis of these to the platform's coaches and get a reply. The platform also includes learning materials, though those are in Russian only. Thanks for visiting!",
-    "startLearning": "Start Learning"
+    "tagline": "Learn to think through chess positions on your own.",
+    "idea": "This project helps beginner players analyze positions themselves — without engine help. Find the moments in your own games where you thought the longest, work out what was going on, and put your ideas into words. Then discuss them with a coach — and soon with other players too.",
+    "ctaPrimary": "Find my key positions",
+    "ctaSecondary": "Learning materials",
+    "howItWorks": {
+      "title": "How it works",
+      "find": {
+        "title": "Bring your games",
+        "text": "Enter your Chess.com or Lichess username — your recent games load automatically."
+      },
+      "think": {
+        "title": "Think it through yourself",
+        "text": "Key Positions shows the moves you spent the most time on. Open one, look for candidate moves and plans, and write down your reasoning — no engine."
+      },
+      "discuss": {
+        "title": "Discuss with a coach",
+        "text": "Send your analysis to a coach on the platform and get a reply with comments and variations."
+      }
+    },
+    "features": {
+      "title": "What you can do here",
+      "keyPositions": {
+        "title": "Key Positions",
+        "description": "Positions from your games where you thought for a long time — the best material for self-analysis."
+      },
+      "games": {
+        "title": "Games",
+        "description": "Your recent Chess.com and Lichess games, with a board to replay every move."
+      },
+      "coaching": {
+        "title": "My coaching",
+        "description": "Your questions to coaches: your analysis, their replies and suggested variations."
+      },
+      "lessons": {
+        "title": "Learning materials",
+        "description": "Theory, piece values and world champions. Currently in Russian only."
+      }
+    },
+    "future": {
+      "title": "Coming soon",
+      "description": "Discuss your analysis with other players — compare ideas on the same position and learn from each other."
+    }
   },
   "lessons": {
     "title": "Lessons",
@@ -356,6 +395,6 @@
     }
   },
   "metadata": {
-    "description": "Learn the basics of chess — pieces, rules, and strategies"
+    "description": "Learn to analyze chess positions yourself — find the key moments in your games and discuss them with a coach."
   }
 }
