@@ -70,7 +70,11 @@ export default async function Home() {
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {features.map((feature) => (
-              <Link key={feature.href} href={feature.href}>
+              <Link
+                key={feature.href}
+                href={feature.href}
+                className="rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              >
                 <Card className="h-full transition-shadow hover:shadow-md">
                   <CardContent>
                     <CardTitle>{t(`features.${feature.key}.title`)}</CardTitle>

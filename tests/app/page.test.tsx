@@ -78,6 +78,13 @@ describe('home page', () => {
     }
   });
 
+  it('feature cards show a focus ring for keyboard users', async () => {
+    render(await Home());
+    expect(
+      screen.getByRole('link', { name: /home\.features\.games\.title/ }),
+    ).toHaveClass('focus-visible:ring-3');
+  });
+
   it('announces discussion with other players as coming soon', async () => {
     render(await Home());
     expect(
