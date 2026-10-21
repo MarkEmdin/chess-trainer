@@ -45,6 +45,8 @@ function thread(
     body: 'What now?',
     created_at: '2026-10-20T10:00:00Z',
     variation: null,
+    move_index: 5,
+    pgn: null,
     responses: [],
     ...overrides,
   };

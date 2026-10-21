@@ -1,3 +1,4 @@
+import { buildReplay } from '@/lib/chess/replay';
 import {
   createCoachingRequest,
   respondToRequest,
@@ -74,6 +75,14 @@ function replyForm(extra: Record<string, string> = {}) {
   return fd;
 }
 
+const RUY_PGN = '1. e4 e5 2. Nf3 Nc6 3. Bb5 a6';
+// Position before half-move 5 (3. Bb5).
+const RUY_KEY_FEN = buildReplay(RUY_PGN, BLACK_TO_MOVE).positions[4];
+
+function insertedPgn(): string | null {
+  return (insert.mock.calls[0][1] as { pgn: string | null }).pgn;
+}
+
 // 4000 characters once line breaks count as one, 4200 as sent by a browser.
 const LONG_CRLF_BODY = ('x'.repeat(19) + '\r\n').repeat(200);
 
@@ -107,6 +116,39 @@ describe('createCoachingRequest', () => {
       'coaching_requests',
       expect.objectContaining({ variation: null }),
     );
+  });
+
+  it('stores the pgn when it matches the asked position', async () => {
+    const result = await createCoachingRequest(
+      undefined,
+      askForm({ fen: RUY_KEY_FEN, move_index: '5', pgn: RUY_PGN }),
+    );
+    expect(result).toEqual({ success: true, requestId: 'new-id' });
+    expect(insertedPgn()).toBe(RUY_PGN);
+  });
+
+  it('stores null pgn when it does not match', async () => {
+    const result = await createCoachingRequest(
+      undefined,
+      askForm({ pgn: RUY_PGN }),
+    );
+    expect(result).toEqual({ success: true, requestId: 'new-id' });
+    expect(insertedPgn()).toBeNull();
+  });
+
+  it('stores null pgn without the field', async () => {
+    await createCoachingRequest(undefined, askForm());
+    expect(insertedPgn()).toBeNull();
+  });
+
+  it('stores null pgn when it is too long', async () => {
+    const padded = `{${'x'.repeat(100001)}} ${RUY_PGN}`;
+    const result = await createCoachingRequest(
+      undefined,
+      askForm({ fen: RUY_KEY_FEN, move_index: '5', pgn: padded }),
+    );
+    expect(result).toEqual({ success: true, requestId: 'new-id' });
+    expect(insertedPgn()).toBeNull();
   });
 
   it('accepts a 4000-character question sent with CRLF line breaks', async () => {
