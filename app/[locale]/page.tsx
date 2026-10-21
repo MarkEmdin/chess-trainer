@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/app/components/ui/button';
 import {
   Card,
@@ -35,7 +36,7 @@ export default async function Home() {
             </Link>
             <Link
               href="/lessons"
-              className={buttonVariants({ variant: 'outline', size: 'lg' })}
+              className={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}
             >
               {t('ctaSecondary')}
             </Link>

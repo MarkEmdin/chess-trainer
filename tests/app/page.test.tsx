@@ -42,6 +42,13 @@ describe('home page', () => {
     ).toHaveAttribute('href', '/lessons');
   });
 
+  it('secondary CTA keeps its visible outline border', async () => {
+    render(await Home());
+    const secondary = screen.getByRole('link', { name: 'home.ctaSecondary' });
+    expect(secondary).toHaveClass('border-border');
+    expect(secondary).not.toHaveClass('border-transparent');
+  });
+
   it('explains how it works in three steps', async () => {
     render(await Home());
     expect(
