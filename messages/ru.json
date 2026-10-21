@@ -96,7 +96,7 @@
     "yourQuestion": "Ваш вопрос",
     "coachResponse": "Ответ тренера",
     "awaitingReply": "Ожидание ответа.",
-    "viewOnChessCom": "Открыть на Chess.com",
+    "openGame": "Открыть партию",
     "variation": {
       "record": "Записать вариант",
       "recording": "Запись варианта",

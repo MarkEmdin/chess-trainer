@@ -141,6 +141,11 @@ export default function LongThinks({
             gameUrl: coachingTarget.game.url,
             moveIndex: coachingTarget.think.moveIndex,
           }}
+          game={{
+            pgn: coachingTarget.game.pgn,
+            moveIndex: coachingTarget.think.moveIndex,
+          }}
+          gameUrl={coachingTarget.game.url}
           onClose={() => setCoachingTarget(null)}
           onSubmitted={refreshRequests}
         />

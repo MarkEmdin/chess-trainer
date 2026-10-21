@@ -79,7 +79,7 @@ export default function CoachingThreadCard({ thread }: Props) {
                   rel="noopener noreferrer"
                 >
                   <ExternalLinkIcon className="size-4" />
-                  {t('viewOnChessCom')}
+                  {t('openGame')}
                 </a>
               </Button>
             </div>
@@ -95,6 +95,12 @@ export default function CoachingThreadCard({ thread }: Props) {
           moveLabel={thread.move_san}
           subtitle={createdAt}
           thread={thread}
+          game={
+            thread.pgn
+              ? { pgn: thread.pgn, moveIndex: thread.move_index }
+              : undefined
+          }
+          gameUrl={thread.game_url}
           onClose={() => setOpen(false)}
         />
       )}

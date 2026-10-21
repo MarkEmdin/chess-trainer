@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { ExternalLinkIcon } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import { Textarea } from '@/app/components/ui/textarea';
 import SectionLabel from '@/app/components/SectionLabel';
@@ -40,6 +41,8 @@ type Props = {
   // The whole game, when known: browsable around the key position `fen`
   // (before half-move `moveIndex`, 1-based). Sent with a new question.
   game?: { pgn: string; moveIndex: number };
+  // Link to the game on its platform; works for older questions too.
+  gameUrl?: string;
   onClose: () => void;
   onSubmitted?: () => void;
 };
@@ -59,6 +62,7 @@ export default function CoachingModal({
   thread,
   ask,
   game,
+  gameUrl,
   onClose,
   onSubmitted,
 }: Props) {
@@ -139,6 +143,17 @@ export default function CoachingModal({
             {moveLabel}
             {subtitle && ` · ${subtitle}`}
           </DialogDescription>
+          {gameUrl && (
+            <a
+              href={gameUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 self-start text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+            >
+              <ExternalLinkIcon className="size-4" />
+              {t('openGame')}
+            </a>
+          )}
         </DialogHeader>
 
         <div className="flex flex-col lg:flex-row gap-4">

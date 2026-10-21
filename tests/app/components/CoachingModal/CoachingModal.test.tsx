@@ -410,6 +410,20 @@ describe('CoachingModal game browsing', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('links to the game when a url is given', () => {
+    renderWithIntl(
+      <CoachingModal
+        {...gameProps}
+        mode="coach"
+        thread={thread({ fen: KEY_FEN })}
+        gameUrl="https://lichess.org/abc"
+      />,
+    );
+    const link = screen.getByRole('link', { name: 'Open game' });
+    expect(link).toHaveAttribute('href', 'https://lichess.org/abc');
+    expect(link).toHaveAttribute('target', '_blank');
+  });
+
   it('shows no game navigation without a pgn', () => {
     renderWithIntl(
       <CoachingModal
