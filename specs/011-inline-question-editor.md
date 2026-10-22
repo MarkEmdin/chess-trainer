@@ -1,6 +1,6 @@
 # Spec: Inline question editor
 
-Status: draft
+Status: done
 Branch: feature/inline-question-editor
 Prototype: branch `spike/question-editor`, page `/ru/prototype/question-editor` (throwaway, never merged)
 
@@ -127,12 +127,12 @@ Under `coaching.editor.*`: `recording`, `startHint`, `backToKey`, `undoMove`, `c
 
 ## Acceptance criteria
 
-- [ ] Clicking into the text turns recording on (green outline); a click elsewhere in the modal turns it off
-- [ ] A board move inserts a chip at the caret; consecutive moves extend it; text in between starts a new chip on the same line (test on the recorder)
-- [ ] Back to key position starts a new line; Undo move shrinks or removes the active chip (test)
-- [ ] Clicking a middle chip and moving branches a new line without changing existing chips (test)
-- [ ] Drawings are saved per position and show when reading that position
-- [ ] The server rejects illegal lines, bad ranges, bad squares and over-limit content; `body` is rebuilt from `content` (tests on `parseContent` and actions)
-- [ ] The coach reply uses the same editor
-- [ ] Old messages render unchanged; the cards show inline plain notation for new ones
-- [ ] Migration file added; `npm run lint`, `npm test`, `npm run build` pass
+- [x] Clicking into the text turns recording on (green outline); a click elsewhere in the modal turns it off
+- [x] A board move inserts a chip at the caret; consecutive moves extend it; text in between starts a new chip on the same line (test on the recorder)
+- [x] Back to key position starts a new line; Undo move shrinks or removes the active chip (test)
+- [x] Clicking a middle chip and moving branches a new line without changing existing chips (test)
+- [x] Drawings are saved per position and show when reading that position
+- [x] The server rejects illegal lines, bad ranges, bad squares and over-limit content; `body` is rebuilt from `content` (tests on `parseContent` and actions)
+- [x] The coach reply uses the same editor
+- [x] Old messages render unchanged; the cards show inline plain notation for new ones
+- [x] Migration file added; `npm run lint`, `npm test`, `npm run build` pass
