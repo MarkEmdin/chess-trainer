@@ -46,8 +46,24 @@ jest.mock('@/app/components/PageLayout', () => ({
 
 jest.mock('@/app/components/CoachingAdminCard', () => ({
   __esModule: true,
-  default: ({ request }: { request: { id: string } }) => (
-    <div data-testid="card">{request.id}</div>
+  default: ({
+    request,
+  }: {
+    request: {
+      id: string;
+      content?: unknown;
+      responses: { content?: unknown }[];
+    };
+  }) => (
+    <div
+      data-testid="card"
+      data-content={JSON.stringify(request.content ?? null)}
+      data-response-content={JSON.stringify(
+        request.responses[0]?.content ?? null,
+      )}
+    >
+      {request.id}
+    </div>
   ),
 }));
 
@@ -62,8 +78,19 @@ const rows = [
     id: 'done-1',
     user_id: 'u1',
     created_at: '2026-10-21T10:00:00Z',
+    content: { v: 1, segments: [], lines: {}, drawings: {} },
     coaching_responses: [
-      { body: 'ok', created_at: '2026-10-21T12:00:00Z', variation: null },
+      {
+        body: 'ok',
+        created_at: '2026-10-21T12:00:00Z',
+        variation: null,
+        content: {
+          v: 1,
+          segments: [{ t: 'text', text: 'ok' }],
+          lines: {},
+          drawings: {},
+        },
+      },
     ],
   },
   {
@@ -136,5 +163,14 @@ describe('admin page', () => {
     expect(
       screen.getByRole('tab', { name: 'coachingAdmin.tabs.answered(1)' }),
     ).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('passes inline-move content of questions and answers to the cards', async () => {
+    await render$('answered');
+    const card = screen.getByTestId('card');
+    expect(JSON.parse(card.dataset.content!)).toMatchObject({ v: 1 });
+    expect(JSON.parse(card.dataset.responseContent!)).toMatchObject({
+      segments: [{ t: 'text', text: 'ok' }],
+    });
   });
 });

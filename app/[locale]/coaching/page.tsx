@@ -28,12 +28,14 @@ export default async function CoachingPage() {
         body,
         created_at,
         variation,
+        content,
         move_index,
         pgn,
         coaching_responses (
           body,
           created_at,
-          variation
+          variation,
+          content
         )
       `,
     )
@@ -48,6 +50,7 @@ export default async function CoachingPage() {
       body: r.body,
       created_at: r.created_at,
       variation: r.variation,
+      content: r.content,
       move_index: r.move_index,
       pgn: r.pgn,
       responses: r.coaching_responses ?? [],
