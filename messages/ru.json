@@ -97,6 +97,16 @@
     "coachResponse": "Ответ тренера",
     "awaitingReply": "Ожидание ответа.",
     "openGame": "Открыть партию",
+    "playedAs": "играл {color}",
+    "youPlayed": "Вы играли {color}",
+    "color": {
+      "white": "белыми",
+      "black": "чёрными"
+    },
+    "players": {
+      "asker": "задал вопрос",
+      "you": "вы"
+    },
     "variation": {
       "record": "Записать вариант",
       "recording": "Запись варианта",
@@ -126,8 +136,7 @@
   },
   "coachingAdmin": {
     "title": "Запросы учеников",
-    "subtitle": "Все открытые вопросы.",
-    "empty": "Пока нет запросов.",
+    "subtitle": "Вопросы учеников.",
     "askedBy": "от {nickname}",
     "question": "Вопрос",
     "yourResponse": "Ваш ответ",
@@ -135,7 +144,15 @@
     "send": "Отправить",
     "sending": "Отправка…",
     "sent": "Ответ отправлен.",
-    "reply": "Ответить"
+    "reply": "Ответить",
+    "tabs": {
+      "new": "Новые ({count})",
+      "answered": "Отвеченные ({count})"
+    },
+    "emptyNew": "Новых вопросов нет.",
+    "emptyAnswered": "Отвеченных вопросов пока нет.",
+    "askedAt": "задан {date}",
+    "answeredAt": "Ответ {date}"
   },
   "coachingPage": {
     "title": "Мои вопросы",

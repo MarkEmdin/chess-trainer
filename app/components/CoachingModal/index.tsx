@@ -19,6 +19,8 @@ import {
   type CoachingRequestState,
   type RespondState,
 } from '@/lib/coaching/actions';
+import { sideToMove } from '@/lib/chess/fen';
+import { readPgnInfo } from '@/lib/chess/pgnInfo';
 import { formatMoveLabel, replayAroundKey } from '@/lib/chess/replay';
 import { playVariation } from '@/lib/chess/variation';
 import { MAX_BODY_LENGTH, normalizeBody } from '@/lib/coaching/body';
@@ -71,10 +73,14 @@ export default function CoachingModal({
   const [draft, setDraft] = useState<string[] | null>(null);
   const [recording, setRecording] = useState(false);
   const [viewTarget, setViewTarget] = useState<ViewTarget>(null);
-  const replay = useMemo(
-    () => (game ? replayAroundKey(game.pgn, fen, game.moveIndex) : null),
-    [game, fen],
-  );
+  const replay = useMemo(() => {
+    if (!game) return null;
+    const around = replayAroundKey(game.pgn, fen, game.moveIndex);
+    return around && { ...around, ...readPgnInfo(game.pgn) };
+  }, [game, fen]);
+  // The key move is the student's, so the side to move there is theirs.
+  const askerColor = sideToMove(fen);
+  const colorLabel = t(`color.${askerColor}`);
   const keyIndex = replay?.keyIndex ?? 0;
   const [boardIndex, setBoardIndex] = useState(keyIndex);
   // Writing and recording are tied to the key position: everything the
@@ -142,6 +148,9 @@ export default function CoachingModal({
           <DialogDescription>
             {moveLabel}
             {subtitle && ` · ${subtitle}`}
+            {mode === 'coach'
+              ? ` · ${t('playedAs', { color: colorLabel })}`
+              : ` · ${t('youPlayed', { color: colorLabel })}`}
           </DialogDescription>
           {gameUrl && (
             <a
@@ -173,6 +182,8 @@ export default function CoachingModal({
                 if (next) setViewTarget(null);
               }}
               game={replay}
+              askerColor={askerColor}
+              askerNote={t(mode === 'coach' ? 'players.asker' : 'players.you')}
               boardIndex={boardIndex}
               onBoardIndexChange={setBoardIndex}
               locked={!atKey}

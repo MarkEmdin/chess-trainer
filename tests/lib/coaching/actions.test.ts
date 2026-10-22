@@ -83,8 +83,8 @@ function insertedPgn(): string | null {
   return (insert.mock.calls[0][1] as { pgn: string | null }).pgn;
 }
 
-// 4000 characters once line breaks count as one, 4200 as sent by a browser.
-const LONG_CRLF_BODY = ('x'.repeat(19) + '\r\n').repeat(200);
+// 8000 characters once line breaks count as one, 8400 as sent by a browser.
+const LONG_CRLF_BODY = ('x'.repeat(19) + '\r\n').repeat(400);
 
 function insertedBody(): string {
   return (insert.mock.calls[0][1] as { body: string }).body;
@@ -151,7 +151,7 @@ describe('createCoachingRequest', () => {
     expect(insertedPgn()).toBeNull();
   });
 
-  it('accepts a 4000-character question sent with CRLF line breaks', async () => {
+  it('accepts an 8000-character question sent with CRLF line breaks', async () => {
     const result = await createCoachingRequest(
       undefined,
       askForm({ body: LONG_CRLF_BODY }),
@@ -196,13 +196,23 @@ describe('respondToRequest', () => {
     expect(insert).not.toHaveBeenCalled();
   });
 
-  it('accepts a 4000-character reply sent with CRLF line breaks', async () => {
+  it('accepts an 8000-character reply sent with CRLF line breaks', async () => {
     const result = await respondToRequest(
       undefined,
       replyForm({ body: LONG_CRLF_BODY }),
     );
     expect(result).toEqual({ success: true });
     expect(insertedBody()).not.toContain('\r');
+  });
+
+  it.each([
+    ['signed out', null],
+    ['a regular user', { id: 'u1', role: 'user' }],
+  ])('refuses a reply from %s', async (_label, user) => {
+    getAuthedUser.mockResolvedValue(user);
+    const result = await respondToRequest(undefined, replyForm());
+    expect(result).toEqual({ error: 'coaching.errors.notAdmin' });
+    expect(insert).not.toHaveBeenCalled();
   });
 
   it('reports a missing request', async () => {

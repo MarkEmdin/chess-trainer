@@ -21,74 +21,12 @@ import {
 import { formatSeconds } from '@/lib/chesscom/format';
 import { sideToMove } from '@/lib/chess/fen';
 import { buildReplay, formatMoveLabel } from '@/lib/chess/replay';
-import type { Game, GameColor, GamePlayer } from '@/lib/games/types';
+import type { Game, GameColor } from '@/lib/games/types';
 import GameMatchup from '@/app/components/GameMatchup';
-import { cn } from '@/lib/utils';
+import PlayerRow from '@/app/components/PlayerRow';
 
 // Last-move squares use the conventional chess highlight, not a theme token.
 const LAST_MOVE_STYLE = { backgroundColor: 'rgba(255, 213, 79, 0.5)' };
-
-function PlayerRow({
-  player,
-  pieceColor,
-  clock,
-  isUser,
-  isActive,
-}: {
-  player: GamePlayer;
-  pieceColor: GameColor;
-  clock: string | undefined;
-  isUser: boolean;
-  isActive: boolean;
-}) {
-  const t = useTranslations('games.modal');
-  return (
-    <div
-      data-slot="player-row"
-      className={cn(
-        'flex items-center justify-between gap-3 pl-2 pr-2 py-1.5 text-sm rounded-md border-l-4 transition-colors',
-        // Whoever is to move at the current position gets a strong marker,
-        // plus the "To move" text below their name.
-        isActive
-          ? 'border-primary bg-accent/60'
-          : 'border-transparent',
-      )}
-    >
-      <div className="flex items-center gap-2 min-w-0">
-        <span
-          aria-hidden
-          className={cn(
-            'size-4 rounded-full shrink-0 border border-foreground/40',
-            pieceColor === 'white' ? 'bg-white' : 'bg-black',
-          )}
-        />
-        <div className="flex flex-col min-w-0">
-          <div className="flex items-center gap-1.5 min-w-0">
-            {isUser ? (
-              <strong className="truncate font-semibold">
-                {player.username}
-              </strong>
-            ) : (
-              <span className="truncate">{player.username}</span>
-            )}
-            <span className="text-muted-foreground shrink-0">
-              ({player.rating})
-            </span>
-          </div>
-          <span className="text-xs text-muted-foreground">
-            {t(pieceColor)}
-            {isActive && ` · ${t('toMove')}`}
-          </span>
-        </div>
-      </div>
-      {clock && (
-        <span className="font-mono text-base tabular-nums shrink-0">
-          {clock}
-        </span>
-      )}
-    </div>
-  );
-}
 
 type Props = {
   game: Game;
@@ -114,10 +52,10 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
       if (e.key === 'ArrowLeft') setIndex((i) => Math.max(0, i - 1));
       else if (e.key === 'ArrowRight')
         setIndex((i) => Math.min(totalMoves, i + 1));
-      else if (e.key === 'Home') setIndex(0);
-      else if (e.key === 'End') setIndex(totalMoves);
+      else if (e.key === 'Home' || e.key === 'ArrowUp') setIndex(0);
+      else if (e.key === 'End' || e.key === 'ArrowDown') setIndex(totalMoves);
       else return;
-      // Home/End would otherwise also scroll the dialog.
+      // Home/End/ArrowUp/ArrowDown would otherwise also scroll the dialog.
       e.preventDefault();
     };
     document.addEventListener('keydown', handler);
@@ -196,7 +134,10 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
               below 280px — short landscape screens scroll instead). */}
           <div className="mx-auto w-full max-w-[max(280px,min(720px,calc(100dvh-310px)))] flex flex-col gap-1.5">
             <PlayerRow
-              player={game.opponent}
+              player={{
+                name: game.opponent.username,
+                rating: game.opponent.rating,
+              }}
               pieceColor={topColor}
               clock={clocks[topColor]}
               isUser={false}
@@ -208,7 +149,7 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
               squareStyles={lastMoveSquares}
             />
             <PlayerRow
-              player={game.user}
+              player={{ name: game.user.username, rating: game.user.rating }}
               pieceColor={bottomColor}
               clock={clocks[bottomColor]}
               isUser
@@ -273,11 +214,7 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
                   : t('lastMoveCaption', { move: lastMoveLabel }))}
             </span>
             <Button variant="outline" size="sm" asChild>
-              <a
-                href={game.url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href={game.url} target="_blank" rel="noopener noreferrer">
                 <ExternalLinkIcon className="size-4" />
                 {t('viewGame')}
               </a>

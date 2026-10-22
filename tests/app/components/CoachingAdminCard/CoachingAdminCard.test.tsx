@@ -61,6 +61,30 @@ describe('CoachingAdminCard', () => {
     );
   });
 
+  it('shows when the question was asked, with the time', () => {
+    renderWithIntl(<CoachingAdminCard request={request()} />);
+    expect(
+      screen.getByText(/asked Oct 20, 2026, \d{1,2}:\d{2}/),
+    ).toBeInTheDocument();
+  });
+
+  it('shows when the answer was sent', () => {
+    renderWithIntl(
+      <CoachingAdminCard
+        request={request({
+          responses: [
+            {
+              body: 'Play Nf6',
+              created_at: '2026-10-21T12:00:00Z',
+              variation: null,
+            },
+          ],
+        })}
+      />,
+    );
+    expect(screen.getByText(/Answered Oct 21, 2026/)).toBeInTheDocument();
+  });
+
   it('links to the game on its platform', () => {
     renderWithIntl(<CoachingAdminCard request={request({})} />);
     expect(screen.getByRole('link', { name: 'Open game' })).toHaveAttribute(

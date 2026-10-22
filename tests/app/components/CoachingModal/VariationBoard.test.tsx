@@ -44,6 +44,8 @@ function setup(overrides: Partial<Parameters<typeof VariationBoard>[0]> = {}) {
     boardIndex: 0,
     onBoardIndexChange: jest.fn(),
     locked: false,
+    askerColor: 'white' as const,
+    askerNote: 'you',
     ...overrides,
   };
   const utils = renderWithIntl(<VariationBoard {...props} />);

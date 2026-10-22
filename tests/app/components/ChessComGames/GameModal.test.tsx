@@ -72,6 +72,15 @@ describe('<GameModal />', () => {
     expect(rowOf('bob')).toHaveTextContent(/to move/i);
   });
 
+  it('jumps to the end with ArrowDown and back to the start with ArrowUp', () => {
+    renderWithIntl(<GameModal game={makeGame()} onClose={() => {}} />);
+    const start = board().getAttribute('data-position');
+    press('ArrowDown');
+    expect(board()).toHaveAttribute('data-highlight', '["f3","g1"]');
+    press('ArrowUp');
+    expect(board()).toHaveAttribute('data-position', start);
+  });
+
   it('highlights the last move squares', () => {
     renderWithIntl(<GameModal game={makeGame()} onClose={() => {}} />);
     expect(board()).toHaveAttribute('data-highlight', '[]');
@@ -81,7 +90,14 @@ describe('<GameModal />', () => {
 
   it('prevents default for navigation keys', () => {
     renderWithIntl(<GameModal game={makeGame()} onClose={() => {}} />);
-    for (const key of ['End', 'Home', 'ArrowRight', 'ArrowLeft']) {
+    for (const key of [
+      'End',
+      'Home',
+      'ArrowRight',
+      'ArrowLeft',
+      'ArrowDown',
+      'ArrowUp',
+    ]) {
       expect(press(key)).toBe(false);
     }
   });

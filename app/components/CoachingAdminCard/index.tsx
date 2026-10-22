@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import dynamic from 'next/dynamic';
 import { useFormatter, useTranslations } from 'next-intl';
 import { ExternalLinkIcon } from 'lucide-react';
@@ -15,6 +15,8 @@ import type { CoachingThreadData } from '@/lib/coaching/types';
 const CoachingModal = dynamic(() => import('@/app/components/CoachingModal'), {
   ssr: false,
 });
+
+const noSubscribe = () => () => {};
 
 export type AdminCoachingRequest = CoachingThreadData & {
   user_nickname: string;
@@ -31,9 +33,25 @@ export default function CoachingAdminCard({ request }: Props) {
   const tCoaching = useTranslations('coaching');
   const format = useFormatter();
   const [open, setOpen] = useState(false);
-  const askedAt = format.dateTime(new Date(request.created_at), {
-    dateStyle: 'medium',
-  });
+  // Date and time, in the coach's own time zone. The server doesn't know
+  // that zone, so its HTML carries only the date and the time appears once
+  // hydrated; rendering both on the server would mismatch on hydration.
+  const hydrated = useSyncExternalStore(
+    noSubscribe,
+    () => true,
+    () => false,
+  );
+  const when = (iso: string) =>
+    format.dateTime(
+      new Date(iso),
+      hydrated
+        ? {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          }
+        : { dateStyle: 'medium', timeZone: 'UTC' },
+    );
   const answered = request.responses.length > 0;
 
   return (
@@ -53,7 +71,9 @@ export default function CoachingAdminCard({ request }: Props) {
               <span className="text-sm text-muted-foreground">
                 {t('askedBy', { nickname: request.user_nickname })}
               </span>
-              <span className="text-xs text-muted-foreground">{askedAt}</span>
+              <span className="text-sm text-muted-foreground">
+                {t('askedAt', { date: when(request.created_at) })}
+              </span>
             </div>
 
             <SectionLabel label={t('question')}>
@@ -63,7 +83,12 @@ export default function CoachingAdminCard({ request }: Props) {
             {answered && (
               <SectionLabel label={t('yourResponse')}>
                 {request.responses.map((r, i) => (
-                  <MessagePreview key={i} fen={request.fen} message={r} />
+                  <div key={i} className="flex flex-col gap-1">
+                    <span className="text-xs text-muted-foreground">
+                      {t('answeredAt', { date: when(r.created_at) })}
+                    </span>
+                    <MessagePreview fen={request.fen} message={r} />
+                  </div>
                 ))}
               </SectionLabel>
             )}
