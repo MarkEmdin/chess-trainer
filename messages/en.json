@@ -132,6 +132,10 @@
       "notAdmin": "Only the coach can reply.",
       "alreadyResponded": "You've already responded to this question.",
       "invalidVariation": "This variation can't be saved. Try recording it again."
+    },
+    "status": {
+      "asked": "Question asked",
+      "answered": "Answered"
     }
   },
   "coachingAdmin": {
@@ -157,7 +161,13 @@
   "coachingPage": {
     "title": "My coaching",
     "subtitle": "Positions you've asked the coach about.",
-    "empty": "No questions yet — go to Key Positions and click \"Ask coach\" on any long-think position."
+    "empty": "No questions yet — go to Key Positions and click \"Ask coach\" on any long-think position.",
+    "tabs": {
+      "waiting": "Awaiting reply ({count})",
+      "answered": "Answered ({count})"
+    },
+    "emptyWaiting": "No questions awaiting a reply.",
+    "emptyAnswered": "No answers yet — the coach will reply soon."
   },
   "profile": {
     "title": "Profile",
@@ -392,7 +402,14 @@
     "showing": "{count, plural, one {# long think} other {# long thinks}} across {gameCount, plural, one {# game} other {# games}}",
     "thoughtFor": "Thought {duration}",
     "thresholdLabel": "Threshold",
-    "secondsShort": "{value}s"
+    "secondsShort": "{value}s",
+    "askedFilter": {
+      "all": "All ({count})",
+      "unasked": "Not asked ({count})",
+      "asked": "Asked ({count})"
+    },
+    "emptyUnasked": "You've asked about every position here.",
+    "emptyAsked": "You haven't asked about any of these positions yet."
   },
   "videoModal": {
     "watchVideo": "Watch video"
