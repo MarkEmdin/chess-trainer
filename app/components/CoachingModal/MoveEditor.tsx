@@ -45,12 +45,11 @@ export type RecorderStore = {
 };
 
 export function useRecorderStore(fen: string): RecorderStore {
-  const ref = useRef<RecorderState | null>(null);
-  if (ref.current === null) ref.current = initialRecorder(fen);
-  const [state, setState] = useState(ref.current);
-  const get = useCallback(() => ref.current!, []);
+  const [state, setState] = useState(() => initialRecorder(fen));
+  const ref = useRef(state);
+  const get = useCallback(() => ref.current, []);
   const update = useCallback((fn: (s: RecorderState) => RecorderState) => {
-    ref.current = fn(ref.current!);
+    ref.current = fn(ref.current);
     setState(ref.current);
   }, []);
   return { state, get, update };
