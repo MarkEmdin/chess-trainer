@@ -1,4 +1,4 @@
-import { findLongThinks } from '@/lib/games/longThinks';
+import { collectLongThinks, findLongThinks } from '@/lib/games/longThinks';
 import type { Game } from '@/lib/games/types';
 
 // Four half-moves, 3-minute time control, no increment unless overridden.
@@ -99,5 +99,27 @@ describe('findLongThinks', () => {
       clockSnapshots: [{ whiteSeconds: 180, blackSeconds: 180 }],
     });
     expect(findLongThinks(game, 5)).toEqual([]);
+  });
+});
+
+describe('collectLongThinks', () => {
+  // Games arrive newest first, page after page. Loading an older page must
+  // only add cards below the ones already shown, never reshuffle them.
+  it('keeps game order and puts the longest thinks first within a game', () => {
+    const newer = makeGame({ id: 'newer' });
+    const older = makeGame({
+      id: 'older',
+      clockSnapshots: [
+        { whiteSeconds: 180, blackSeconds: 180 },
+        { whiteSeconds: 120, blackSeconds: 180 }, // e4: 60s
+        { whiteSeconds: 120, blackSeconds: 170 },
+        { whiteSeconds: 30, blackSeconds: 170 }, // Nf3: 90s
+        { whiteSeconds: 30, blackSeconds: 165 },
+      ],
+    });
+    const order = collectLongThinks([newer, older], 5).map(
+      ({ game, think }) => `${game.id} ${think.san}`,
+    );
+    expect(order).toEqual(['newer Nf3', 'newer e4', 'older Nf3', 'older e4']);
   });
 });

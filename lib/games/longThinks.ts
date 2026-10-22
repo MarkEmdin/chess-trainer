@@ -97,9 +97,20 @@ function findAllThinks(game: Game): LongThink[] {
 // Uses the same `(prev + increment) − current` formula as the GameModal's
 // per-move delta, so increment-style time controls don't mis-attribute the
 // auto-gain as thinking.
-export function findLongThinks(
-  game: Game,
-  thresholdSec: number,
-): LongThink[] {
+export function findLongThinks(game: Game, thresholdSec: number): LongThink[] {
   return findAllThinks(game).filter((think) => think.seconds >= thresholdSec);
+}
+
+// Cards for the key-positions list. Games keep their newest-first order so
+// "Load more" only appends older games below; within one game the longest
+// think comes first.
+export function collectLongThinks(
+  games: Game[],
+  thresholdSec: number,
+): { think: LongThink; game: Game }[] {
+  return games.flatMap((game) =>
+    findLongThinks(game, thresholdSec)
+      .sort((a, b) => b.seconds - a.seconds)
+      .map((think) => ({ think, game })),
+  );
 }
