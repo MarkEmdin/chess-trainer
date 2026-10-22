@@ -132,6 +132,19 @@
       "notAdmin": "Only the coach can reply.",
       "alreadyResponded": "You've already responded to this question.",
       "invalidVariation": "This variation can't be saved. Try recording it again."
+    },
+    "editor": {
+      "recording": "● Recording — moves go into the text",
+      "startHint": "Click the text field to start recording",
+      "backToKey": "Back to key position — start a new variation",
+      "undoMove": "Undo move",
+      "clearDrawings": "Clear drawings",
+      "hint": "Play moves on the board to insert them. Right-click: circle, right-drag: arrow.",
+      "errors": {
+        "tooManyLines": "Too many variations (max {max})",
+        "lineTooLong": "Variation too long (max {max} moves)",
+        "tooManyChips": "Too many move chips (max {max})"
+      }
     }
   },
   "coachingAdmin": {
