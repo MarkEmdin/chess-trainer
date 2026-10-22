@@ -152,13 +152,13 @@ describe('CoachingModal', () => {
       />,
     );
     const textbox = screen.getByRole('textbox');
-    fireEvent.change(textbox, { target: { value: 'a'.repeat(4001) } });
-    expect(screen.getByText('4001 / 4000')).toHaveClass('text-destructive');
+    fireEvent.change(textbox, { target: { value: 'a'.repeat(8001) } });
+    expect(screen.getByText('8001 / 8000')).toHaveClass('text-destructive');
     expect(
       screen.getByRole('button', { name: 'Send to coach' }),
     ).toBeDisabled();
     fireEvent.change(textbox, { target: { value: 'a\r\nb' } });
-    expect(screen.getByText('3 / 4000')).not.toHaveClass('text-destructive');
+    expect(screen.getByText('3 / 8000')).not.toHaveClass('text-destructive');
     expect(screen.getByRole('button', { name: 'Send to coach' })).toBeEnabled();
   });
 
