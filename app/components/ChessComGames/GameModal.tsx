@@ -49,9 +49,7 @@ function PlayerRow({
         'flex items-center justify-between gap-3 pl-2 pr-2 py-1.5 text-sm rounded-md border-l-4 transition-colors',
         // Whoever is to move at the current position gets a strong marker,
         // plus the "To move" text below their name.
-        isActive
-          ? 'border-primary bg-accent/60'
-          : 'border-transparent',
+        isActive ? 'border-primary bg-accent/60' : 'border-transparent',
       )}
     >
       <div className="flex items-center gap-2 min-w-0">
@@ -114,10 +112,10 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
       if (e.key === 'ArrowLeft') setIndex((i) => Math.max(0, i - 1));
       else if (e.key === 'ArrowRight')
         setIndex((i) => Math.min(totalMoves, i + 1));
-      else if (e.key === 'Home') setIndex(0);
-      else if (e.key === 'End') setIndex(totalMoves);
+      else if (e.key === 'Home' || e.key === 'ArrowUp') setIndex(0);
+      else if (e.key === 'End' || e.key === 'ArrowDown') setIndex(totalMoves);
       else return;
-      // Home/End would otherwise also scroll the dialog.
+      // Home/End/ArrowUp/ArrowDown would otherwise also scroll the dialog.
       e.preventDefault();
     };
     document.addEventListener('keydown', handler);
@@ -273,11 +271,7 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
                   : t('lastMoveCaption', { move: lastMoveLabel }))}
             </span>
             <Button variant="outline" size="sm" asChild>
-              <a
-                href={game.url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href={game.url} target="_blank" rel="noopener noreferrer">
                 <ExternalLinkIcon className="size-4" />
                 {t('viewGame')}
               </a>

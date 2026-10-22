@@ -162,7 +162,7 @@ function GameNav({
   );
 }
 
-// ⏮ ◀ ▶ ⏭ plus ← → Home End. Mounted only while its board is shown, so the
+// ⏮ ◀ ▶ ⏭ plus ← → Home End, and ↑ ↓ for start/end as on Lichess. Mounted only while its board is shown, so the
 // keys never drive a board that's out of view.
 function StepControls({
   index,
@@ -187,10 +187,10 @@ function StepControls({
       }
       if (e.key === 'ArrowLeft') onChange(Math.max(0, index - 1));
       else if (e.key === 'ArrowRight') onChange(Math.min(total, index + 1));
-      else if (e.key === 'Home') onChange(0);
-      else if (e.key === 'End') onChange(total);
+      else if (e.key === 'Home' || e.key === 'ArrowUp') onChange(0);
+      else if (e.key === 'End' || e.key === 'ArrowDown') onChange(total);
       else return;
-      // Home/End would otherwise also scroll the dialog.
+      // Home/End/ArrowUp/ArrowDown would otherwise also scroll the dialog.
       e.preventDefault();
     };
     document.addEventListener('keydown', handler);
