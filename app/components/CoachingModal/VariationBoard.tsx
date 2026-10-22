@@ -17,10 +17,12 @@ import type { ReplayMove } from '@/lib/chess/replay';
 import { formatSeconds } from '@/lib/chesscom/format';
 import type { ClockSnapshot } from '@/lib/games/types';
 import { playVariation } from '@/lib/chess/variation';
+import { drawingSquareStyles, mergeSquareStyles } from '@/lib/chess/drawing';
+import { drawKey, type Drawing } from '@/lib/coaching/content';
 import { cn } from '@/lib/utils';
+import { Chess, type Square } from 'chess.js';
 import GameMoveList from './GameMoveList';
 import VariationLine from './VariationLine';
-import { useVariationRecorder } from './useVariationRecorder';
 
 // Same highlight as the game modal's last move; also marks the tap-tap
 // source square while recording.
@@ -28,25 +30,39 @@ const HIGHLIGHT_STYLE = { backgroundColor: 'rgba(255, 213, 79, 0.5)' };
 
 type Orientation = 'white' | 'black';
 
+// The board while the author writes (spec 011): moves go into the text.
+export type WritingBoard = {
+  fen: string;
+  lastMove: { from: string; to: string } | null;
+  drawing: Drawing;
+  onMove: (from: string, to: string) => boolean;
+  onMark: (from: string, to: string) => void;
+  onClearDrawings: () => void;
+};
+
+// A sent line the parent asked to show, opened at `startPly`. `line` names
+// it in `drawings` (null for an old single variation, which has none).
+export type ViewedLine = {
+  sans: string[];
+  line: string | null;
+  startPly: number;
+  drawings: Record<string, Drawing>;
+};
+
 type Props = {
   fen: string;
   orientation: Orientation;
   // Author side only: the student before asking, the coach before replying.
-  canRecord: boolean;
-  draft: string[] | null;
-  onDraftChange: (next: string[] | null) => void;
-  // A sent variation the parent asked to show; null = show `fen`.
-  viewing: string[] | null;
+  canWrite: boolean;
+  writing: WritingBoard | null;
+  viewing: ViewedLine | null;
   onStopViewing: () => void;
-  onRecordingChange: (recording: boolean) => void;
   // The whole game around `fen` (= positions[keyIndex]), when it was saved.
   game: GameReplay | null;
   // Board position while browsing `game`; the parent owns it so the form
   // can lock away from the key position.
   boardIndex: number;
   onBoardIndexChange: (index: number) => void;
-  // Away from the key position: draft controls stay visible but disabled.
-  locked: boolean;
   // The student's side, marked on the player rows with `askerNote`.
   askerColor: Orientation;
   askerNote: string;
@@ -63,35 +79,19 @@ export type GameReplay = {
 };
 
 export default function VariationBoard(props: Props) {
-  const [recording, setRecording] = useState(false);
-
-  function setRecordingAndNotify(next: boolean) {
-    setRecording(next);
-    props.onRecordingChange(next);
-  }
-
-  if (recording) {
-    return (
-      <Recorder
-        fen={props.fen}
-        orientation={props.orientation}
-        initial={props.draft ?? undefined}
-        onDone={(moves) => {
-          props.onDraftChange(moves.length > 0 ? moves : null);
-          setRecordingAndNotify(false);
-        }}
-      />
-    );
+  if (props.writing) {
+    return <Writer orientation={props.orientation} {...props.writing} />;
   }
 
   if (props.viewing) {
+    const { sans, line, startPly } = props.viewing;
     return (
       <Viewer
-        // Re-mount per variation so the step index starts at 0.
-        key={props.viewing.join(' ')}
+        // Re-mount per line and start so the step index starts there.
+        key={`${line}:${startPly}:${sans.join(' ')}`}
         fen={props.fen}
         orientation={props.orientation}
-        sans={props.viewing}
+        viewing={props.viewing}
         onBack={props.onStopViewing}
       />
     );
@@ -120,6 +120,7 @@ export default function VariationBoard(props: Props) {
 
   return (
     <div className="flex flex-col gap-2">
+      {props.canWrite && <StartHint />}
       {playerRow(topColor)}
       <Frame>
         <ChessboardWithNotation
@@ -138,17 +139,6 @@ export default function VariationBoard(props: Props) {
           game={game}
           boardIndex={boardIndex}
           onChange={props.onBoardIndexChange}
-        />
-      )}
-      {/* Recording sits right under the board controls: it's the main action
-          at the key position, so the long move list goes last. */}
-      {props.canRecord && (
-        <DraftControls
-          fen={props.fen}
-          draft={props.draft}
-          disabled={props.locked}
-          onRecord={() => setRecordingAndNotify(true)}
-          onRemove={() => props.onDraftChange(null)}
         />
       )}
       {game && (
@@ -209,11 +199,13 @@ function StepControls({
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      // The reply textarea sits next to the board: keys typed there belong
-      // to the text, not the board.
+      // The text editor sits next to the board: keys typed there belong to
+      // the text, not the board.
       if (
         e.target instanceof HTMLTextAreaElement ||
-        e.target instanceof HTMLInputElement
+        e.target instanceof HTMLInputElement ||
+        (e.target instanceof HTMLElement &&
+          !!e.target.closest('[contenteditable="true"]'))
       ) {
         return;
       }
@@ -296,130 +288,79 @@ function Frame({
   );
 }
 
-function DraftControls({
-  fen,
-  draft,
-  disabled,
-  onRecord,
-  onRemove,
-}: {
-  fen: string;
-  draft: string[] | null;
-  disabled: boolean;
-  onRecord: () => void;
-  onRemove: () => void;
-}) {
-  const t = useTranslations('coaching.variation');
-  const played = draft ? playVariation(fen, draft) : null;
-
-  if (!played) {
-    return (
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="self-start"
-        disabled={disabled}
-        onClick={onRecord}
-      >
-        {t('record')}
-      </Button>
-    );
-  }
-
+function StartHint() {
+  const t = useTranslations('coaching.editor');
   return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-xs text-muted-foreground">{t('attached')}</span>
-      <VariationLine moves={played.moves} />
-      <div className="flex gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={disabled}
-          onClick={onRecord}
-        >
-          {t('edit')}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          disabled={disabled}
-          onClick={onRemove}
-        >
-          {t('remove')}
-        </Button>
-      </div>
-    </div>
+    <span className="text-sm text-muted-foreground">{t('startHint')}</span>
   );
 }
 
-function Recorder({
-  fen,
+function Writer({
   orientation,
-  initial,
-  onDone,
-}: {
-  fen: string;
-  orientation: Orientation;
-  initial: string[] | undefined;
-  onDone: (moves: string[]) => void;
-}) {
-  const t = useTranslations('coaching.variation');
-  const recorder = useVariationRecorder(fen, initial);
-  const played = playVariation(fen, recorder.moves);
+  fen,
+  lastMove,
+  drawing,
+  onMove,
+  onMark,
+  onClearDrawings,
+}: WritingBoard & { orientation: Orientation }) {
+  const t = useTranslations('coaching.editor');
+  // Tap-tap input for touch screens: first tap picks one of the side to
+  // move's pieces, second tap tries the move (or picks another own piece).
+  const [selected, setSelected] = useState<string | null>(null);
 
-  const squareStyles: Record<string, React.CSSProperties> = {};
-  if (recorder.lastMove) {
-    squareStyles[recorder.lastMove.from] = HIGHLIGHT_STYLE;
-    squareStyles[recorder.lastMove.to] = HIGHLIGHT_STYLE;
+  function clickSquare(square: string) {
+    const chess = new Chess(fen);
+    const piece = chess.get(square as Square);
+    const isOwn = piece !== undefined && piece.color === chess.turn();
+    if (selected && !isOwn) {
+      onMove(selected, square);
+      setSelected(null);
+      return;
+    }
+    setSelected(isOwn ? square : null);
   }
-  if (recorder.selected) squareStyles[recorder.selected] = HIGHLIGHT_STYLE;
+
+  const highlights: Record<string, React.CSSProperties> = {};
+  if (lastMove) {
+    highlights[lastMove.from] = HIGHLIGHT_STYLE;
+    highlights[lastMove.to] = HIGHLIGHT_STYLE;
+  }
+  if (selected) highlights[selected] = HIGHLIGHT_STYLE;
 
   return (
     <div className="flex flex-col gap-2">
-      <Frame recording>
-        <ChessboardWithNotation
-          position={recorder.fen}
-          boardOrientation={orientation}
-          squareStyles={squareStyles}
-          allowDragging
-          onPieceDrop={({ sourceSquare, targetSquare }) =>
-            targetSquare ? recorder.tryMove(sourceSquare, targetSquare) : false
-          }
-          onSquareClick={({ square }) => recorder.clickSquare(square)}
-        />
-      </Frame>
       <span className="text-sm font-medium text-green-600">
         {t('recording')}
       </span>
-      {played && played.moves.length > 0 && (
-        <VariationLine moves={played.moves} />
-      )}
-      <div className="flex gap-2 flex-wrap">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={recorder.undo}
-          disabled={recorder.moves.length === 0}
-        >
-          {t('undo')}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={recorder.clear}
-          disabled={recorder.moves.length === 0}
-        >
-          {t('clear')}
-        </Button>
-        <Button type="button" size="sm" onClick={() => onDone(recorder.moves)}>
-          {t('done')}
-        </Button>
-      </div>
+      <Frame recording>
+        <ChessboardWithNotation
+          position={fen}
+          boardOrientation={orientation}
+          squareStyles={mergeSquareStyles(
+            highlights,
+            drawingSquareStyles(drawing),
+          )}
+          arrows={drawing.arrows}
+          allowDragging
+          onPieceDrop={({ sourceSquare, targetSquare }) => {
+            setSelected(null);
+            return targetSquare ? onMove(sourceSquare, targetSquare) : false;
+          }}
+          onSquareClick={({ square }) => clickSquare(square)}
+          onRightDrag={onMark}
+        />
+      </Frame>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="self-start"
+        disabled={drawing.arrows.length === 0 && drawing.circles.length === 0}
+        onClick={onClearDrawings}
+      >
+        {t('clearDrawings')}
+      </Button>
     </div>
   );
 }
@@ -427,24 +368,28 @@ function Recorder({
 function Viewer({
   fen,
   orientation,
-  sans,
+  viewing,
   onBack,
 }: {
   fen: string;
   orientation: Orientation;
-  sans: string[];
+  viewing: ViewedLine;
   onBack: () => void;
 }) {
   const t = useTranslations('coaching.variation');
   // Lines are validated on save; an unplayable one shows just the start.
-  const played = playVariation(fen, sans) ?? { positions: [fen], moves: [] };
+  const played = playVariation(fen, viewing.sans) ?? {
+    positions: [fen],
+    moves: [],
+  };
   const total = played.moves.length;
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(Math.min(viewing.startPly, total));
 
   const last = index > 0 ? played.moves[index - 1] : undefined;
-  const squareStyles = last
-    ? { [last.from]: HIGHLIGHT_STYLE, [last.to]: HIGHLIGHT_STYLE }
-    : undefined;
+  const drawing = viewing.drawings[drawKey(viewing.line, index)] ?? {
+    arrows: [],
+    circles: [],
+  };
 
   return (
     <div className="flex flex-col gap-2">
@@ -452,7 +397,13 @@ function Viewer({
         <ChessboardWithNotation
           position={played.positions[index]}
           boardOrientation={orientation}
-          squareStyles={squareStyles}
+          squareStyles={mergeSquareStyles(
+            last
+              ? { [last.from]: HIGHLIGHT_STYLE, [last.to]: HIGHLIGHT_STYLE }
+              : undefined,
+            drawingSquareStyles(drawing),
+          )}
+          arrows={drawing.arrows}
         />
       </Frame>
       <StepControls index={index} total={total} onChange={setIndex} />

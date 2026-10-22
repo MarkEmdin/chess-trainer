@@ -5,12 +5,14 @@ import VariationBoard from '@/app/components/CoachingModal/VariationBoard';
 type BoardProps = {
   position: string;
   allowDragging?: boolean;
-  squareStyles?: Record<string, unknown>;
+  squareStyles?: Record<string, Record<string, unknown>>;
+  arrows?: [string, string][];
   onPieceDrop?: (args: {
     sourceSquare: string;
     targetSquare: string | null;
   }) => boolean;
   onSquareClick?: (args: { square: string }) => void;
+  onRightDrag?: (from: string, to: string) => void;
 };
 
 // The stub records the props VariationBoard controls, so tests can drive
@@ -30,20 +32,29 @@ AFTER_E4.move('e4');
 const AFTER_E5 = new Chess(AFTER_E4.fen());
 AFTER_E5.move('e5');
 
+function writing(overrides = {}) {
+  return {
+    fen: START,
+    lastMove: null,
+    drawing: { arrows: [], circles: [] },
+    onMove: jest.fn(() => true),
+    onMark: jest.fn(),
+    onClearDrawings: jest.fn(),
+    ...overrides,
+  };
+}
+
 function setup(overrides: Partial<Parameters<typeof VariationBoard>[0]> = {}) {
   const props = {
     fen: START,
     orientation: 'white' as const,
-    canRecord: true,
-    draft: null,
-    onDraftChange: jest.fn(),
+    canWrite: true,
+    writing: null,
     viewing: null,
     onStopViewing: jest.fn(),
-    onRecordingChange: jest.fn(),
     game: null,
     boardIndex: 0,
     onBoardIndexChange: jest.fn(),
-    locked: false,
     askerColor: 'white' as const,
     askerNote: 'you',
     ...overrides,
@@ -55,94 +66,84 @@ function setup(overrides: Partial<Parameters<typeof VariationBoard>[0]> = {}) {
 const frame = () => screen.getByTestId('variation-board-frame');
 
 describe('VariationBoard', () => {
-  it('shows the record button only when the viewer can record', () => {
-    setup({ canRecord: false });
+  it('invites to click the text field when the viewer can write', () => {
+    setup();
     expect(
-      screen.queryByRole('button', { name: 'Record variation' }),
+      screen.getByText('Click the text field to start recording'),
+    ).toBeInTheDocument();
+    expect(frame()).not.toHaveClass('ring-green-600');
+    expect(board.allowDragging).toBeFalsy();
+  });
+
+  it('says nothing about recording to a reader', () => {
+    setup({ canWrite: false });
+    expect(
+      screen.queryByText('Click the text field to start recording'),
     ).not.toBeInTheDocument();
   });
 
-  it('glows green and enables dragging while recording', () => {
-    const { props } = setup();
-    expect(frame()).not.toHaveClass('ring-green-600');
-    expect(board.allowDragging).toBeFalsy();
-    fireEvent.click(screen.getByRole('button', { name: 'Record variation' }));
+  it('glows green and plays moves while writing', () => {
+    const w = writing();
+    setup({ writing: w });
     expect(frame()).toHaveClass('ring-green-600');
-    expect(screen.getByText('Recording variation')).toBeInTheDocument();
+    expect(
+      screen.getByText('● Recording — moves go into the text'),
+    ).toBeInTheDocument();
     expect(board.allowDragging).toBe(true);
-    expect(props.onRecordingChange).toHaveBeenCalledWith(true);
-  });
-
-  it('attaches the recorded line on Done and leaves recording', () => {
-    const { props } = setup();
-    fireEvent.click(screen.getByRole('button', { name: 'Record variation' }));
     act(() => {
       board.onPieceDrop!({ sourceSquare: 'e2', targetSquare: 'e4' });
     });
-    expect(screen.getByText('1. e4')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Done' }));
-    expect(props.onDraftChange).toHaveBeenCalledWith(['e4']);
-    expect(props.onRecordingChange).toHaveBeenLastCalledWith(false);
-    expect(frame()).not.toHaveClass('ring-green-600');
-    expect(screen.getByTestId('board')).toHaveAttribute('data-position', START);
+    expect(w.onMove).toHaveBeenCalledWith('e2', 'e4');
   });
 
-  it('records with two taps', () => {
-    const { props } = setup();
-    fireEvent.click(screen.getByRole('button', { name: 'Record variation' }));
+  it('plays a move with two taps while writing', () => {
+    const w = writing();
+    setup({ writing: w });
     act(() => board.onSquareClick!({ square: 'g1' }));
     act(() => board.onSquareClick!({ square: 'f3' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Done' }));
-    expect(props.onDraftChange).toHaveBeenCalledWith(['Nf3']);
+    expect(w.onMove).toHaveBeenCalledWith('g1', 'f3');
   });
 
-  it('attaches nothing when Done is pressed with no moves', () => {
-    const { props } = setup();
-    fireEvent.click(screen.getByRole('button', { name: 'Record variation' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Done' }));
-    expect(props.onDraftChange).toHaveBeenCalledWith(null);
-  });
-
-  it('edits an attached draft from its last move', () => {
-    const { props } = setup({ draft: ['e4'] });
-    expect(screen.getByText('1. e4')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
-    expect(screen.getByTestId('board')).toHaveAttribute(
-      'data-position',
-      AFTER_E4.fen(),
-    );
-    act(() => {
-      board.onPieceDrop!({ sourceSquare: 'e7', targetSquare: 'e5' });
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Done' }));
-    expect(props.onDraftChange).toHaveBeenCalledWith(['e4', 'e5']);
-  });
-
-  it('removes an attached draft', () => {
-    const { props } = setup({ draft: ['e4'] });
-    fireEvent.click(screen.getByRole('button', { name: 'Remove' }));
-    expect(props.onDraftChange).toHaveBeenCalledWith(null);
+  it('shows and edits drawings while writing', () => {
+    const w = writing({ drawing: { arrows: [['e2', 'e4']], circles: ['d4'] } });
+    setup({ writing: w });
+    expect(board.arrows).toEqual([['e2', 'e4']]);
+    expect(board.squareStyles?.d4.backgroundImage).toContain('radial-gradient');
+    act(() => board.onRightDrag!('c2', 'c4'));
+    expect(w.onMark).toHaveBeenCalledWith('c2', 'c4');
+    fireEvent.click(screen.getByRole('button', { name: 'Clear drawings' }));
+    expect(w.onClearDrawings).toHaveBeenCalled();
   });
 
   it('leaves keys alone while the user types in a text field', () => {
-    setup({ canRecord: false, viewing: ['e4', 'e5'] });
-    const textarea = document.createElement('textarea');
-    document.body.appendChild(textarea);
-    const home = new KeyboardEvent('keydown', {
-      key: 'End',
-      bubbles: true,
-      cancelable: true,
+    setup({
+      canWrite: false,
+      viewing: { sans: ['e4', 'e5'], line: null, startPly: 0, drawings: {} },
     });
-    act(() => {
-      textarea.dispatchEvent(home);
-    });
-    expect(home.defaultPrevented).toBe(false);
+    // jsdom has no contentEditable property, only the attribute.
+    const editor = document.createElement('div');
+    editor.setAttribute('contenteditable', 'true');
+    for (const field of [document.createElement('textarea'), editor]) {
+      document.body.appendChild(field);
+      const end = new KeyboardEvent('keydown', {
+        key: 'End',
+        bubbles: true,
+        cancelable: true,
+      });
+      act(() => {
+        field.dispatchEvent(end);
+      });
+      expect(end.defaultPrevented).toBe(false);
+      field.remove();
+    }
     expect(screen.getByTestId('board')).toHaveAttribute('data-position', START);
-    textarea.remove();
   });
 
   it('steps through a viewed variation', () => {
-    const { props } = setup({ canRecord: false, viewing: ['e4', 'e5'] });
+    const { props } = setup({
+      canWrite: false,
+      viewing: { sans: ['e4', 'e5'], line: null, startPly: 0, drawings: {} },
+    });
     const position = () =>
       screen.getByTestId('board').getAttribute('data-position');
     expect(position()).toBe(START);
@@ -157,5 +158,29 @@ describe('VariationBoard', () => {
     expect(position()).toBe(AFTER_E4.fen());
     fireEvent.click(screen.getByRole('button', { name: 'Back to position' }));
     expect(props.onStopViewing).toHaveBeenCalled();
+  });
+
+  it('opens a viewed line at its start ply with the drawings there', () => {
+    setup({
+      canWrite: false,
+      viewing: {
+        sans: ['e4', 'e5'],
+        line: 'l1',
+        startPly: 2,
+        drawings: {
+          'l1:2': { arrows: [['g1', 'f3']], circles: ['d4'] },
+          'l1:1': { arrows: [], circles: ['e4'] },
+        },
+      },
+    });
+    expect(screen.getByTestId('board')).toHaveAttribute(
+      'data-position',
+      AFTER_E5.fen(),
+    );
+    expect(board.arrows).toEqual([['g1', 'f3']]);
+    expect(board.squareStyles?.d4.backgroundImage).toContain('radial-gradient');
+    fireEvent.keyDown(document, { key: 'ArrowLeft' });
+    expect(board.squareStyles?.e4.backgroundImage).toContain('radial-gradient');
+    expect(board.arrows).toEqual([]);
   });
 });

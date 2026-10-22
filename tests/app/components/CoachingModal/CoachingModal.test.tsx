@@ -1,4 +1,5 @@
 import { Chess } from 'chess.js';
+import { useImperativeHandle, type Ref } from 'react';
 import {
   act,
   fireEvent,
@@ -7,7 +8,13 @@ import {
   waitFor,
 } from '../../../test-utils';
 import CoachingModal from '@/app/components/CoachingModal';
+import type { MessageContent, Segment } from '@/lib/coaching/content';
+import { recordMove } from '@/lib/coaching/moveRecorder';
 import type { CoachingThreadData } from '@/lib/coaching/types';
+import type {
+  MoveEditorApi,
+  RecorderStore,
+} from '@/app/components/CoachingModal/MoveEditor';
 
 type BoardProps = {
   position: string;
@@ -25,6 +32,60 @@ jest.mock('@/app/components/ChessboardWithNotation', () => ({
     return <div data-testid="board" data-position={props.position} />;
   },
 }));
+
+// The real editor is covered in MoveEditor.test.tsx. Here a textarea stands
+// in for it: typed text comes first, then every chip the recorder knows.
+jest.mock('@/app/components/CoachingModal/MoveEditor', () => {
+  const actual = jest.requireActual(
+    '@/app/components/CoachingModal/MoveEditor',
+  );
+  function StubEditor({
+    store,
+    label,
+    onSegmentsChange,
+    onFocus,
+    ref,
+  }: {
+    store: RecorderStore;
+    label: string;
+    onSegmentsChange: (s: Segment[]) => void;
+    onFocus: () => void;
+    ref?: Ref<MoveEditorApi>;
+  }) {
+    const report = (text: string) =>
+      onSegmentsChange([
+        ...(text ? [{ t: 'text' as const, text }] : []),
+        ...Object.values(store.get().chips).map((c) => ({
+          t: 'moves' as const,
+          ...c,
+        })),
+      ]);
+    useImperativeHandle(ref, () => ({
+      move(from, to) {
+        const result = recordMove(store.get(), from, to);
+        if ('error' in result) return false;
+        store.update(() => result.state);
+        report(
+          (document.querySelector('#stub-editor') as HTMLTextAreaElement).value,
+        );
+        return true;
+      },
+      focus() {},
+    }));
+    return (
+      <textarea
+        id="stub-editor"
+        // Not a field of the form: React resets form fields after an action,
+        // and the real editor is a contenteditable that it never touches.
+        form="no-form"
+        aria-label={label}
+        onFocus={onFocus}
+        onChange={(e) => report(e.target.value)}
+      />
+    );
+  }
+  return { ...actual, __esModule: true, default: StubEditor };
+});
 
 const createCoachingRequest = jest.fn();
 const respondToRequest = jest.fn();
@@ -59,16 +120,23 @@ const baseProps = {
   onClose: jest.fn(),
 };
 
-function recordNf6() {
-  fireEvent.click(screen.getByRole('button', { name: 'Record variation' }));
+const editor = () => screen.getByRole('textbox');
+const frame = () => screen.getByTestId('variation-board-frame');
+
+// Focus the text (recording starts) and play g8-f6 on the board.
+function playNf6() {
+  fireEvent.focus(editor());
   act(() => {
     board.onPieceDrop!({ sourceSquare: 'g8', targetSquare: 'f6' });
   });
-  fireEvent.click(screen.getByRole('button', { name: 'Done' }));
 }
 
 function submittedForm(mock: jest.Mock): FormData {
   return mock.mock.calls[0][1] as FormData;
+}
+
+function sentContent(mock: jest.Mock): MessageContent {
+  return JSON.parse(String(submittedForm(mock).get('content')));
 }
 
 beforeEach(() => {
@@ -80,7 +148,7 @@ beforeEach(() => {
 });
 
 describe('CoachingModal', () => {
-  it('lets the student ask with text and a variation', async () => {
+  it('lets the student ask with text and moves played on the board', async () => {
     renderWithIntl(
       <CoachingModal
         {...baseProps}
@@ -89,23 +157,23 @@ describe('CoachingModal', () => {
         ask={{ gameUrl: 'https://lichess.org/abc', moveIndex: 5 }}
       />,
     );
-    recordNf6();
-    expect(screen.getByText('3… Nf6')).toBeInTheDocument();
-    fireEvent.change(screen.getByRole('textbox'), {
-      target: { value: 'Is Nf6 fine?' },
-    });
+    fireEvent.change(editor(), { target: { value: 'Is this fine? ' } });
+    playNf6();
     fireEvent.click(screen.getByRole('button', { name: 'Send to coach' }));
     await waitFor(() => expect(createCoachingRequest).toHaveBeenCalled());
     const fd = submittedForm(createCoachingRequest);
-    expect(fd.get('body')).toBe('Is Nf6 fine?');
+    expect(fd.get('body')).toBe('Is this fine? 3… Nf6');
+    expect(Object.values(sentContent(createCoachingRequest).lines)).toEqual([
+      ['Nf6'],
+    ]);
     expect(fd.get('fen')).toBe(FEN);
     expect(fd.get('move_index')).toBe('5');
     expect(fd.get('move_san')).toBe('3. Nf3');
     expect(fd.get('game_url')).toBe('https://lichess.org/abc');
-    expect(fd.get('variation')).toBe('["Nf6"]');
+    expect(fd.has('variation')).toBe(false);
   });
 
-  it('sends no variation field when none is recorded', async () => {
+  it('records only while the text is focused', () => {
     renderWithIntl(
       <CoachingModal
         {...baseProps}
@@ -114,15 +182,29 @@ describe('CoachingModal', () => {
         ask={{ gameUrl: 'https://lichess.org/abc', moveIndex: 5 }}
       />,
     );
-    fireEvent.change(screen.getByRole('textbox'), {
-      target: { value: 'Help' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Send to coach' }));
-    await waitFor(() => expect(createCoachingRequest).toHaveBeenCalled());
-    expect(submittedForm(createCoachingRequest).has('variation')).toBe(false);
+    expect(frame()).not.toHaveClass('ring-green-600');
+    expect(board.onPieceDrop).toBeUndefined();
+    fireEvent.focus(editor());
+    expect(frame()).toHaveClass('ring-green-600');
+    fireEvent.pointerDown(screen.getByText('Ask the coach'));
+    expect(frame()).not.toHaveClass('ring-green-600');
   });
 
-  it('keeps the text and variation when the server returns an error', async () => {
+  it('keeps recording through clicks on the board', () => {
+    renderWithIntl(
+      <CoachingModal
+        {...baseProps}
+        mode="student"
+        thread={undefined}
+        ask={{ gameUrl: 'https://lichess.org/abc', moveIndex: 5 }}
+      />,
+    );
+    fireEvent.focus(editor());
+    fireEvent.pointerDown(screen.getByTestId('board'));
+    expect(frame()).toHaveClass('ring-green-600');
+  });
+
+  it('keeps the text when the server returns an error', async () => {
     createCoachingRequest.mockResolvedValue({ error: 'boom' });
     renderWithIntl(
       <CoachingModal
@@ -132,14 +214,10 @@ describe('CoachingModal', () => {
         ask={{ gameUrl: 'https://lichess.org/abc', moveIndex: 5 }}
       />,
     );
-    fireEvent.change(screen.getByRole('textbox'), {
-      target: { value: 'My idea' },
-    });
-    recordNf6();
+    fireEvent.change(editor(), { target: { value: 'My idea' } });
     fireEvent.click(screen.getByRole('button', { name: 'Send to coach' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('boom');
-    expect(screen.getByRole('textbox')).toHaveValue('My idea');
-    expect(screen.getByText('Variation')).toBeInTheDocument();
+    expect(editor()).toHaveValue('My idea');
   });
 
   it('counts characters and blocks sending over the limit', () => {
@@ -151,18 +229,17 @@ describe('CoachingModal', () => {
         ask={{ gameUrl: 'https://lichess.org/abc', moveIndex: 5 }}
       />,
     );
-    const textbox = screen.getByRole('textbox');
-    fireEvent.change(textbox, { target: { value: 'a'.repeat(8001) } });
+    const send = () => screen.getByRole('button', { name: 'Send to coach' });
+    expect(send()).toBeDisabled();
+    fireEvent.change(editor(), { target: { value: 'a'.repeat(8001) } });
     expect(screen.getByText('8001 / 8000')).toHaveClass('text-destructive');
-    expect(
-      screen.getByRole('button', { name: 'Send to coach' }),
-    ).toBeDisabled();
-    fireEvent.change(textbox, { target: { value: 'a\r\nb' } });
+    expect(send()).toBeDisabled();
+    fireEvent.change(editor(), { target: { value: 'a\nb' } });
     expect(screen.getByText('3 / 8000')).not.toHaveClass('text-destructive');
-    expect(screen.getByRole('button', { name: 'Send to coach' })).toBeEnabled();
+    expect(send()).toBeEnabled();
   });
 
-  it("shows the coach the question's variation and sends a reply with one", async () => {
+  it("shows the coach the question's variation and replies with moves", async () => {
     renderWithIntl(
       <CoachingModal
         {...baseProps}
@@ -173,24 +250,60 @@ describe('CoachingModal', () => {
     expect(screen.getByText('What now?')).toBeInTheDocument();
     expect(screen.getByText('3… Nf6')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'View variation' }));
-    expect(
-      screen.getByRole('button', { name: 'Back to position' }),
-    ).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Back to position' }));
 
-    recordNf6();
-    fireEvent.change(screen.getByRole('textbox'), {
-      target: { value: 'Yes, develop.' },
-    });
+    fireEvent.change(editor(), { target: { value: 'Yes, develop: ' } });
+    playNf6();
     fireEvent.click(screen.getByRole('button', { name: 'Send reply' }));
     await waitFor(() => expect(respondToRequest).toHaveBeenCalled());
     const fd = submittedForm(respondToRequest);
     expect(fd.get('request_id')).toBe('r1');
-    expect(fd.get('body')).toBe('Yes, develop.');
-    expect(fd.get('variation')).toBe('["Nf6"]');
+    expect(fd.get('body')).toBe('Yes, develop: 3… Nf6');
+    expect(Object.values(sentContent(respondToRequest).lines)).toEqual([
+      ['Nf6'],
+    ]);
   });
 
-  it("lets the student step through the coach's variation", () => {
+  it('opens a chip of an inline message at its move, with drawings', () => {
+    const content: MessageContent = {
+      v: 1,
+      segments: [
+        { t: 'text', text: 'After ' },
+        { t: 'moves', line: 'l1', from: 0, to: 2 },
+      ],
+      lines: { l1: ['Nf6', 'Nc3'] },
+      drawings: { 'l1:2': { arrows: [['f6', 'e4']], circles: [] } },
+    };
+    renderWithIntl(
+      <CoachingModal
+        {...baseProps}
+        mode="student"
+        thread={thread({
+          responses: [
+            {
+              body: 'After 3… Nf6 4. Nc3',
+              created_at: '2026-10-21T10:00:00Z',
+              variation: null,
+              content,
+            },
+          ],
+        })}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: '3… Nf6 4. Nc3' }));
+    const after = new Chess(FEN);
+    after.move('Nf6');
+    after.move('Nc3');
+    expect(screen.getByTestId('board')).toHaveAttribute(
+      'data-position',
+      after.fen(),
+    );
+    expect(screen.getByRole('button', { name: '3… Nf6 4. Nc3' })).toHaveClass(
+      'ring-2',
+    );
+  });
+
+  it("lets the student step through the coach's old variation", () => {
     renderWithIntl(
       <CoachingModal
         {...baseProps}
@@ -207,9 +320,6 @@ describe('CoachingModal', () => {
       />,
     );
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: 'Record variation' }),
-    ).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'View variation' }));
     fireEvent.keyDown(document, { key: 'ArrowRight' });
     const after = new Chess(FEN);
@@ -237,20 +347,6 @@ describe('CoachingModal', () => {
     expect(
       screen.queryByRole('button', { name: 'View variation' }),
     ).not.toBeInTheDocument();
-  });
-
-  it('disables viewing while recording', () => {
-    renderWithIntl(
-      <CoachingModal
-        {...baseProps}
-        mode="coach"
-        thread={thread({ variation: ['Nf6'] })}
-      />,
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Record variation' }));
-    expect(
-      screen.getByRole('button', { name: 'View variation' }),
-    ).toBeDisabled();
   });
 });
 
@@ -282,8 +378,6 @@ describe('CoachingModal game browsing', () => {
     );
   }
 
-  const banner = () => screen.queryByText(/On the board now/);
-
   it('opens on the key position with the key move starred', () => {
     renderAsking();
     expect(screen.getByTestId('board')).toHaveAttribute(
@@ -294,37 +388,24 @@ describe('CoachingModal game browsing', () => {
       'aria-current',
       'step',
     );
-    expect(banner()).not.toBeInTheDocument();
   });
 
-  it('locks writing away from the key position and keeps the text', () => {
+  it('focusing the text brings the board back to the key position', () => {
     renderAsking();
-    fireEvent.change(screen.getByRole('textbox'), {
-      target: { value: 'idea' },
-    });
     fireEvent.click(screen.getByRole('button', { name: 'Previous move' }));
-    // The key board is after 2… Nc6; one step back shows it after 2. Nf3.
-    expect(banner()).toHaveTextContent('2. Nf3');
-    expect(banner()).toHaveTextContent('3. Bb5');
-    expect(screen.getByRole('textbox')).toBeDisabled();
-    expect(screen.getByRole('textbox')).toHaveValue('idea');
-    expect(
-      screen.getByRole('button', { name: 'Record variation' }),
-    ).toBeDisabled();
-    expect(
-      screen.getByRole('button', { name: 'Send to coach' }),
-    ).toBeDisabled();
+    fireEvent.focus(screen.getByRole('textbox'));
+    expect(screen.getByTestId('board')).toHaveAttribute(
+      'data-position',
+      KEY_FEN,
+    );
   });
 
-  it('back to key position unlocks', () => {
+  it('back to key position returns the board there', () => {
     renderAsking();
     fireEvent.click(screen.getByRole('button', { name: 'Previous move' }));
-    const backButtons = screen.getAllByRole('button', {
-      name: 'Back to key position',
-    });
-    fireEvent.click(backButtons[backButtons.length - 1]);
-    expect(banner()).not.toBeInTheDocument();
-    expect(screen.getByRole('textbox')).toBeEnabled();
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Back to key position' }),
+    );
     expect(screen.getByTestId('board')).toHaveAttribute(
       'data-position',
       KEY_FEN,
@@ -334,9 +415,7 @@ describe('CoachingModal game browsing', () => {
   it('clicking the starred move returns to the key position', () => {
     renderAsking();
     fireEvent.click(screen.getByRole('button', { name: '4. Ba4' }));
-    expect(banner()).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /3\. Bb5 ★/ }));
-    expect(banner()).not.toBeInTheDocument();
     expect(screen.getByTestId('board')).toHaveAttribute(
       'data-position',
       KEY_FEN,
@@ -355,7 +434,6 @@ describe('CoachingModal game browsing', () => {
   it('steps through the game with arrow keys', () => {
     renderAsking();
     fireEvent.keyDown(document, { key: 'ArrowRight' });
-    expect(banner()).toHaveTextContent('3. Bb5');
     expect(screen.getByTestId('board')).not.toHaveAttribute(
       'data-position',
       KEY_FEN,
@@ -413,16 +491,6 @@ describe('CoachingModal game browsing', () => {
     }
   });
 
-  it('keeps Record variation above the move list', () => {
-    renderAsking();
-    const record = screen.getByRole('button', { name: 'Record variation' });
-    const firstMove = screen.getByRole('button', { name: '1. e4' });
-    expect(
-      record.compareDocumentPosition(firstMove) &
-        Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
-  });
-
   it('sends the pgn with a new question', async () => {
     renderAsking();
     fireEvent.change(screen.getByRole('textbox'), {
@@ -435,7 +503,7 @@ describe('CoachingModal game browsing', () => {
 
   it('hides game navigation while recording', () => {
     renderAsking();
-    fireEvent.click(screen.getByRole('button', { name: 'Record variation' }));
+    fireEvent.focus(screen.getByRole('textbox'));
     expect(
       screen.queryByRole('button', { name: 'Previous move' }),
     ).not.toBeInTheDocument();
