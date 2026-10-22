@@ -4,7 +4,7 @@ import { useDeferredValue, useState } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { Loader2Icon } from 'lucide-react';
-import { findLongThinks, type LongThink } from '@/lib/games/longThinks';
+import { collectLongThinks, type LongThink } from '@/lib/games/longThinks';
 import type { Game } from '@/lib/games/types';
 import { useStoredThreshold } from '@/lib/chesscom/useStoredThreshold';
 import { useMyCoachingRequests } from '@/lib/coaching/useMyCoachingRequests';
@@ -32,14 +32,6 @@ function formatThinkMove(think: LongThink): string {
   return think.color === 'white'
     ? `${think.fullMoveNumber}. ${think.san}`
     : `${think.fullMoveNumber}… ${think.san}`;
-}
-
-function enrich(games: Game[], thresholdSec: number): EnrichedThink[] {
-  return games
-    .flatMap((game) =>
-      findLongThinks(game, thresholdSec).map((think) => ({ think, game })),
-    )
-    .sort((a, b) => b.think.seconds - a.think.seconds);
 }
 
 type Props = {
@@ -81,13 +73,13 @@ export default function LongThinks({
         emptyMessage={t('empty', { threshold: deferredThreshold })}
         renderStatus={({ games }) =>
           t('showing', {
-            count: enrich(games, deferredThreshold).length,
+            count: collectLongThinks(games, deferredThreshold).length,
             gameCount: games.length,
           })
         }
       >
         {({ games }) => {
-          const enriched = enrich(games, deferredThreshold);
+          const enriched = collectLongThinks(games, deferredThreshold);
           return (
             <div className="flex flex-col gap-4">
               <ThresholdSelector value={threshold} onChange={setThreshold} />
