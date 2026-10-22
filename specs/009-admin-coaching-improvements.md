@@ -1,6 +1,6 @@
 # Spec: Admin coaching improvements
 
-Status: in-progress
+Status: done
 Branch: feature/admin-coaching-improvements
 
 ## Problem
@@ -80,11 +80,11 @@ New keys (en/ru):
 
 ## Acceptance criteria
 
-- [ ] `/admin` redirects for signed-out and `user`-role visitors (test)
-- [ ] `respondToRequest` refuses non-admins (test)
-- [ ] Tabs filter correctly, counts match, `?tab=answered` selects the second tab (test)
-- [ ] Cards show question date+time; answered cards show the answer date
-- [ ] Modal header names the student's color; player rows with clocks follow the browsed position (test)
-- [ ] ↑/↓ go to start/end in GameModal, game browsing and the variation viewer (test)
-- [ ] 8000-character comments are accepted (test)
-- [ ] `npm run lint`, `npm test`, `npm run build` pass
+- [x] `/admin` redirects for signed-out and `user`-role visitors (test)
+- [x] `respondToRequest` refuses non-admins (test)
+- [x] Tabs filter correctly, counts match, `?tab=answered` selects the second tab (test)
+- [x] Cards show question date+time; answered cards show the answer date
+- [x] Modal header names the student's color; player rows with clocks follow the browsed position (test)
+- [x] ↑/↓ go to start/end in GameModal, game browsing and the variation viewer (test)
+- [x] 8000-character comments are accepted (test)
+- [x] `npm run lint`, `npm test`, `npm run build` pass
