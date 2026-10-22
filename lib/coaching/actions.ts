@@ -7,6 +7,11 @@ import { getAuthedUser } from '@/lib/auth/getUser';
 import { replayAroundKey } from '@/lib/chess/replay';
 import { parseVariationField, playVariation } from '@/lib/chess/variation';
 import { MAX_BODY_LENGTH, normalizeBody } from './body';
+import {
+  contentToPlainText,
+  parseContent,
+  type MessageContent,
+} from './content';
 
 export type CoachingRequestState =
   | { error: string }
@@ -24,6 +29,42 @@ function readVariation(
   const parsed = parseVariationField(formData.get('variation'));
   if (parsed === null || parsed === 'invalid') return parsed;
   return playVariation(fen, parsed) ? parsed : 'invalid';
+}
+
+type MessageFields =
+  | {
+      body: string;
+      variation: string[] | null;
+      content: MessageContent | null;
+    }
+  | { error: 'missingFields' | 'bodyTooLong' | 'invalidVariation' };
+
+// The message itself, for a question or an answer. An inline-editor message
+// sends `content`; its `body` is rebuilt here, never taken from the form.
+// Older clients send `body` plus an optional single `variation`.
+function readMessage(formData: FormData, fen: string): MessageFields {
+  const content = parseContent(formData.get('content'), fen);
+  if (content === 'invalid') return { error: 'invalidVariation' };
+
+  const body = content
+    ? contentToPlainText(fen, content).trim()
+    : normalizeBody(String(formData.get('body') ?? '')).trim();
+  if (!body) return { error: 'missingFields' };
+  if (body.length > MAX_BODY_LENGTH) return { error: 'bodyTooLong' };
+  if (content) return { body, variation: null, content };
+
+  const variation = readVariation(formData, fen);
+  if (variation === 'invalid') return { error: 'invalidVariation' };
+  return { body, variation, content: null };
+}
+
+function messageError(
+  t: Awaited<ReturnType<typeof getTranslations>>,
+  error: 'missingFields' | 'bodyTooLong' | 'invalidVariation',
+): string {
+  return error === 'bodyTooLong'
+    ? t('bodyTooLong', { max: MAX_BODY_LENGTH })
+    : t(error);
 }
 
 const MAX_PGN_LENGTH = 100_000;
@@ -55,26 +96,14 @@ export async function createCoachingRequest(
   const fen = String(formData.get('fen') ?? '').trim();
   const move_index = Number(formData.get('move_index'));
   const move_san = String(formData.get('move_san') ?? '').trim();
-  const body = normalizeBody(String(formData.get('body') ?? '')).trim();
 
-  if (
-    !game_url ||
-    !fen ||
-    !move_san ||
-    !body ||
-    !Number.isInteger(move_index)
-  ) {
+  if (!game_url || !fen || !move_san || !Number.isInteger(move_index)) {
     return { error: t('missingFields') };
   }
 
-  if (body.length > MAX_BODY_LENGTH) {
-    return { error: t('bodyTooLong', { max: MAX_BODY_LENGTH }) };
-  }
-
-  const variation = readVariation(formData, fen);
-  if (variation === 'invalid') {
-    return { error: t('invalidVariation') };
-  }
+  const message = readMessage(formData, fen);
+  if ('error' in message) return { error: messageError(t, message.error) };
+  const { body, variation, content } = message;
 
   const pgn = readPgn(formData, fen, move_index);
 
@@ -97,6 +126,7 @@ export async function createCoachingRequest(
       move_san,
       body,
       variation,
+      content,
       pgn,
     })
     .select('id')
@@ -127,14 +157,9 @@ export async function respondToRequest(
   const t = await getTranslations('coaching.errors');
 
   const request_id = String(formData.get('request_id') ?? '').trim();
-  const body = normalizeBody(String(formData.get('body') ?? '')).trim();
 
-  if (!request_id || !body) {
+  if (!request_id) {
     return { error: t('missingFields') };
-  }
-
-  if (body.length > MAX_BODY_LENGTH) {
-    return { error: t('bodyTooLong', { max: MAX_BODY_LENGTH }) };
   }
 
   const user = await getAuthedUser();
@@ -155,10 +180,10 @@ export async function respondToRequest(
     return { error: t('missingFields') };
   }
 
-  const variation = readVariation(formData, request.fen);
-  if (variation === 'invalid') {
-    return { error: t('invalidVariation') };
-  }
+  // Validated against the stored position, never a fen from the form.
+  const message = readMessage(formData, request.fen);
+  if ('error' in message) return { error: messageError(t, message.error) };
+  const { body, variation, content } = message;
 
   const { data: existing } = await supabase
     .from('coaching_responses')
@@ -172,7 +197,7 @@ export async function respondToRequest(
 
   const { error } = await supabase
     .from('coaching_responses')
-    .insert({ request_id, body, variation });
+    .insert({ request_id, body, variation, content });
 
   if (error) {
     return { error: error.message };
