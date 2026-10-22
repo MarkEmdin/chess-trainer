@@ -202,10 +202,21 @@ export default function MoveEditor({
     [editor],
   );
 
+  const focusTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (focusTimer.current) clearTimeout(focusTimer.current);
+    },
+    [],
+  );
   const focus = useCallback(() => {
     // The board library hands focus back to the dragged piece a moment
-    // after the drop; wait that out before taking it back.
-    setTimeout(() => editor?.commands.focus(), 120);
+    // after the drop; wait that out before taking it back. The dialog may
+    // close in between, so never touch a destroyed editor.
+    if (focusTimer.current) clearTimeout(focusTimer.current);
+    focusTimer.current = setTimeout(() => {
+      if (editor && !editor.isDestroyed) editor.commands.focus();
+    }, 120);
   }, [editor]);
 
   useImperativeHandle(
