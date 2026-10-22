@@ -97,6 +97,16 @@
     "coachResponse": "Ответ тренера",
     "awaitingReply": "Ожидание ответа.",
     "openGame": "Открыть партию",
+    "playedAs": "играл {color}",
+    "youPlayed": "Вы играли {color}",
+    "color": {
+      "white": "белыми",
+      "black": "чёрными"
+    },
+    "players": {
+      "asker": "задал вопрос",
+      "you": "вы"
+    },
     "variation": {
       "record": "Записать вариант",
       "recording": "Запись варианта",

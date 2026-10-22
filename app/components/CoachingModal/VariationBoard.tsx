@@ -9,8 +9,13 @@ import {
   ChevronRightIcon,
 } from 'lucide-react';
 import ChessboardWithNotation from '@/app/components/ChessboardWithNotation';
+import PlayerRow from '@/app/components/PlayerRow';
 import { Button } from '@/app/components/ui/button';
+import { sideToMove } from '@/lib/chess/fen';
+import type { PgnPlayer } from '@/lib/chess/pgnInfo';
 import type { ReplayMove } from '@/lib/chess/replay';
+import { formatSeconds } from '@/lib/chesscom/format';
+import type { ClockSnapshot } from '@/lib/games/types';
 import { playVariation } from '@/lib/chess/variation';
 import { cn } from '@/lib/utils';
 import GameMoveList from './GameMoveList';
@@ -42,12 +47,19 @@ type Props = {
   onBoardIndexChange: (index: number) => void;
   // Away from the key position: draft controls stay visible but disabled.
   locked: boolean;
+  // The student's side, marked on the player rows with `askerNote`.
+  askerColor: Orientation;
+  askerNote: string;
 };
 
 export type GameReplay = {
   positions: string[];
   moves: ReplayMove[];
   keyIndex: number;
+  // From the PGN headers and clock comments; shown around the board.
+  white?: PgnPlayer;
+  black?: PgnPlayer;
+  clocks?: ClockSnapshot[];
 };
 
 export default function VariationBoard(props: Props) {
@@ -88,8 +100,27 @@ export default function VariationBoard(props: Props) {
   const { game, boardIndex } = props;
   const last = game && boardIndex > 0 ? game.moves[boardIndex - 1] : undefined;
 
+  // Player rows only while browsing the game: a variation has no clock.
+  function playerRow(color: Orientation) {
+    const player = game?.[color];
+    if (!game || !player) return null;
+    const seconds = game.clocks?.[boardIndex]?.[`${color}Seconds`];
+    return (
+      <PlayerRow
+        player={player}
+        pieceColor={color}
+        clock={seconds !== undefined ? formatSeconds(seconds) : undefined}
+        isUser={color === props.askerColor}
+        isActive={sideToMove(game.positions[boardIndex]) === color}
+        note={color === props.askerColor ? props.askerNote : undefined}
+      />
+    );
+  }
+  const topColor = props.orientation === 'white' ? 'black' : 'white';
+
   return (
     <div className="flex flex-col gap-2">
+      {playerRow(topColor)}
       <Frame>
         <ChessboardWithNotation
           position={game ? game.positions[boardIndex] : props.fen}
@@ -101,6 +132,7 @@ export default function VariationBoard(props: Props) {
           }
         />
       </Frame>
+      {playerRow(props.orientation)}
       {game && (
         <GameNav
           game={game}

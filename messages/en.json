@@ -97,6 +97,16 @@
     "coachResponse": "Coach's response",
     "awaitingReply": "Awaiting reply.",
     "openGame": "Open game",
+    "playedAs": "played {color}",
+    "youPlayed": "You played {color}",
+    "color": {
+      "white": "White",
+      "black": "Black"
+    },
+    "players": {
+      "asker": "asked the question",
+      "you": "you"
+    },
     "variation": {
       "record": "Record variation",
       "recording": "Recording variation",

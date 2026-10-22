@@ -4,12 +4,8 @@ import type {
   ChessComMonthResponse,
   ChessComRawGame,
 } from './types';
-import type {
-  ClockSnapshot,
-  Game,
-  GameResult,
-  GamesPage,
-} from '@/lib/games/types';
+import { extractClockSnapshots } from '@/lib/chess/pgnInfo';
+import type { Game, GameResult, GamesPage } from '@/lib/games/types';
 
 const API_BASE = 'https://api.chess.com/pub';
 
@@ -35,7 +31,8 @@ async function fetchArchives(
     { signal },
   );
   if (res.status === 404) throw new PlayerNotFoundError(username);
-  if (!res.ok) throw new Error(`Chess.com archives fetch failed: ${res.status}`);
+  if (!res.ok)
+    throw new Error(`Chess.com archives fetch failed: ${res.status}`);
   const data = (await res.json()) as ChessComArchivesResponse;
   return data.archives;
 }
@@ -61,68 +58,6 @@ function extractOpening(ecoUrl: string | undefined): string | undefined {
   const slug = ecoUrl.split('/').pop();
   if (!slug) return undefined;
   return decodeURIComponent(slug).replace(/-/g, ' ');
-}
-
-// "0:02:59.9" → 179.9 seconds.
-function parseClockToSeconds(raw: string): number {
-  const [hms, frac = '0'] = raw.split('.');
-  const parts = hms.split(':').map((p) => parseInt(p, 10));
-  const fracSeconds = parseFloat(`0.${frac}`) || 0;
-  if (parts.length === 3) {
-    return parts[0] * 3600 + parts[1] * 60 + parts[2] + fracSeconds;
-  }
-  if (parts.length === 2) {
-    return parts[0] * 60 + parts[1] + fracSeconds;
-  }
-  return parts[0] + fracSeconds;
-}
-
-// Chess.com `time_control` formats: "300" (5 min sudden death), "300+5"
-// (5 min + 5 sec increment), "1/86400" (daily, 1 day per move). Daily games
-// don't fit the seconds model, so we return undefined for them.
-function parseTimeControl(
-  tc: string,
-): { initial: number; increment: number } | undefined {
-  if (tc.includes('/')) return undefined;
-  const [initPart, incPart] = tc.split('+');
-  const initial = parseInt(initPart, 10);
-  if (isNaN(initial)) return undefined;
-  const increment = incPart ? parseInt(incPart, 10) : 0;
-  return { initial, increment: isNaN(increment) ? 0 : increment };
-}
-
-// Builds one snapshot per position. Index 0 is the starting clocks; each
-// subsequent index reflects state after that half-move. Whichever side just
-// moved gets their clock updated; the other side's clock is carried forward
-// from the previous snapshot.
-function extractClockSnapshots(
-  pgn: string,
-  timeControl: string,
-): { snapshots: ClockSnapshot[]; increment: number } {
-  const tc = parseTimeControl(timeControl);
-  const initialSeconds = tc?.initial;
-  const increment = tc?.increment ?? 0;
-
-  const clockRegex = /\[%clk\s+([^\]]+)\]/g;
-  const matches: number[] = [];
-  let m: RegExpExecArray | null;
-  while ((m = clockRegex.exec(pgn)) !== null) {
-    matches.push(parseClockToSeconds(m[1].trim()));
-  }
-
-  const snapshots: ClockSnapshot[] = [
-    { whiteSeconds: initialSeconds, blackSeconds: initialSeconds },
-  ];
-
-  let currentWhite = initialSeconds;
-  let currentBlack = initialSeconds;
-  for (let i = 0; i < matches.length; i++) {
-    if (i % 2 === 0) currentWhite = matches[i];
-    else currentBlack = matches[i];
-    snapshots.push({ whiteSeconds: currentWhite, blackSeconds: currentBlack });
-  }
-
-  return { snapshots, increment };
 }
 
 function normalizeGame(raw: ChessComRawGame, username: string): Game {

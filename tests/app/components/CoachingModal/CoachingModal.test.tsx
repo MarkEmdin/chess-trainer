@@ -471,4 +471,70 @@ describe('CoachingModal game browsing', () => {
       screen.queryByRole('button', { name: 'Previous move' }),
     ).not.toBeInTheDocument();
   });
+
+  const PGN_WITH_CLOCKS = `[White "alice"]
+[Black "bob"]
+[WhiteElo "1500"]
+[BlackElo "1620"]
+[TimeControl "180+0"]
+
+1. e4 {[%clk 0:02:58]} 1... e5 {[%clk 0:02:55]} 2. Nf3 {[%clk 0:02:40]} 2... Nc6 {[%clk 0:02:30]} 3. Bb5 {[%clk 0:01:10]} 3... a6 {[%clk 0:02:20]} *`;
+
+  const rowOf = (name: string) =>
+    screen.getByText(name).closest('[data-slot="player-row"]') as HTMLElement;
+
+  it('shows both players with clocks and marks the student for the coach', () => {
+    renderWithIntl(
+      <CoachingModal
+        {...gameProps}
+        game={{ pgn: PGN_WITH_CLOCKS, moveIndex: 5 }}
+        mode="coach"
+        subtitle="asked by alice"
+        thread={thread({ fen: KEY_FEN, pgn: PGN_WITH_CLOCKS })}
+      />,
+    );
+    expect(
+      screen.getByText(/asked by alice · played White/),
+    ).toBeInTheDocument();
+    expect(rowOf('alice')).toHaveTextContent('(1500)');
+    expect(rowOf('alice')).toHaveTextContent(/asked the question/);
+    expect(rowOf('alice')).toHaveTextContent(/to move/i);
+    expect(rowOf('alice')).toHaveTextContent('02:40');
+    expect(rowOf('bob')).toHaveTextContent('02:30');
+    expect(rowOf('bob')).not.toHaveTextContent(/asked the question/);
+
+    fireEvent.keyDown(document, { key: 'ArrowRight' });
+    expect(rowOf('alice')).toHaveTextContent('01:10');
+    expect(rowOf('bob')).toHaveTextContent(/to move/i);
+  });
+
+  it('tells the student which color they played', () => {
+    renderWithIntl(
+      <CoachingModal
+        {...gameProps}
+        game={{ pgn: PGN_WITH_CLOCKS, moveIndex: 5 }}
+        mode="student"
+        thread={undefined}
+        ask={{ gameUrl: 'https://lichess.org/abc', moveIndex: 5 }}
+      />,
+    );
+    expect(screen.getByText(/You played White/)).toBeInTheDocument();
+    expect(rowOf('alice')).toHaveTextContent(/you/);
+  });
+
+  it('names the color even without a saved game', () => {
+    renderWithIntl(
+      <CoachingModal
+        {...baseProps}
+        mode="coach"
+        subtitle="asked by alice"
+        thread={thread()}
+      />,
+    );
+    // FEN has black to move: the student played Black.
+    expect(
+      screen.getByText(/asked by alice · played Black/),
+    ).toBeInTheDocument();
+    expect(document.querySelector('[data-slot="player-row"]')).toBeNull();
+  });
 });
