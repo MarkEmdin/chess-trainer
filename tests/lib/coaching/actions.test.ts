@@ -205,6 +205,16 @@ describe('respondToRequest', () => {
     expect(insertedBody()).not.toContain('\r');
   });
 
+  it.each([
+    ['signed out', null],
+    ['a regular user', { id: 'u1', role: 'user' }],
+  ])('refuses a reply from %s', async (_label, user) => {
+    getAuthedUser.mockResolvedValue(user);
+    const result = await respondToRequest(undefined, replyForm());
+    expect(result).toEqual({ error: 'coaching.errors.notAdmin' });
+    expect(insert).not.toHaveBeenCalled();
+  });
+
   it('reports a missing request', async () => {
     requestRow = null;
     const result = await respondToRequest(undefined, replyForm());

@@ -1,13 +1,18 @@
-import { redirect } from '@/i18n/navigation';
+import { Link, redirect } from '@/i18n/navigation';
 import { getTranslations, getLocale } from 'next-intl/server';
 import { getAuthedUser } from '@/lib/auth/getUser';
 import { createClient } from '@/lib/supabase/server';
+import { buttonVariants } from '@/app/components/ui/button';
 import PageLayout from '@/app/components/PageLayout';
 import CoachingAdminCard, {
   type AdminCoachingRequest,
 } from '@/app/components/CoachingAdminCard';
 
-export default async function AdminPage() {
+type Tab = 'new' | 'answered';
+
+export default async function AdminPage({
+  searchParams,
+}: PageProps<'/[locale]/admin'>) {
   const user = await getAuthedUser();
   if (!user || user.role !== 'admin') {
     const locale = await getLocale();
@@ -15,6 +20,8 @@ export default async function AdminPage() {
   }
 
   const t = await getTranslations('coachingAdmin');
+  // The tab lives in the URL so reloads and back/forward keep it.
+  const tab: Tab = (await searchParams).tab === 'answered' ? 'answered' : 'new';
 
   // Two queries instead of a single join: coaching_requests.user_id has
   // a FK to auth.users.id, not user_profiles.id, so PostgREST can't
@@ -68,13 +75,37 @@ export default async function AdminPage() {
     responses: r.coaching_responses ?? [],
   }));
 
+  const byTab: Record<Tab, AdminCoachingRequest[]> = {
+    new: cards.filter((c) => c.responses.length === 0),
+    answered: cards.filter((c) => c.responses.length > 0),
+  };
+  const shown = byTab[tab];
+
   return (
     <PageLayout title={t('title')} subtitle={t('subtitle')}>
-      {cards.length === 0 ? (
-        <p className="text-muted-foreground">{t('empty')}</p>
+      <div className="flex gap-2 mb-4" role="tablist">
+        {(['new', 'answered'] as const).map((key) => (
+          <Link
+            key={key}
+            href={key === 'new' ? '/admin' : '/admin?tab=answered'}
+            role="tab"
+            aria-selected={tab === key}
+            className={buttonVariants({
+              variant: tab === key ? 'default' : 'outline',
+              size: 'sm',
+            })}
+          >
+            {t(`tabs.${key}`, { count: byTab[key].length })}
+          </Link>
+        ))}
+      </div>
+      {shown.length === 0 ? (
+        <p className="text-muted-foreground">
+          {t(tab === 'new' ? 'emptyNew' : 'emptyAnswered')}
+        </p>
       ) : (
         <div className="flex flex-col gap-3">
-          {cards.map((card) => (
+          {shown.map((card) => (
             <CoachingAdminCard key={card.id} request={card} />
           ))}
         </div>

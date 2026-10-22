@@ -126,8 +126,7 @@
   },
   "coachingAdmin": {
     "title": "Coaching requests",
-    "subtitle": "All open questions from students.",
-    "empty": "No coaching requests yet.",
+    "subtitle": "Questions from students.",
     "askedBy": "asked by {nickname}",
     "question": "Question",
     "yourResponse": "Your response",
@@ -135,7 +134,15 @@
     "send": "Send reply",
     "sending": "Sending…",
     "sent": "Reply sent.",
-    "reply": "Reply"
+    "reply": "Reply",
+    "tabs": {
+      "new": "New ({count})",
+      "answered": "Answered ({count})"
+    },
+    "emptyNew": "No new questions.",
+    "emptyAnswered": "No answered questions yet.",
+    "askedAt": "asked {date}",
+    "answeredAt": "Answered {date}"
   },
   "coachingPage": {
     "title": "My coaching",
