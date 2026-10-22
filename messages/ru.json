@@ -8,30 +8,30 @@
     "openMenu": "Открыть меню"
   },
   "auth": {
-    "signIn": "Login",
-    "signUp": "Register",
-    "signOut": "Logout",
+    "signIn": "Войти",
+    "signUp": "Регистрация",
+    "signOut": "Выйти",
     "admin": "Админ",
     "myCoaching": "Мои вопросы",
-    "email": "Email",
+    "email": "Почта",
     "nickname": "Никнейм",
     "password": "Пароль",
     "login": {
       "title": "С возвращением",
       "subtitle": "Войдите в свой аккаунт.",
-      "submit": "Login",
+      "submit": "Войти",
       "pending": "Вход…",
       "switchPrompt": "Нет аккаунта?",
-      "switchLink": "Register",
+      "switchLink": "Зарегистрироваться",
       "forgotPasswordLink": "Забыли пароль?"
     },
     "register": {
       "title": "Создать аккаунт",
       "subtitle": "Начни отслеживать свой шахматный прогресс.",
-      "submit": "Register",
+      "submit": "Зарегистрироваться",
       "pending": "Создание…",
       "switchPrompt": "Уже есть аккаунт?",
-      "switchLink": "Login"
+      "switchLink": "Войти"
     },
     "errors": {
       "fieldsRequired": "Все поля обязательны",
