@@ -19,4 +19,6 @@ export type CoachingThreadData = CoachingMessage & {
   // Whole game, when it was saved with the question (null for older ones).
   pgn: string | null;
   responses: CoachingMessage[];
+  // When the student first opened the answer (spec 012); absent if not loaded.
+  response_seen_at?: string | null;
 };
