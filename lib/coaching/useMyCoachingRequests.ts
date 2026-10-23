@@ -14,6 +14,11 @@ type FetchKey = readonly ['coaching-requests', 'mine'];
 
 const fetcher = async (): Promise<CoachingRequestsByFen> => {
   const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return {};
+
   const { data, error } = await supabase
     .from('coaching_requests')
     .select(
@@ -26,6 +31,7 @@ const fetcher = async (): Promise<CoachingRequestsByFen> => {
         content,
         move_index,
         pgn,
+        response_seen_at,
         coaching_responses (
           body,
           created_at,
@@ -34,6 +40,8 @@ const fetcher = async (): Promise<CoachingRequestsByFen> => {
         )
       `,
     )
+    // Admins can read every request (RLS); this page is about my own.
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
   if (error || !data) return {};
@@ -50,6 +58,7 @@ const fetcher = async (): Promise<CoachingRequestsByFen> => {
         content: r.content,
         move_index: r.move_index,
         pgn: r.pgn,
+        response_seen_at: r.response_seen_at,
         responses: r.coaching_responses ?? [],
       },
     ]),

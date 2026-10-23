@@ -203,9 +203,27 @@ export async function respondToRequest(
     return { error: error.message };
   }
 
-  // Refresh the admin dashboard so the form swaps to read-only mode, and the
-  // student's thread list so the answer shows up there.
+  // Refresh the admin dashboard so the form swaps to read-only mode, the
+  // student's thread list so the answer shows up there, and the layout so
+  // the header bell recounts.
   revalidatePath('/[locale]/admin', 'page');
   revalidatePath('/[locale]/coaching', 'page');
+  revalidatePath('/[locale]', 'layout');
   return { success: true };
+}
+
+// Student-side: the answer was opened in full (spec 012). The RPC only
+// touches the caller's own, still-unseen request. Never throws: if it
+// fails, the "new" badge just stays.
+export async function markResponseSeen(requestId: string): Promise<void> {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc('mark_coaching_response_seen', {
+      p_request_id: requestId,
+    });
+    if (error) return;
+    revalidatePath('/[locale]', 'layout');
+  } catch {
+    // Offline or similar: nothing to recover.
+  }
 }

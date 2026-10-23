@@ -1,4 +1,4 @@
-import { fireEvent, renderWithIntl, screen } from '../../../test-utils';
+import { act, fireEvent, renderWithIntl, screen } from '../../../test-utils';
 import CoachingThreadCard, {
   type CoachingThread,
 } from '@/app/components/CoachingThreadCard';
@@ -10,6 +10,7 @@ jest.mock(
       mode: string;
       game?: { pgn: string; moveIndex: number };
       gameUrl?: string;
+      onClose: () => void;
     }) {
       return (
         <div
@@ -18,10 +19,16 @@ jest.mock(
           data-pgn={props.game?.pgn ?? ''}
           data-move-index={props.game?.moveIndex ?? ''}
           data-game-url={props.gameUrl ?? ''}
-        />
+        >
+          <button onClick={props.onClose}>close-stub</button>
+        </div>
       );
     },
 );
+const markResponseSeen = jest.fn();
+jest.mock('@/lib/coaching/actions', () => ({
+  markResponseSeen: (id: string) => markResponseSeen(id),
+}));
 jest.mock('@/app/components/ChessboardContainer', () => ({
   __esModule: true,
   default: () => <div data-testid="board" />,
@@ -87,5 +94,49 @@ describe('CoachingThreadCard', () => {
   it("previews the coach's variation", () => {
     renderWithIntl(<CoachingThreadCard thread={thread} />);
     expect(screen.getByText('3… Nf6')).toBeInTheDocument();
+  });
+
+  describe('new answer', () => {
+    const unseen = { ...thread, response_seen_at: null };
+
+    beforeEach(() => {
+      markResponseSeen.mockReset();
+      markResponseSeen.mockResolvedValue(undefined);
+    });
+
+    it('labels an answer nobody opened yet', () => {
+      renderWithIntl(<CoachingThreadCard thread={unseen} />);
+      expect(screen.getByText('New answer')).toBeInTheDocument();
+    });
+
+    it('marks it seen once when opened, and drops the label', () => {
+      renderWithIntl(<CoachingThreadCard thread={unseen} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Open' }));
+      expect(markResponseSeen).toHaveBeenCalledWith('r1');
+      expect(screen.queryByText('New answer')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'close-stub' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Open' }));
+      expect(markResponseSeen).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      ['a seen answer', { ...thread, response_seen_at: '2026-10-22T00:00Z' }],
+      ['no answer yet', { ...thread, responses: [], response_seen_at: null }],
+    ])('leaves %s alone', (_label, t) => {
+      renderWithIntl(<CoachingThreadCard thread={t} />);
+      expect(screen.queryByText('New answer')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: 'Open' }));
+      expect(markResponseSeen).not.toHaveBeenCalled();
+    });
+
+    it('still opens the modal when marking fails', async () => {
+      markResponseSeen.mockRejectedValue(new Error('offline'));
+      renderWithIntl(<CoachingThreadCard thread={unseen} />);
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'Open' }));
+      });
+      expect(screen.getByTestId('coaching-modal')).toBeInTheDocument();
+    });
   });
 });

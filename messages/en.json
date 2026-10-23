@@ -138,7 +138,8 @@
     },
     "status": {
       "asked": "Question asked",
-      "answered": "Answered"
+      "answered": "Answered",
+      "newAnswer": "New answer"
     }
   },
   "coachingAdmin": {
@@ -171,6 +172,13 @@
     },
     "emptyWaiting": "No questions awaiting a reply.",
     "emptyAnswered": "No answers yet — the coach will reply soon."
+  },
+  "notifications": {
+    "bell": "Notifications",
+    "bellLabel": "Notifications: {answers} new answers, {questions} new questions",
+    "bellLabelStudent": "Notifications: {answers} new answers",
+    "newQuestions": "New student questions",
+    "myAnswers": "Answers to my questions"
   },
   "profile": {
     "title": "Profile",

@@ -20,6 +20,8 @@ type Props = {
   // `onAskCoach` opens the modal regardless.
   showCoachingButton: boolean;
   threadStatus: ThreadStatus;
+  // An answer the student hasn't opened yet (spec 012).
+  hasNewAnswer: boolean;
   onAskCoach: () => void;
 };
 
@@ -70,6 +72,7 @@ export default function LongThinkCard({
   onClick,
   showCoachingButton,
   threadStatus,
+  hasNewAnswer,
   onAskCoach,
 }: Props) {
   const t = useTranslations('thinkTime');
@@ -159,7 +162,13 @@ export default function LongThinkCard({
                     {tCoaching('status.asked')}
                   </span>
                 )}
-                {threadStatus === 'answered' && (
+                {threadStatus === 'answered' && hasNewAnswer && (
+                  <span className="inline-flex items-center gap-1 rounded bg-destructive px-2 py-0.5 text-xs font-medium text-white">
+                    <CheckIcon className="size-3" />
+                    {tCoaching('status.newAnswer')}
+                  </span>
+                )}
+                {threadStatus === 'answered' && !hasNewAnswer && (
                   <span className="inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                     <CheckIcon className="size-3" />
                     {tCoaching('status.answered')}

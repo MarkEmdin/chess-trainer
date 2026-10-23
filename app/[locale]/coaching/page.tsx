@@ -16,7 +16,7 @@ export default async function CoachingPage({
   const user = await getAuthedUser();
   if (!user) {
     const locale = await getLocale();
-    redirect({ href: '/login', locale });
+    return redirect({ href: '/login', locale });
   }
 
   const t = await getTranslations('coachingPage');
@@ -39,6 +39,7 @@ export default async function CoachingPage({
         content,
         move_index,
         pgn,
+        response_seen_at,
         coaching_responses (
           body,
           created_at,
@@ -47,6 +48,8 @@ export default async function CoachingPage({
         )
       `,
     )
+    // Admins can read every request (RLS); "my questions" means my own.
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
   const threads: CoachingThread[] =
@@ -61,6 +64,7 @@ export default async function CoachingPage({
       content: r.content,
       move_index: r.move_index,
       pgn: r.pgn,
+      response_seen_at: r.response_seen_at,
       responses: r.coaching_responses ?? [],
     })) ?? [];
 
