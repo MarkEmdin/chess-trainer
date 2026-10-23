@@ -1,6 +1,14 @@
 'use client';
 
-import { useActionState, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useActionState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import type { JSONContent } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import { ExternalLinkIcon } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
@@ -32,6 +40,12 @@ import {
   recorderContent,
   toggleMark,
 } from '@/lib/coaching/moveRecorder';
+import {
+  clearDraft,
+  draftKey,
+  loadDraft,
+  saveDraft,
+} from '@/lib/coaching/drafts';
 import { cn } from '@/lib/utils';
 import type { CoachingMessage, CoachingThreadData } from '@/lib/coaching/types';
 import MessageContentView from './MessageContentView';
@@ -59,6 +73,8 @@ type Props = {
   onSubmitted?: () => void;
 };
 
+const DRAFT_SAVE_DELAY_MS = 500;
+
 // The line the board is showing, and which chip (or old variation) of
 // which message opened it, so that chip can be highlighted.
 type Viewing = ViewedLine & { key: string };
@@ -83,7 +99,26 @@ export default function CoachingModal({
   const tAdmin = useTranslations('coachingAdmin');
   const [recording, setRecording] = useState(false);
   const [viewing, setViewing] = useState<Viewing | null>(null);
-  const store = useRecorderStore(fen);
+  // Unsent text survives an accidental close (spec 012): one draft per
+  // question being asked or per request being answered.
+  const draftId = useMemo(() => {
+    if (mode === 'student') {
+      return !thread && ask
+        ? draftKey({
+            kind: 'ask',
+            gameUrl: ask.gameUrl,
+            moveIndex: ask.moveIndex,
+          })
+        : null;
+    }
+    return thread && thread.responses.length === 0
+      ? draftKey({ kind: 'reply', requestId: thread.id })
+      : null;
+  }, [mode, thread, ask]);
+  const [draft] = useState(() => (draftId ? loadDraft(draftId, fen) : null));
+  const store = useRecorderStore(fen, draft?.recorder);
+  const draftDoc = useRef<JSONContent | null>(draft?.doc ?? null);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const editorApi = useRef<MoveEditorApi>(null);
   const [segments, setSegments] = useState<Segment[]>([]);
   const boardColumn = useRef<HTMLDivElement>(null);
@@ -119,6 +154,32 @@ export default function CoachingModal({
   useEffect(() => {
     if (justSubmitted) onSubmitted?.();
   }, [justSubmitted, onSubmitted]);
+
+  const scheduleDraftSave = useCallback(() => {
+    if (!draftId || justSubmitted || !draftDoc.current) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      if (draftDoc.current) {
+        saveDraft(draftId, { doc: draftDoc.current, recorder: store.get() });
+      }
+    }, DRAFT_SAVE_DELAY_MS);
+  }, [draftId, justSubmitted, store]);
+
+  // Drawings change the recorder without touching the text.
+  useEffect(scheduleDraftSave, [store.state, scheduleDraftSave]);
+
+  useEffect(() => {
+    if (!justSubmitted || !draftId) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    clearDraft(draftId);
+  }, [justSubmitted, draftId]);
+
+  useEffect(
+    () => () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    },
+    [],
+  );
 
   const canWrite =
     !justSubmitted &&
@@ -326,6 +387,11 @@ export default function CoachingModal({
                       : tAdmin('responsePlaceholder')
                   }
                   onSegmentsChange={setSegments}
+                  initialDoc={draft?.doc}
+                  onDocChange={(doc) => {
+                    draftDoc.current = doc;
+                    scheduleDraftSave();
+                  }}
                   onFocus={startRecording}
                 />
                 <p

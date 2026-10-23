@@ -5,6 +5,8 @@ import MoveEditor, {
   type MoveEditorApi,
 } from '@/app/components/CoachingModal/MoveEditor';
 import type { Segment } from '@/lib/coaching/content';
+import { initialRecorder } from '@/lib/coaching/moveRecorder';
+import type { JSONContent } from '@tiptap/core';
 
 const FEN = 'r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3';
 
@@ -102,5 +104,83 @@ describe('<MoveEditor />', () => {
     });
     expect(document.querySelector('[data-chip]')).toBeNull();
     expect(screen.getByTestId('chip-count')).toHaveTextContent('0');
+  });
+
+  describe('restored draft', () => {
+    const recorder = {
+      ...initialRecorder(FEN),
+      lines: { l1: ['d6'] },
+      chips: { c1: { line: 'l1', from: 0, to: 1 } },
+      nextId: 2,
+      typed: true,
+    };
+    const doc: JSONContent = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'Maybe ' },
+            { type: 'moveChip', attrs: { id: 'c1', label: '3… d6' } },
+          ],
+        },
+      ],
+    };
+
+    function Restored({
+      onSegments,
+      onDoc,
+    }: {
+      onSegments: (s: Segment[]) => void;
+      onDoc: (d: JSONContent) => void;
+    }) {
+      const store = useRecorderStore(FEN, recorder);
+      const api = useRef<MoveEditorApi>(null);
+      return (
+        <>
+          <MoveEditor
+            ref={api}
+            store={store}
+            label="Your question"
+            placeholder="Write here"
+            initialDoc={doc}
+            onSegmentsChange={onSegments}
+            onDocChange={onDoc}
+            onFocus={() => {}}
+          />
+          <button type="button" onClick={() => api.current?.move('d7', 'd6')}>
+            fake move
+          </button>
+          <span data-testid="lines">{JSON.stringify(store.state.lines)}</span>
+        </>
+      );
+    }
+
+    it('brings back the text and working chips', async () => {
+      const onSegments = jest.fn();
+      renderWithIntl(<Restored onSegments={onSegments} onDoc={() => {}} />);
+      const box = await screen.findByRole('textbox', { name: 'Your question' });
+      expect(box).toHaveTextContent('Maybe 3… d6');
+      expect(document.querySelector('[data-chip="c1"]')).not.toBeNull();
+      expect(screen.getByTestId('lines')).toHaveTextContent('{"l1":["d6"]}');
+      expect(onSegments).toHaveBeenLastCalledWith([
+        { t: 'text', text: 'Maybe ' },
+        { t: 'moves', line: 'l1', from: 0, to: 1 },
+      ]);
+    });
+
+    it('reports the document as it changes', async () => {
+      const onDoc = jest.fn();
+      renderWithIntl(<Restored onSegments={() => {}} onDoc={onDoc} />);
+      await screen.findByRole('textbox', { name: 'Your question' });
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'fake move' }));
+      });
+      const last = onDoc.mock.lastCall![0] as JSONContent;
+      const chips = last.content![0].content!.filter(
+        (n) => n.type === 'moveChip',
+      );
+      expect(chips).toHaveLength(2);
+    });
   });
 });

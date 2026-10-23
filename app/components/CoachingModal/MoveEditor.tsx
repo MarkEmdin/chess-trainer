@@ -10,7 +10,12 @@ import {
   type Ref,
 } from 'react';
 import { useTranslations } from 'next-intl';
-import { EditorContent, useEditor, type Editor } from '@tiptap/react';
+import {
+  EditorContent,
+  useEditor,
+  type Editor,
+  type JSONContent,
+} from '@tiptap/react';
 import Document from '@tiptap/extension-document';
 import Paragraph from '@tiptap/extension-paragraph';
 import Text from '@tiptap/extension-text';
@@ -44,8 +49,12 @@ export type RecorderStore = {
   update: (fn: (s: RecorderState) => RecorderState) => void;
 };
 
-export function useRecorderStore(fen: string): RecorderStore {
-  const [state, setState] = useState(() => initialRecorder(fen));
+// `initial` restores a saved draft (spec 012).
+export function useRecorderStore(
+  fen: string,
+  initial?: RecorderState,
+): RecorderStore {
+  const [state, setState] = useState(() => initial ?? initialRecorder(fen));
   const ref = useRef(state);
   const get = useCallback(() => ref.current, []);
   const update = useCallback((fn: (s: RecorderState) => RecorderState) => {
@@ -67,6 +76,10 @@ type Props = {
   placeholder: string;
   onSegmentsChange: (segments: Segment[]) => void;
   onFocus: () => void;
+  // A saved draft to start from; its chips must be in `store`.
+  initialDoc?: JSONContent;
+  // Every change to the text, for saving a draft.
+  onDocChange?: (doc: JSONContent) => void;
   ref?: Ref<MoveEditorApi>;
 };
 
@@ -93,6 +106,8 @@ export default function MoveEditor({
   placeholder,
   onSegmentsChange,
   onFocus,
+  initialDoc,
+  onDocChange,
   ref,
 }: Props) {
   const t = useTranslations('coaching.editor');
@@ -103,13 +118,14 @@ export default function MoveEditor({
   // Where the caret was after our own last edit: a selection change that
   // lands anywhere else means the user moved the caret.
   const lastOwnPos = useRef<number | null>(null);
-  const latest = useRef({ onSegmentsChange, onFocus });
+  const latest = useRef({ onSegmentsChange, onFocus, onDocChange });
   useEffect(() => {
-    latest.current = { onSegmentsChange, onFocus };
+    latest.current = { onSegmentsChange, onFocus, onDocChange };
   });
 
   const editor = useEditor({
     immediatelyRender: false,
+    content: initialDoc,
     extensions: [
       Document,
       Paragraph,
@@ -140,6 +156,13 @@ export default function MoveEditor({
       },
     },
     onFocus: () => latest.current.onFocus(),
+    // A restored draft is text the form must know about before any edit.
+    onCreate: ({ editor }) => {
+      if (!initialDoc) return;
+      latest.current.onSegmentsChange(
+        docToSegments(editor.getJSON(), store.get().chips),
+      );
+    },
     onSelectionUpdate: ({ editor, transaction }) => {
       if (transaction.getMeta('ownEdit')) return;
       if (editor.state.selection.from !== lastOwnPos.current) {
@@ -165,6 +188,7 @@ export default function MoveEditor({
       if (!transaction.getMeta('ownEdit')) store.update(markTyped);
       store.update((s) => syncChips(s, ids));
       latest.current.onSegmentsChange(docToSegments(json, store.get().chips));
+      latest.current.onDocChange?.(json);
     },
   });
 
