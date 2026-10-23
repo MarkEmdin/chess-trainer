@@ -1,6 +1,6 @@
 # Spec: Notification bell + coaching drafts
 
-Status: approved
+Status: done
 Branch: feature/notifications
 
 ## Problem
@@ -79,7 +79,7 @@ The user asked for this in the same release: an accidental close of the modal mu
 - `alter table public.coaching_requests add column response_seen_at timestamptz;` (nullable).
 - Backfill: `update coaching_requests set response_seen_at = now() where exists (select 1 from coaching_responses where request_id = coaching_requests.id);`
 - Students have no UPDATE policy on `coaching_requests`, and requests are deliberately immutable from the client. Add a narrow `security definer` RPC rather than an UPDATE policy:
-  `public.mark_coaching_response_seen(p_request_id uuid) returns void`. It sets `response_seen_at = now()` only where `id = p_request_id and user_id = auth.uid() and response_seen_at is null`, and does nothing otherwise. `set search_path = public`, granted to `authenticated` only.
+  `public.mark_coaching_response_seen(p_request_id uuid) returns void`. It sets `response_seen_at = now()` only where `id = p_request_id and user_id = auth.uid() and response_seen_at is null`, and does nothing otherwise. `set search_path = public`, granted to `authenticated` only (revoked from `public` and `anon`; Supabase grants `anon` directly).
 - **Prod:** this migration has to be applied to prod (`npx supabase db push --linked`) **before** the PR merges. See memory `project_prod_migrations`.
 
 ### Rules
@@ -134,18 +134,18 @@ Use ICU plurals in the aria labels if it reads better. Keep both files structura
 
 ## Acceptance criteria
 
-- [ ] Signed-out: no bell (test)
-- [ ] Student with 0 unseen: bell, no pill. With 3 unseen: red pill "3". With 12: "9+" (test)
-- [ ] Student bell links to `/coaching?tab=answered` (test)
-- [ ] Unseen answered card shows "New answer". Clicking "Open" calls `markResponseSeen` once and opens the modal (test)
-- [ ] Opening an already-seen or unanswered card doesn't call `markResponseSeen` (test)
-- [ ] `/think-time`: opening an unseen answered position calls `markResponseSeen`, and its badge shows "New answer" until then (test)
-- [ ] Draft: typing text plus a move chip, closing the modal and reopening it restores both, and the chip still shows its line (test)
-- [ ] Draft: deleted after a successful submit, kept after a failed one. Expired or corrupt drafts are ignored. Storage throwing doesn't break the editor (test)
-- [ ] Admin: green pill = requests with no response, red pill = own unseen. The dropdown has both rows with correct links (test)
-- [ ] `/coaching` lists only the current user's requests, including for admins (test)
-- [ ] Migration: backfill marks existing answered requests seen. The RPC can't mark another user's request (verified on local Supabase)
-- [ ] Browser check on local Supabase: answer a question as admin → the student's bell shows 1 → open it → the bell clears
-- [ ] Pills readable in light / dark / rose
-- [ ] `npm run lint`, `npm test`, `npm run build` pass
-- [ ] Prod migration applied before merge
+- [x] Signed-out: no bell (test)
+- [x] Student with 0 unseen: bell, no pill. With 3 unseen: red pill "3". With 12: "9+" (test)
+- [x] Student bell links to `/coaching?tab=answered` (test)
+- [x] Unseen answered card shows "New answer". Clicking "Open" calls `markResponseSeen` once and opens the modal (test)
+- [x] Opening an already-seen or unanswered card doesn't call `markResponseSeen` (test)
+- [x] `/think-time`: opening an unseen answered position calls `markResponseSeen`, and its badge shows "New answer" until then (test)
+- [x] Draft: typing text plus a move chip, closing the modal and reopening it restores both, and the chip still shows its line (test)
+- [x] Draft: deleted after a successful submit, kept after a failed one. Expired or corrupt drafts are ignored. Storage throwing doesn't break the editor (test)
+- [x] Admin: green pill = requests with no response, red pill = own unseen. The dropdown has both rows with correct links (test)
+- [x] `/coaching` lists only the current user's requests, including for admins (test)
+- [x] Migration: backfill marks existing answered requests seen. The RPC can't mark another user's request (verified on local Supabase)
+- [x] Browser check on local Supabase: answer a question as admin → the student's bell shows 1 → open it → the bell clears
+- [x] Pills readable in light / dark / rose
+- [x] `npm run lint`, `npm test`, `npm run build` pass
+- [ ] Prod migration applied before merge (user runs `npx supabase db push --linked`)
