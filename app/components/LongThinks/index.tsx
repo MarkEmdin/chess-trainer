@@ -9,6 +9,8 @@ import type { Game } from '@/lib/games/types';
 import { useStoredThreshold } from '@/lib/chesscom/useStoredThreshold';
 import { useMyCoachingRequests } from '@/lib/coaching/useMyCoachingRequests';
 import { threadStatus } from '@/lib/coaching/status';
+import { isUnseen } from '@/lib/coaching/notifications';
+import { markResponseSeen } from '@/lib/coaching/actions';
 import {
   ASKED_FILTERS,
   matchesAskedFilter,
@@ -72,6 +74,19 @@ export default function LongThinks({
   const t = useTranslations('thinkTime');
   const format = useFormatter();
 
+  // Opening the thread shows the coach's answer in full, so an unseen one
+  // counts as read (spec 012); refetch so the badge drops.
+  function openCoaching(target: EnrichedThink) {
+    setCoachingTarget(target);
+    const thread = requestsByFen?.[target.think.fenBefore];
+    if (thread && isUnseen(thread)) {
+      void markResponseSeen(thread.id).then(
+        () => refreshRequests(),
+        () => {},
+      );
+    }
+  }
+
   return (
     <>
       <GamesShell
@@ -88,10 +103,14 @@ export default function LongThinks({
       >
         {({ games }) => {
           const enriched = collectLongThinks(games, deferredThreshold).map(
-            (item) => ({
-              ...item,
-              status: threadStatus(requestsByFen?.[item.think.fenBefore]),
-            }),
+            (item) => {
+              const thread = requestsByFen?.[item.think.fenBefore];
+              return {
+                ...item,
+                status: threadStatus(thread),
+                hasNewAnswer: !!thread && isUnseen(thread),
+              };
+            },
           );
           const shown = enriched.filter((item) =>
             matchesAskedFilter(item.status, askedFilter),
@@ -134,7 +153,7 @@ export default function LongThinks({
                 </p>
               ) : (
                 <div className="flex flex-col gap-3">
-                  {shown.map(({ think, game, status }) => (
+                  {shown.map(({ think, game, status, hasNewAnswer }) => (
                     <LongThinkCard
                       key={`${game.id}-${think.moveIndex}`}
                       think={think}
@@ -142,7 +161,8 @@ export default function LongThinks({
                       onClick={() => setSelected({ think, game })}
                       showCoachingButton={isAuthenticated}
                       threadStatus={status}
-                      onAskCoach={() => setCoachingTarget({ think, game })}
+                      hasNewAnswer={hasNewAnswer}
+                      onAskCoach={() => openCoaching({ think, game })}
                     />
                   ))}
                 </div>

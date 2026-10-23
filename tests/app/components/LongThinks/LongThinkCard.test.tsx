@@ -46,6 +46,7 @@ const whiteThink: LongThink = {
 const defaultCoachingProps = {
   showCoachingButton: false,
   threadStatus: 'none' as const,
+  hasNewAnswer: false,
   onAskCoach: () => {},
 };
 
@@ -151,5 +152,34 @@ describe('<LongThinkCard />', () => {
       if (text === label) expect(screen.getByText(text)).toBeInTheDocument();
       else expect(screen.queryByText(text)).not.toBeInTheDocument();
     }
+  });
+
+  it('says "New answer" for an answer not opened yet', () => {
+    renderWithIntl(
+      <LongThinkCard
+        think={whiteThink}
+        game={baseGame}
+        onClick={() => {}}
+        {...defaultCoachingProps}
+        threadStatus="answered"
+        hasNewAnswer
+      />,
+    );
+    expect(screen.getByText('New answer')).toBeInTheDocument();
+    expect(screen.queryByText('Answered')).not.toBeInTheDocument();
+  });
+
+  it('says "Answered" once the answer was opened', () => {
+    renderWithIntl(
+      <LongThinkCard
+        think={whiteThink}
+        game={baseGame}
+        onClick={() => {}}
+        {...defaultCoachingProps}
+        threadStatus="answered"
+      />,
+    );
+    expect(screen.getByText('Answered')).toBeInTheDocument();
+    expect(screen.queryByText('New answer')).not.toBeInTheDocument();
   });
 });
