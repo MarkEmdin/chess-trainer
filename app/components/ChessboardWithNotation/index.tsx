@@ -1,6 +1,8 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { Chessboard, type ChessboardOptions } from 'react-chessboard';
+import { MARK_COLOR } from '@/lib/chess/drawing';
 
 // react-chessboard renders rank/file labels inside the squares' corners,
 // which gets unreadable on the small boards we use in cards and modals.
@@ -18,6 +20,10 @@ type Props = {
   allowDragging?: boolean;
   onPieceDrop?: ChessboardOptions['onPieceDrop'];
   onSquareClick?: ChessboardOptions['onSquareClick'];
+  // Drawings (spec 011): arrows to show, and right-button input. A
+  // right-click on one square reports from === to (a circle).
+  arrows?: [string, string][];
+  onRightDrag?: (from: string, to: string) => void;
 };
 
 export default function ChessboardWithNotation({
@@ -27,7 +33,18 @@ export default function ChessboardWithNotation({
   allowDragging = false,
   onPieceDrop,
   onSquareClick,
+  arrows,
+  onRightDrag,
 }: Props) {
+  // react-chessboard keeps the first handlers it is given, so a later render
+  // with new state would still call stale ones. Route every event through a
+  // ref that always holds this render's callbacks.
+  const handlers = useRef({ onPieceDrop, onSquareClick, onRightDrag });
+  useEffect(() => {
+    handlers.current = { onPieceDrop, onSquareClick, onRightDrag };
+  });
+  const rightStart = useRef<string | null>(null);
+
   // Flip the label order when the board is viewed from black.
   const files = boardOrientation === 'white' ? FILES : [...FILES].reverse();
   const ranks =
@@ -59,8 +76,27 @@ export default function ChessboardWithNotation({
             showNotation: false,
             showAnimations: false,
             squareStyles,
-            onPieceDrop,
-            onSquareClick,
+            // We draw arrows ourselves so they can be saved per position.
+            allowDrawingArrows: false,
+            arrows: arrows?.map(([startSquare, endSquare]) => ({
+              startSquare,
+              endSquare,
+              color: MARK_COLOR,
+            })),
+            onPieceDrop: onPieceDrop
+              ? (args) => handlers.current.onPieceDrop?.(args) ?? false
+              : undefined,
+            onSquareClick: onSquareClick
+              ? (args) => handlers.current.onSquareClick?.(args)
+              : undefined,
+            onSquareMouseDown: ({ square }, e) => {
+              if (e.button === 2) rightStart.current = square;
+            },
+            onSquareMouseUp: ({ square }, e) => {
+              if (e.button !== 2 || !rightStart.current) return;
+              handlers.current.onRightDrag?.(rightStart.current, square);
+              rightStart.current = null;
+            },
           }}
         />
       </div>

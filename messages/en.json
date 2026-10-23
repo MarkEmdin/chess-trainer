@@ -108,21 +108,11 @@
       "you": "you"
     },
     "variation": {
-      "record": "Record variation",
-      "recording": "Recording variation",
-      "undo": "Undo move",
-      "clear": "Clear",
-      "done": "Done",
-      "edit": "Edit",
-      "remove": "Remove",
       "view": "View variation",
-      "backToPosition": "Back to position",
-      "attached": "Variation"
+      "backToPosition": "Back to position"
     },
     "game": {
-      "backToKey": "Back to key position",
-      "lockedBanner": "On the board now: {move}. You can write and record variations only at the key position {keyMove}.",
-      "startPosition": "starting position"
+      "backToKey": "Back to key position"
     },
     "errors": {
       "missingFields": "Position data is missing — try reopening the modal.",
@@ -132,6 +122,19 @@
       "notAdmin": "Only the coach can reply.",
       "alreadyResponded": "You've already responded to this question.",
       "invalidVariation": "This variation can't be saved. Try recording it again."
+    },
+    "editor": {
+      "recording": "● Recording — moves go into the text",
+      "startHint": "Click the text field to start recording",
+      "backToKey": "Back to key position — start a new variation",
+      "undoMove": "Undo move",
+      "clearDrawings": "Clear drawings",
+      "hint": "Play moves on the board to insert them. Right-click: circle, right-drag: arrow.",
+      "errors": {
+        "tooManyLines": "Too many variations (max {max})",
+        "lineTooLong": "Variation too long (max {max} moves)",
+        "tooManyChips": "Too many move chips (max {max})"
+      }
     },
     "status": {
       "asked": "Question asked",

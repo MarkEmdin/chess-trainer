@@ -184,6 +184,7 @@ describe('respondToRequest', () => {
       request_id: 'r1',
       body: 'Play Nf6',
       variation: ['Nf6', 'Nc3'],
+      content: null,
     });
   });
 
@@ -220,5 +221,113 @@ describe('respondToRequest', () => {
     const result = await respondToRequest(undefined, replyForm());
     expect(result).toEqual({ error: 'coaching.errors.missingFields' });
     expect(insert).not.toHaveBeenCalled();
+  });
+});
+
+// Inline-editor messages (spec 011): moves live in `content`, and `body` is
+// rebuilt from it on the server.
+function content(segments: unknown[], lines: Record<string, string[]>) {
+  return JSON.stringify({ v: 1, segments, lines, drawings: {} });
+}
+
+const D6_CONTENT = content(
+  [
+    { t: 'text', text: 'Хотел ' },
+    { t: 'moves', line: 'l1', from: 0, to: 1 },
+  ],
+  { l1: ['d6'] },
+);
+
+describe('inline-move content', () => {
+  it('stores content and rebuilds the body from it', async () => {
+    const result = await createCoachingRequest(
+      undefined,
+      askForm({ body: 'ignored', content: D6_CONTENT }),
+    );
+    expect(result).toEqual({ success: true, requestId: 'new-id' });
+    expect(insert).toHaveBeenCalledWith(
+      'coaching_requests',
+      expect.objectContaining({
+        body: 'Хотел 3… d6',
+        variation: null,
+        content: JSON.parse(D6_CONTENT),
+      }),
+    );
+  });
+
+  it('rejects content with an illegal line', async () => {
+    const result = await createCoachingRequest(
+      undefined,
+      askForm({
+        content: content([{ t: 'moves', line: 'l1', from: 0, to: 1 }], {
+          l1: ['c3'],
+        }),
+      }),
+    );
+    expect(result).toEqual({ error: 'coaching.errors.invalidVariation' });
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  it('refuses content that is only whitespace', async () => {
+    const result = await createCoachingRequest(
+      undefined,
+      askForm({ body: '', content: content([{ t: 'text', text: '   ' }], {}) }),
+    );
+    expect(result).toEqual({ error: 'coaching.errors.missingFields' });
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  it('accepts moves without any text', async () => {
+    const result = await createCoachingRequest(
+      undefined,
+      askForm({
+        body: '',
+        content: content([{ t: 'moves', line: 'l1', from: 0, to: 1 }], {
+          l1: ['d6'],
+        }),
+      }),
+    );
+    expect(result).toEqual({ success: true, requestId: 'new-id' });
+    expect(insertedBody()).toBe('3… d6');
+  });
+
+  it('rejects content whose rebuilt body is too long', async () => {
+    const result = await createCoachingRequest(
+      undefined,
+      askForm({
+        content: content([{ t: 'text', text: 'x'.repeat(8001) }], {}),
+      }),
+    );
+    expect(result).toEqual({ error: 'coaching.errors.bodyTooLong' });
+  });
+
+  it("validates a reply against the request's fen, not the form's", async () => {
+    // c3 is a white move: illegal from the request's black-to-move fen even
+    // though the form claims a white-to-move position.
+    const result = await respondToRequest(
+      undefined,
+      replyForm({
+        fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+        content: content([{ t: 'moves', line: 'l1', from: 0, to: 1 }], {
+          l1: ['c3'],
+        }),
+      }),
+    );
+    expect(result).toEqual({ error: 'coaching.errors.invalidVariation' });
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  it('stores reply content with the rebuilt body', async () => {
+    const result = await respondToRequest(
+      undefined,
+      replyForm({ content: D6_CONTENT }),
+    );
+    expect(result).toEqual({ success: true });
+    expect(insert).toHaveBeenCalledWith('coaching_responses', {
+      request_id: 'r1',
+      body: 'Хотел 3… d6',
+      variation: null,
+      content: JSON.parse(D6_CONTENT),
+    });
   });
 });

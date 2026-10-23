@@ -1,10 +1,9 @@
 'use client';
 
-import { useActionState, useEffect, useMemo, useState } from 'react';
+import { useActionState, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { ExternalLinkIcon } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
-import { Textarea } from '@/app/components/ui/textarea';
 import SectionLabel from '@/app/components/SectionLabel';
 import {
   Dialog,
@@ -21,12 +20,23 @@ import {
 } from '@/lib/coaching/actions';
 import { sideToMove } from '@/lib/chess/fen';
 import { readPgnInfo } from '@/lib/chess/pgnInfo';
-import { formatMoveLabel, replayAroundKey } from '@/lib/chess/replay';
+import { replayAroundKey } from '@/lib/chess/replay';
 import { playVariation } from '@/lib/chess/variation';
-import { MAX_BODY_LENGTH, normalizeBody } from '@/lib/coaching/body';
+import { MAX_BODY_LENGTH } from '@/lib/coaching/body';
+import { contentToPlainText, type Segment } from '@/lib/coaching/content';
+import {
+  boardFen,
+  boardLastMove,
+  clearDrawings,
+  currentDrawing,
+  recorderContent,
+  toggleMark,
+} from '@/lib/coaching/moveRecorder';
 import { cn } from '@/lib/utils';
 import type { CoachingMessage, CoachingThreadData } from '@/lib/coaching/types';
-import VariationBoard from './VariationBoard';
+import MessageContentView from './MessageContentView';
+import MoveEditor, { useRecorderStore, type MoveEditorApi } from './MoveEditor';
+import VariationBoard, { type ViewedLine } from './VariationBoard';
 import VariationLine from './VariationLine';
 
 type Props = {
@@ -49,8 +59,9 @@ type Props = {
   onSubmitted?: () => void;
 };
 
-// Which message's variation the board is showing.
-type ViewTarget = 'question' | number | null;
+// The line the board is showing, and which chip (or old variation) of
+// which message opened it, so that chip can be highlighted.
+type Viewing = ViewedLine & { key: string };
 
 // One dialog for asking (student), answering (coach) and reading the thread
 // (both). The board column hosts recording and viewing; the text column holds
@@ -70,9 +81,13 @@ export default function CoachingModal({
 }: Props) {
   const t = useTranslations('coaching');
   const tAdmin = useTranslations('coachingAdmin');
-  const [draft, setDraft] = useState<string[] | null>(null);
   const [recording, setRecording] = useState(false);
-  const [viewTarget, setViewTarget] = useState<ViewTarget>(null);
+  const [viewing, setViewing] = useState<Viewing | null>(null);
+  const store = useRecorderStore(fen);
+  const editorApi = useRef<MoveEditorApi>(null);
+  const [segments, setSegments] = useState<Segment[]>([]);
+  const boardColumn = useRef<HTMLDivElement>(null);
+  const form = useRef<HTMLFormElement>(null);
   const replay = useMemo(() => {
     if (!game) return null;
     const around = replayAroundKey(game.pgn, fen, game.moveIndex);
@@ -83,14 +98,9 @@ export default function CoachingModal({
   const colorLabel = t(`color.${askerColor}`);
   const keyIndex = replay?.keyIndex ?? 0;
   const [boardIndex, setBoardIndex] = useState(keyIndex);
-  // Writing and recording are tied to the key position: everything the
-  // student or coach writes is about that one board.
-  const atKey = !replay || boardIndex === keyIndex;
-  // Controlled on purpose: React resets uncontrolled fields after every form
-  // action, errors included, which would wipe a long comment.
-  const [body, setBody] = useState('');
-  const bodyLength = normalizeBody(body).length;
-  const tooLong = bodyLength > MAX_BODY_LENGTH;
+  const content = recorderContent(store.state, segments);
+  const plainText = contentToPlainText(fen, content).trim();
+  const tooLong = plainText.length > MAX_BODY_LENGTH;
 
   const [askState, askAction, askPending] = useActionState<
     CoachingRequestState,
@@ -114,19 +124,34 @@ export default function CoachingModal({
     !justSubmitted &&
     (mode === 'student' ? !thread : thread?.responses.length === 0);
 
-  // A sent variation starts from the key position, so viewing one (and
-  // leaving it) puts the game board back there.
-  function view(target: ViewTarget) {
+  // Every line starts from the key position, so viewing one (and leaving
+  // it) puts the game board back there.
+  function view(next: Viewing | null) {
     setBoardIndex(keyIndex);
-    setViewTarget(target);
+    setRecording(false);
+    setViewing(next);
   }
 
-  const viewing =
-    viewTarget === 'question'
-      ? (thread?.variation ?? null)
-      : viewTarget !== null
-        ? (thread?.responses[viewTarget]?.variation ?? null)
-        : null;
+  // Writing is about the key position: focusing the text shows it, and the
+  // board records into the text until a click lands outside the board and
+  // the form.
+  function startRecording() {
+    setBoardIndex(keyIndex);
+    setViewing(null);
+    setRecording(true);
+  }
+
+  useEffect(() => {
+    if (!recording) return;
+    const onDown = (e: PointerEvent) => {
+      const target = e.target as Node;
+      if (boardColumn.current?.contains(target)) return;
+      if (form.current?.contains(target)) return;
+      setRecording(false);
+    };
+    document.addEventListener('pointerdown', onDown, true);
+    return () => document.removeEventListener('pointerdown', onDown, true);
+  }, [recording]);
 
   const questionLabel =
     mode === 'student' ? t('yourQuestion') : tAdmin('question');
@@ -140,7 +165,15 @@ export default function CoachingModal({
         if (!open) onClose();
       }}
     >
-      <DialogContent className="sm:max-w-5xl max-h-[calc(100dvh-2rem)] overflow-y-auto">
+      <DialogContent
+        className="sm:max-w-5xl max-h-[calc(100dvh-2rem)] overflow-y-auto"
+        // Focusing the text starts recording, so the dialog must not drop
+        // focus there on open: it focuses itself and the user picks.
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+          (e.currentTarget as HTMLElement).focus();
+        }}
+      >
         <DialogHeader>
           <DialogTitle className="font-normal text-base">
             {thread || justSubmitted ? t('threadTitle') : t('askTitle')}
@@ -168,25 +201,40 @@ export default function CoachingModal({
         <div className="flex flex-col lg:flex-row gap-4">
           {/* Same sizing idea as the game modal: as large as the screen
               allows, but leave room for the recording/viewing controls. */}
-          <div className="w-full mx-auto lg:mx-0 lg:shrink-0 max-w-[max(280px,min(560px,calc(100dvh-330px)))] lg:w-[max(280px,min(560px,calc(100dvh-330px)))]">
+          <div
+            ref={boardColumn}
+            className="w-full mx-auto lg:mx-0 lg:shrink-0 max-w-[max(280px,min(560px,calc(100dvh-330px)))] lg:w-[max(280px,min(560px,calc(100dvh-330px)))]"
+          >
             <VariationBoard
               fen={fen}
               orientation={orientation}
-              canRecord={canWrite}
-              draft={draft}
-              onDraftChange={setDraft}
+              canWrite={canWrite}
+              writing={
+                recording && canWrite
+                  ? {
+                      fen: boardFen(store.state),
+                      lastMove: boardLastMove(store.state),
+                      drawing: currentDrawing(store.state),
+                      onMove: (from, to) =>
+                        editorApi.current?.move(from, to) ?? false,
+                      onMark: (from, to) => {
+                        store.update((s) => toggleMark(s, from, to));
+                        editorApi.current?.focus();
+                      },
+                      onClearDrawings: () => {
+                        store.update(clearDrawings);
+                        editorApi.current?.focus();
+                      },
+                    }
+                  : null
+              }
               viewing={viewing}
               onStopViewing={() => view(null)}
-              onRecordingChange={(next) => {
-                setRecording(next);
-                if (next) setViewTarget(null);
-              }}
               game={replay}
               askerColor={askerColor}
               askerNote={t(mode === 'coach' ? 'players.asker' : 'players.you')}
               boardIndex={boardIndex}
               onBoardIndexChange={setBoardIndex}
-              locked={!atKey}
             />
           </div>
 
@@ -196,8 +244,9 @@ export default function CoachingModal({
                 label={questionLabel}
                 message={thread}
                 fen={fen}
-                viewDisabled={recording}
-                onView={() => view('question')}
+                id="question"
+                viewingKey={viewing?.key ?? null}
+                onView={view}
               />
             )}
 
@@ -213,8 +262,9 @@ export default function CoachingModal({
                       key={i}
                       message={response}
                       fen={fen}
-                      viewDisabled={recording}
-                      onView={() => view(i)}
+                      id={`response-${i}`}
+                      viewingKey={viewing?.key ?? null}
+                      onView={view}
                     />
                   ))
                 )}
@@ -227,33 +277,9 @@ export default function CoachingModal({
               </p>
             )}
 
-            {canWrite && replay && !atKey && (
-              <div
-                role="status"
-                className="flex flex-col gap-2 rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm text-foreground"
-              >
-                <p>
-                  {t('game.lockedBanner', {
-                    move:
-                      boardIndex > 0
-                        ? formatMoveLabel(replay.moves[boardIndex - 1])
-                        : t('game.startPosition'),
-                    keyMove: formatMoveLabel(replay.moves[keyIndex]),
-                  })}
-                </p>
-                <Button
-                  type="button"
-                  size="sm"
-                  className="self-start"
-                  onClick={() => setBoardIndex(keyIndex)}
-                >
-                  {t('game.backToKey')}
-                </Button>
-              </div>
-            )}
-
             {canWrite && (
               <form
+                ref={form}
                 action={mode === 'student' ? askAction : replyAction}
                 className="flex flex-col gap-3"
               >
@@ -278,35 +304,29 @@ export default function CoachingModal({
                 ) : (
                   <input type="hidden" name="request_id" value={thread?.id} />
                 )}
-                {draft && (
-                  <input
-                    type="hidden"
-                    name="variation"
-                    value={JSON.stringify(draft)}
-                  />
-                )}
+                <input
+                  type="hidden"
+                  name="content"
+                  value={JSON.stringify(content)}
+                />
+                <input type="hidden" name="body" value={plainText} />
 
-                <label
-                  htmlFor="coaching-body"
-                  className="text-sm font-medium text-foreground"
-                >
+                <span className="text-sm font-medium text-foreground">
                   {mode === 'student' ? t('bodyLabel') : tAdmin('yourResponse')}
-                </label>
-                <Textarea
-                  id="coaching-body"
-                  name="body"
-                  rows={6}
-                  required
-                  minLength={1}
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  disabled={!atKey}
-                  className="resize-y sm:min-h-60"
+                </span>
+                <MoveEditor
+                  ref={editorApi}
+                  store={store}
+                  label={
+                    mode === 'student' ? t('bodyLabel') : tAdmin('yourResponse')
+                  }
                   placeholder={
                     mode === 'student'
                       ? t('bodyPlaceholder')
                       : tAdmin('responsePlaceholder')
                   }
+                  onSegmentsChange={setSegments}
+                  onFocus={startRecording}
                 />
                 <p
                   className={cn(
@@ -315,7 +335,7 @@ export default function CoachingModal({
                   )}
                 >
                   {t('charCount', {
-                    count: bodyLength,
+                    count: plainText.length,
                     max: MAX_BODY_LENGTH,
                   })}
                 </p>
@@ -330,14 +350,14 @@ export default function CoachingModal({
                   {mode === 'student' ? (
                     <Button
                       type="submit"
-                      disabled={askPending || recording || tooLong || !atKey}
+                      disabled={askPending || tooLong || !plainText}
                     >
                       {askPending ? t('submitting') : t('submit')}
                     </Button>
                   ) : (
                     <Button
                       type="submit"
-                      disabled={replyPending || recording || tooLong || !atKey}
+                      disabled={replyPending || tooLong || !plainText}
                     >
                       {replyPending ? tAdmin('sending') : tAdmin('send')}
                     </Button>
@@ -355,8 +375,10 @@ export default function CoachingModal({
 type MessageProps = {
   message: CoachingMessage;
   fen: string;
-  viewDisabled: boolean;
-  onView: () => void;
+  // Names this message in `Viewing.key`.
+  id: string;
+  viewingKey: string | null;
+  onView: (viewing: Viewing) => void;
 };
 
 function Message({ label, ...rest }: MessageProps & { label: string }) {
@@ -367,8 +389,31 @@ function Message({ label, ...rest }: MessageProps & { label: string }) {
   );
 }
 
-function MessageBody({ message, fen, viewDisabled, onView }: MessageProps) {
+function MessageBody({ message, fen, id, viewingKey, onView }: MessageProps) {
   const t = useTranslations('coaching.variation');
+  const { content } = message;
+  if (content) {
+    const active = viewingKey?.startsWith(`${id}:`)
+      ? Number(viewingKey.slice(id.length + 1))
+      : null;
+    return (
+      <MessageContentView
+        fen={fen}
+        content={content}
+        activeChip={active}
+        onChipClick={(segment, index) =>
+          onView({
+            sans: content.lines[segment.line],
+            line: segment.line,
+            startPly: segment.to,
+            drawings: content.drawings,
+            key: `${id}:${index}`,
+          })
+        }
+      />
+    );
+  }
+
   const played = message.variation
     ? playVariation(fen, message.variation)
     : null;
@@ -385,8 +430,15 @@ function MessageBody({ message, fen, viewDisabled, onView }: MessageProps) {
             variant="outline"
             size="sm"
             className="self-start"
-            disabled={viewDisabled}
-            onClick={onView}
+            onClick={() =>
+              onView({
+                sans: message.variation!,
+                line: null,
+                startPly: 0,
+                drawings: {},
+                key: `${id}:old`,
+              })
+            }
           >
             {t('view')}
           </Button>

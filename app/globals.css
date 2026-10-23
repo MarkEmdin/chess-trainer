@@ -162,3 +162,11 @@
     @apply font-sans;
   }
 }
+/* Inline move editor (spec 011): Tiptap's placeholder on the empty doc. */
+.move-editor p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--muted-foreground);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
