@@ -1,6 +1,7 @@
 import { Link } from '@/i18n/navigation';
 import MobileNav from '@/app/components/MobileNav';
 import AuthMenu from '@/app/components/AuthMenu';
+import NotificationBell from '@/app/components/NotificationBell';
 
 const navLinks = [
   { href: '/lessons/world-champions', key: 'worldChampions' },
@@ -24,7 +25,10 @@ export default function Header() {
           ♔ Chess Fundamentals
         </Link>
 
-        <MobileNav navLinks={navLinks} authMenu={<AuthMenu />} />
+        <div className="flex items-center gap-2">
+          <NotificationBell />
+          <MobileNav navLinks={navLinks} authMenu={<AuthMenu />} />
+        </div>
       </nav>
     </header>
   );
