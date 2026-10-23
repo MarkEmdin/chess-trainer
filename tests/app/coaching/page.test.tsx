@@ -57,12 +57,21 @@ const reply = {
   variation: null,
 };
 let rows: { id: string; coaching_responses: (typeof reply)[] }[] = [];
+const eq = jest.fn();
+const select = jest.fn();
 
 jest.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
     from: () => {
       const builder = {
-        select: () => builder,
+        select: (columns: string) => {
+          select(columns);
+          return builder;
+        },
+        eq: (column: string, value: string) => {
+          eq(column, value);
+          return builder;
+        },
         order: async () => ({ data: rows }),
       };
       return builder;
@@ -80,6 +89,8 @@ const render$ = async (tab?: string) =>
 
 beforeEach(() => {
   redirect.mockClear();
+  eq.mockClear();
+  select.mockClear();
   getAuthedUser.mockResolvedValue({ id: 'u1', role: 'user' });
   rows = [
     { id: 'wait-1', coaching_responses: [] },
@@ -127,5 +138,17 @@ describe('coaching page', () => {
     await render$();
     expect(screen.getByText('coachingPage.empty')).toBeInTheDocument();
     expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
+  });
+
+  it('lists only the signed-in user’s own questions', async () => {
+    await render$();
+    expect(eq).toHaveBeenCalledWith('user_id', 'u1');
+    expect(select.mock.calls[0][0]).toMatch(/response_seen_at/);
+  });
+
+  it('lists only an admin’s own questions too', async () => {
+    getAuthedUser.mockResolvedValue({ id: 'a1', role: 'admin' });
+    await render$();
+    expect(eq).toHaveBeenCalledWith('user_id', 'a1');
   });
 });
