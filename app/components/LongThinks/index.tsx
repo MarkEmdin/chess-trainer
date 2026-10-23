@@ -8,6 +8,13 @@ import { collectLongThinks, type LongThink } from '@/lib/games/longThinks';
 import type { Game } from '@/lib/games/types';
 import { useStoredThreshold } from '@/lib/chesscom/useStoredThreshold';
 import { useMyCoachingRequests } from '@/lib/coaching/useMyCoachingRequests';
+import { threadStatus } from '@/lib/coaching/status';
+import {
+  ASKED_FILTERS,
+  matchesAskedFilter,
+  type AskedFilter,
+} from '@/lib/coaching/askedFilter';
+import { Button } from '@/app/components/ui/button';
 import GamesShell from '@/app/components/GamesShell';
 import LongThinkCard from './LongThinkCard';
 import ThresholdSelector from './ThresholdSelector';
@@ -50,6 +57,7 @@ export default function LongThinks({
     null,
   );
   const [threshold, setThreshold] = useStoredThreshold();
+  const [askedFilter, setAskedFilter] = useState<AskedFilter>('all');
   // Only fetched when signed in (the hook handles the gating). Map is
   // keyed by fen so each card can do an O(1) "do I have a thread for
   // this position?" lookup.
@@ -79,10 +87,39 @@ export default function LongThinks({
         }
       >
         {({ games }) => {
-          const enriched = collectLongThinks(games, deferredThreshold);
+          const enriched = collectLongThinks(games, deferredThreshold).map(
+            (item) => ({
+              ...item,
+              status: threadStatus(requestsByFen?.[item.think.fenBefore]),
+            }),
+          );
+          const shown = enriched.filter((item) =>
+            matchesAskedFilter(item.status, askedFilter),
+          );
           return (
             <div className="flex flex-col gap-4">
               <ThresholdSelector value={threshold} onChange={setThreshold} />
+              {isAuthenticated && enriched.length > 0 && (
+                <div className="flex gap-2 flex-wrap" role="tablist">
+                  {ASKED_FILTERS.map((key) => (
+                    <Button
+                      key={key}
+                      type="button"
+                      role="tab"
+                      aria-selected={askedFilter === key}
+                      variant={askedFilter === key ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setAskedFilter(key)}
+                    >
+                      {t(`askedFilter.${key}`, {
+                        count: enriched.filter((item) =>
+                          matchesAskedFilter(item.status, key),
+                        ).length,
+                      })}
+                    </Button>
+                  ))}
+                </div>
+              )}
               {isPending ? (
                 <div className="flex items-center justify-center py-12 text-muted-foreground">
                   <Loader2Icon aria-hidden className="size-6 animate-spin" />
@@ -91,16 +128,20 @@ export default function LongThinks({
                 <p className="text-muted-foreground">
                   {t('empty', { threshold: deferredThreshold })}
                 </p>
+              ) : shown.length === 0 ? (
+                <p className="text-muted-foreground">
+                  {t(askedFilter === 'unasked' ? 'emptyUnasked' : 'emptyAsked')}
+                </p>
               ) : (
                 <div className="flex flex-col gap-3">
-                  {enriched.map(({ think, game }) => (
+                  {shown.map(({ think, game, status }) => (
                     <LongThinkCard
                       key={`${game.id}-${think.moveIndex}`}
                       think={think}
                       game={game}
                       onClick={() => setSelected({ think, game })}
                       showCoachingButton={isAuthenticated}
-                      existingThread={!!requestsByFen?.[think.fenBefore]}
+                      threadStatus={status}
                       onAskCoach={() => setCoachingTarget({ think, game })}
                     />
                   ))}

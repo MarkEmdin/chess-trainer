@@ -45,7 +45,7 @@ const whiteThink: LongThink = {
 // would otherwise compete for `getByRole('button')`.
 const defaultCoachingProps = {
   showCoachingButton: false,
-  existingThread: false,
+  threadStatus: 'none' as const,
   onAskCoach: () => {},
 };
 
@@ -131,5 +131,25 @@ describe('<LongThinkCard />', () => {
     );
     await user.click(screen.getByRole('button'));
     expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ['none', null],
+    ['asked', 'Question asked'],
+    ['answered', 'Answered'],
+  ] as const)('shows the %s coaching badge', (status, label) => {
+    renderWithIntl(
+      <LongThinkCard
+        think={whiteThink}
+        game={baseGame}
+        onClick={() => {}}
+        {...defaultCoachingProps}
+        threadStatus={status}
+      />,
+    );
+    for (const text of ['Question asked', 'Answered']) {
+      if (text === label) expect(screen.getByText(text)).toBeInTheDocument();
+      else expect(screen.queryByText(text)).not.toBeInTheDocument();
+    }
   });
 });
