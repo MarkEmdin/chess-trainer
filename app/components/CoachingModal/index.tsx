@@ -101,7 +101,9 @@ export default function CoachingModal({
   const [viewing, setViewing] = useState<Viewing | null>(null);
   // Unsent text survives an accidental close (spec 012): one draft per
   // question being asked or per request being answered.
-  const draftId = useMemo(() => {
+  // Fixed when the modal opens: after sending, the refreshed thread no
+  // longer needs a draft, but the one just sent still has to be cleared.
+  const [draftId] = useState(() => {
     if (mode === 'student') {
       return !thread && ask
         ? draftKey({
@@ -114,7 +116,7 @@ export default function CoachingModal({
     return thread && thread.responses.length === 0
       ? draftKey({ kind: 'reply', requestId: thread.id })
       : null;
-  }, [mode, thread, ask]);
+  });
   const [draft] = useState(() => (draftId ? loadDraft(draftId, fen) : null));
   const store = useRecorderStore(fen, draft?.recorder);
   const draftDoc = useRef<JSONContent | null>(draft?.doc ?? null);

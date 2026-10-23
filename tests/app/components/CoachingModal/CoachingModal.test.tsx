@@ -696,6 +696,41 @@ describe('CoachingModal drafts', () => {
     );
   });
 
+  it('deletes the coach’s draft even when the refreshed thread already has the answer', async () => {
+    let finish: (v: { success: true }) => void = () => {};
+    respondToRequest.mockReturnValue(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    );
+    const { rerender } = renderWithIntl(
+      <CoachingModal {...baseProps} mode="coach" thread={thread()} />,
+    );
+    fireEvent.change(editor(), { target: { value: 'Play Nf6' } });
+    await waitFor(() =>
+      expect(savedText('coaching-draft:reply:r1')).toBe('Play Nf6'),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Send reply' }));
+    await waitFor(() => expect(respondToRequest).toHaveBeenCalled());
+    // revalidatePath re-renders the admin page with the answer in place,
+    // landing with (here: just before) the action's own result.
+    rerender(
+      <CoachingModal
+        {...baseProps}
+        mode="coach"
+        thread={thread({
+          responses: [
+            { body: 'Play Nf6', created_at: '2026-10-23', variation: null },
+          ],
+        })}
+      />,
+    );
+    await act(async () => finish({ success: true }));
+    await waitFor(() =>
+      expect(localStorage.getItem('coaching-draft:reply:r1')).toBeNull(),
+    );
+  });
+
   it('leaves storage alone when there is nothing to write', () => {
     const getItem = jest.spyOn(Storage.prototype, 'getItem');
     renderWithIntl(
