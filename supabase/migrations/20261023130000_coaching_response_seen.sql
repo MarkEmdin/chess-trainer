@@ -27,5 +27,7 @@ as $$
       and response_seen_at is null;
 $$;
 
-revoke all on function public.mark_coaching_response_seen(uuid) from public;
+-- Supabase grants new functions to anon directly, so revoking from public
+-- alone leaves it callable signed out.
+revoke all on function public.mark_coaching_response_seen(uuid) from public, anon;
 grant execute on function public.mark_coaching_response_seen(uuid) to authenticated;

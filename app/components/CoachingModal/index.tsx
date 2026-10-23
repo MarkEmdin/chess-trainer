@@ -157,30 +157,46 @@ export default function CoachingModal({
     if (justSubmitted) onSubmitted?.();
   }, [justSubmitted, onSubmitted]);
 
+  // The save waiting out the delay; run at once if the modal closes first,
+  // so a quick accidental close keeps the last edit too.
+  const pendingSave = useRef<(() => void) | null>(null);
+  const cancelPendingSave = useCallback(() => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = null;
+    pendingSave.current = null;
+  }, []);
+
   const scheduleDraftSave = useCallback(() => {
     if (!draftId || justSubmitted || !draftDoc.current) return;
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => {
+    cancelPendingSave();
+    const save = () => {
       if (draftDoc.current) {
         saveDraft(draftId, { doc: draftDoc.current, recorder: store.get() });
       }
+    };
+    pendingSave.current = save;
+    saveTimer.current = setTimeout(() => {
+      pendingSave.current = null;
+      save();
     }, DRAFT_SAVE_DELAY_MS);
-  }, [draftId, justSubmitted, store]);
+  }, [draftId, justSubmitted, store, cancelPendingSave]);
 
   // Drawings change the recorder without touching the text.
   useEffect(scheduleDraftSave, [store.state, scheduleDraftSave]);
 
   useEffect(() => {
     if (!justSubmitted || !draftId) return;
-    if (saveTimer.current) clearTimeout(saveTimer.current);
+    cancelPendingSave();
     clearDraft(draftId);
-  }, [justSubmitted, draftId]);
+  }, [justSubmitted, draftId, cancelPendingSave]);
 
   useEffect(
     () => () => {
-      if (saveTimer.current) clearTimeout(saveTimer.current);
+      const save = pendingSave.current;
+      cancelPendingSave();
+      save?.();
     },
-    [],
+    [cancelPendingSave],
   );
 
   const canWrite =

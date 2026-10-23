@@ -163,6 +163,8 @@ function sentContent(mock: jest.Mock): MessageContent {
 }
 
 beforeEach(() => {
+  // Unmounting a writable modal saves its draft; start every test clean.
+  localStorage.clear();
   createCoachingRequest.mockReset().mockResolvedValue({
     success: true,
     requestId: 'r1',
@@ -652,6 +654,13 @@ describe('CoachingModal drafts', () => {
 
     renderWithIntl(<CoachingModal {...askProps} />);
     expect(editor()).toHaveValue('Is this fine?');
+  });
+
+  it('keeps the last edit when the modal closes before the save delay', () => {
+    const { unmount } = renderWithIntl(<CoachingModal {...askProps} />);
+    fireEvent.change(editor(), { target: { value: 'Closed at once' } });
+    unmount();
+    expect(savedText(ASK_KEY)).toBe('Closed at once');
   });
 
   it('sends a restored draft as it was', async () => {
