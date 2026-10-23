@@ -11,6 +11,8 @@ import SectionLabel from '@/app/components/SectionLabel';
 import { sideToMove } from '@/lib/chess/fen';
 import { formatVariation, playVariation } from '@/lib/chess/variation';
 import type { CoachingMessage, CoachingThreadData } from '@/lib/coaching/types';
+import { isUnseen } from '@/lib/coaching/notifications';
+import { markResponseSeen } from '@/lib/coaching/actions';
 
 // The modal pulls in chess.js and the interactive board; load it only when
 // the card is opened.
@@ -31,9 +33,19 @@ export default function CoachingThreadCard({ thread }: Props) {
   const t = useTranslations('coaching');
   const format = useFormatter();
   const [open, setOpen] = useState(false);
+  // Flipped locally on open, so the label goes at once and a second open
+  // doesn't ask the server again.
+  const [seen, setSeen] = useState(() => !isUnseen(thread));
   const createdAt = format.dateTime(new Date(thread.created_at), {
     dateStyle: 'medium',
   });
+
+  function openThread() {
+    setOpen(true);
+    if (seen) return;
+    setSeen(true);
+    void markResponseSeen(thread.id).catch(() => {});
+  }
 
   return (
     <Card>
@@ -50,6 +62,11 @@ export default function CoachingThreadCard({ thread }: Props) {
                 {thread.move_san}
               </span>
               <span className="text-xs text-muted-foreground">{createdAt}</span>
+              {!seen && (
+                <span className="rounded-full bg-destructive px-2 py-0.5 text-xs font-medium text-white">
+                  {t('status.newAnswer')}
+                </span>
+              )}
             </div>
 
             <SectionLabel label={t('yourQuestion')}>
@@ -69,7 +86,7 @@ export default function CoachingThreadCard({ thread }: Props) {
             </SectionLabel>
 
             <div className="flex gap-2 flex-wrap">
-              <Button size="sm" onClick={() => setOpen(true)}>
+              <Button size="sm" onClick={openThread}>
                 {t('open')}
               </Button>
               <Button variant="outline" size="sm" asChild>
