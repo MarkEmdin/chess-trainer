@@ -1,6 +1,8 @@
 import { buildReplay } from '@/lib/chess/replay';
+import { revalidatePath } from 'next/cache';
 import {
   createCoachingRequest,
+  markResponseSeen,
   respondToRequest,
 } from '@/lib/coaching/actions';
 
@@ -8,6 +10,7 @@ const BLACK_TO_MOVE =
   'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 3 3';
 
 const insert = jest.fn();
+const rpc = jest.fn();
 let requestRow: { fen: string } | null = null;
 let existingResponse: { id: string } | null = null;
 
@@ -38,6 +41,7 @@ function insertedRow() {
 jest.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
     from,
+    rpc: (...args: unknown[]) => rpc(...args),
     auth: { getUser: async () => ({ data: { user: { id: 'u1' } } }) },
   }),
 }));
@@ -188,6 +192,11 @@ describe('respondToRequest', () => {
     });
   });
 
+  it('refreshes the layout so the header bell recounts', async () => {
+    await respondToRequest(undefined, replyForm());
+    expect(revalidatePath).toHaveBeenCalledWith('/[locale]', 'layout');
+  });
+
   it("rejects a variation illegal from the request's fen", async () => {
     const result = await respondToRequest(
       undefined,
@@ -329,5 +338,31 @@ describe('inline-move content', () => {
       variation: null,
       content: JSON.parse(D6_CONTENT),
     });
+  });
+});
+
+describe('markResponseSeen', () => {
+  beforeEach(() => {
+    rpc.mockReset();
+    jest.mocked(revalidatePath).mockClear();
+  });
+
+  it('marks the answer seen and refreshes the header', async () => {
+    rpc.mockResolvedValue({ error: null });
+    await markResponseSeen('r1');
+    expect(rpc).toHaveBeenCalledWith('mark_coaching_response_seen', {
+      p_request_id: 'r1',
+    });
+    expect(revalidatePath).toHaveBeenCalledWith('/[locale]', 'layout');
+  });
+
+  it('resolves quietly when the RPC reports an error', async () => {
+    rpc.mockResolvedValue({ error: { message: 'boom' } });
+    await expect(markResponseSeen('r1')).resolves.toBeUndefined();
+  });
+
+  it('resolves quietly when the RPC call throws', async () => {
+    rpc.mockRejectedValue(new Error('offline'));
+    await expect(markResponseSeen('r1')).resolves.toBeUndefined();
   });
 });
