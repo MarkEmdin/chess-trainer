@@ -138,7 +138,8 @@
     },
     "status": {
       "asked": "Вопрос задан",
-      "answered": "Есть ответ"
+      "answered": "Есть ответ",
+      "newAnswer": "Новый ответ"
     }
   },
   "coachingAdmin": {
@@ -171,6 +172,13 @@
     },
     "emptyWaiting": "Нет вопросов, ожидающих ответа.",
     "emptyAnswered": "Ответов пока нет — тренер скоро ответит."
+  },
+  "notifications": {
+    "bell": "Уведомления",
+    "bellLabel": "Уведомления: новых ответов — {answers}, новых вопросов — {questions}",
+    "bellLabelStudent": "Уведомления: новых ответов — {answers}",
+    "newQuestions": "Новые вопросы учеников",
+    "myAnswers": "Ответы на мои вопросы"
   },
   "profile": {
     "title": "Профиль",
