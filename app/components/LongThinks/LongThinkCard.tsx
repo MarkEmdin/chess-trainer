@@ -1,11 +1,12 @@
 'use client';
 
 import { useFormatter, useTranslations } from 'next-intl';
-import { ClockIcon, MessageSquareIcon } from 'lucide-react';
+import { CheckIcon, ClockIcon, MessageSquareIcon } from 'lucide-react';
 import ChessboardWithNotation from '@/app/components/ChessboardWithNotation';
 import { formatSeconds } from '@/lib/chesscom/format';
 import type { LongThink } from '@/lib/games/longThinks';
 import type { Game, GamePlayer } from '@/lib/games/types';
+import type { ThreadStatus } from '@/lib/coaching/status';
 import { Card, CardContent } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -14,11 +15,11 @@ type Props = {
   think: LongThink;
   game: Game;
   onClick: () => void;
-  // Coaching surface — only meaningful for signed-in users. `existingThread`
-  // flips the "Ask coach" button into "View thread"; `onAskCoach` opens
-  // the modal regardless.
+  // Coaching surface — only meaningful for signed-in users. Once asked,
+  // `threadStatus` adds a badge and flips "Ask coach" into "View thread";
+  // `onAskCoach` opens the modal regardless.
   showCoachingButton: boolean;
-  existingThread: boolean;
+  threadStatus: ThreadStatus;
   onAskCoach: () => void;
 };
 
@@ -68,7 +69,7 @@ export default function LongThinkCard({
   game,
   onClick,
   showCoachingButton,
-  existingThread,
+  threadStatus,
   onAskCoach,
 }: Props) {
   const t = useTranslations('thinkTime');
@@ -152,6 +153,18 @@ export default function LongThinkCard({
                     })}
                   </span>
                 </span>
+                {threadStatus === 'asked' && (
+                  <span className="inline-flex items-center gap-1 rounded border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                    <MessageSquareIcon className="size-3" />
+                    {tCoaching('status.asked')}
+                  </span>
+                )}
+                {threadStatus === 'answered' && (
+                  <span className="inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                    <CheckIcon className="size-3" />
+                    {tCoaching('status.answered')}
+                  </span>
+                )}
               </div>
               <p className="text-xs text-muted-foreground">
                 {tTile(`timeClass.${game.timeClass}`)} · {dateStr}
@@ -168,7 +181,7 @@ export default function LongThinkCard({
                   className="self-start mt-1"
                 >
                   <MessageSquareIcon className="size-3.5" />
-                  {existingThread
+                  {threadStatus !== 'none'
                     ? tCoaching('viewThread')
                     : tCoaching('askCoach')}
                 </Button>
