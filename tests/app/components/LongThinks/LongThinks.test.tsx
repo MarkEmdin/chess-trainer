@@ -3,9 +3,13 @@ import LongThinks from '@/app/components/LongThinks';
 
 const FEN = 'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 2 3';
 
-jest.mock('next/dynamic', () => () => function ModalStub() {
-  return <div data-testid="modal" />;
-});
+jest.mock(
+  'next/dynamic',
+  () => () =>
+    function ModalStub() {
+      return <div data-testid="modal" />;
+    },
+);
 
 jest.mock('@/app/components/GamesShell', () => ({
   __esModule: true,
@@ -28,7 +32,13 @@ jest.mock('@/lib/games/longThinks', () => ({
         fenBefore: FEN,
         seconds: 47,
       },
-      game: { id: 'g1', url: 'u', pgn: '', userColor: 'white', endTime: new Date() },
+      game: {
+        id: 'g1',
+        url: 'u',
+        pgn: '',
+        userColor: 'white',
+        endTime: new Date(),
+      },
     },
   ],
 }));
