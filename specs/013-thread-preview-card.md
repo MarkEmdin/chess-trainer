@@ -25,7 +25,7 @@ Card with a thread (signed-in student):
 - "Coach's response" label + the latest response text clamped to 2 lines, or "Awaiting reply." in muted italic when there is none.
 - No button. Clicking (or Enter/Space on) the card opens the coaching modal. An unseen answer is marked seen, same as before (spec 012).
 
-Card without a thread: unchanged.
+Card without a thread: unchanged. The game modal it opens gets an "Ask coach" button next to "View game" (signed-in only, `/think-time` only); it closes the game and opens the coaching modal on the same key position.
 
 ## Data & types
 
@@ -35,6 +35,7 @@ Card without a thread: unchanged.
 ## UI
 
 - `app/components/LongThinks/LongThinkCard.tsx`: new optional `thread` prop. When present it renders the preview and hides the coaching button.
+- `app/components/ChessComGames/GameModal.tsx`: optional `onAskCoach` prop renders an "Ask coach" button; `/games` doesn't pass it.
 - `app/components/LongThinks/index.tsx`: passes `thread`; card click goes to `openCoaching` when a thread exists, otherwise to the game modal.
 
 ## i18n
@@ -47,6 +48,7 @@ Card without a thread: unchanged.
 - [x] Card with a thread shows the question and the latest answer (or "Awaiting reply."), no button
 - [x] Clicking a card with a thread opens the coaching modal and marks an unseen answer seen
 - [x] Clicking a card without a thread still opens the game modal; "Ask coach" still works
+- [x] The game modal on `/think-time` offers "Ask coach" for signed-in users
 - [x] `npm run lint` passes with zero warnings
 - [x] `npm run build` passes
 - [x] Tests under `tests/app/components/LongThinks/`

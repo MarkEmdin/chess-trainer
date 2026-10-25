@@ -187,6 +187,14 @@ export default function LongThinks({
           game={selected.game}
           initialIndex={selected.think.moveIndex - 1}
           onClose={() => setSelected(null)}
+          onAskCoach={
+            isAuthenticated
+              ? () => {
+                  setSelected(null);
+                  openCoaching(selected);
+                }
+              : undefined
+          }
         />
       )}
 

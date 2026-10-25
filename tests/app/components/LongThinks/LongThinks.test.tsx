@@ -3,11 +3,17 @@ import LongThinks from '@/app/components/LongThinks';
 
 const FEN = 'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 2 3';
 
+// Both modals load through next/dynamic, so one stub stands in for each;
+// it exposes the game modal's "Ask coach" handler when it gets one.
 jest.mock(
   'next/dynamic',
   () => () =>
-    function ModalStub() {
-      return <div data-testid="modal" />;
+    function ModalStub({ onAskCoach }: { onAskCoach?: () => void }) {
+      return (
+        <div data-testid="modal">
+          {onAskCoach && <button onClick={onAskCoach}>modal ask</button>}
+        </div>
+      );
     },
 );
 
@@ -147,5 +153,21 @@ describe('<LongThinks /> card click', () => {
     });
     expect(markResponseSeen).not.toHaveBeenCalled();
     expect(screen.getByTestId('modal')).toBeInTheDocument();
+  });
+
+  it('asks the coach from the game modal', async () => {
+    request = undefined;
+    renderIt();
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'open' }));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'modal ask' }));
+    });
+    // Game modal swapped for the coaching one, which has no ask handler.
+    expect(screen.getAllByTestId('modal')).toHaveLength(1);
+    expect(
+      screen.queryByRole('button', { name: 'modal ask' }),
+    ).not.toBeInTheDocument();
   });
 });
