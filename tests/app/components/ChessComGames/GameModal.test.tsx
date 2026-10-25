@@ -139,4 +139,24 @@ describe('<GameModal />', () => {
     expect(board()).toHaveAttribute('data-position', parser.fen());
     expect(screen.getByText('Move 3 / 3')).toBeInTheDocument();
   });
+
+  it('offers "Ask coach" when given a handler', () => {
+    const onAskCoach = jest.fn();
+    renderWithIntl(
+      <GameModal
+        game={makeGame()}
+        onClose={() => {}}
+        onAskCoach={onAskCoach}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /ask coach/i }));
+    expect(onAskCoach).toHaveBeenCalledTimes(1);
+  });
+
+  it('has no "Ask coach" without a handler', () => {
+    renderWithIntl(<GameModal game={makeGame()} onClose={() => {}} />);
+    expect(
+      screen.queryByRole('button', { name: /ask coach/i }),
+    ).not.toBeInTheDocument();
+  });
 });

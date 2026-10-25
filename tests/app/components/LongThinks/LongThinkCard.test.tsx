@@ -169,6 +169,70 @@ describe('<LongThinkCard />', () => {
     expect(screen.queryByText('Answered')).not.toBeInTheDocument();
   });
 
+  it('shows the question and the latest answer', () => {
+    renderWithIntl(
+      <LongThinkCard
+        think={whiteThink}
+        game={baseGame}
+        onClick={() => {}}
+        {...defaultCoachingProps}
+        threadStatus="answered"
+        thread={{
+          body: 'Why not e5?',
+          responses: [{ body: 'old' }, { body: 'Because Nxe5.' }],
+        }}
+      />,
+    );
+    expect(screen.getByText('Your question')).toBeInTheDocument();
+    expect(screen.getByText('Why not e5?')).toBeInTheDocument();
+    expect(screen.getByText("Coach's response")).toBeInTheDocument();
+    expect(screen.getByText('Because Nxe5.')).toBeInTheDocument();
+    expect(screen.queryByText('old')).not.toBeInTheDocument();
+  });
+
+  it('shows "Awaiting reply." with no answer yet', () => {
+    renderWithIntl(
+      <LongThinkCard
+        think={whiteThink}
+        game={baseGame}
+        onClick={() => {}}
+        {...defaultCoachingProps}
+        threadStatus="asked"
+        thread={{ body: 'Why not e5?', responses: [] }}
+      />,
+    );
+    expect(screen.getByText('Awaiting reply.')).toBeInTheDocument();
+  });
+
+  it('hides the coaching button when there is a thread', () => {
+    renderWithIntl(
+      <LongThinkCard
+        think={whiteThink}
+        game={baseGame}
+        onClick={() => {}}
+        {...defaultCoachingProps}
+        showCoachingButton
+        threadStatus="asked"
+        thread={{ body: 'Why not e5?', responses: [] }}
+      />,
+    );
+    expect(screen.queryByText('Ask coach')).not.toBeInTheDocument();
+    expect(screen.queryByText('View thread')).not.toBeInTheDocument();
+  });
+
+  it('keeps "Ask coach" without a thread', () => {
+    renderWithIntl(
+      <LongThinkCard
+        think={whiteThink}
+        game={baseGame}
+        onClick={() => {}}
+        {...defaultCoachingProps}
+        showCoachingButton
+      />,
+    );
+    expect(screen.getByText('Ask coach')).toBeInTheDocument();
+  });
+
   it('says "Answered" once the answer was opened', () => {
     renderWithIntl(
       <LongThinkCard

@@ -8,6 +8,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ExternalLinkIcon,
+  MessageSquareIcon,
 } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui/button';
@@ -32,10 +33,19 @@ type Props = {
   game: Game;
   onClose: () => void;
   initialIndex?: number;
+  // Shown on /think-time for a position not asked about yet, mirroring the
+  // card's button (spec 013).
+  onAskCoach?: () => void;
 };
 
-export default function GameModal({ game, onClose, initialIndex }: Props) {
+export default function GameModal({
+  game,
+  onClose,
+  initialIndex,
+  onAskCoach,
+}: Props) {
   const t = useTranslations('games.modal');
+  const tCoaching = useTranslations('coaching');
   const tTile = useTranslations('games.tile');
   const format = useFormatter();
   const { positions, moves } = useMemo(
@@ -213,12 +223,20 @@ export default function GameModal({ game, onClose, initialIndex }: Props) {
                     })
                   : t('lastMoveCaption', { move: lastMoveLabel }))}
             </span>
-            <Button variant="outline" size="sm" asChild>
-              <a href={game.url} target="_blank" rel="noopener noreferrer">
-                <ExternalLinkIcon className="size-4" />
-                {t('viewGame')}
-              </a>
-            </Button>
+            <div className="flex gap-2 flex-wrap">
+              {onAskCoach && (
+                <Button variant="outline" size="sm" onClick={onAskCoach}>
+                  <MessageSquareIcon className="size-4" />
+                  {tCoaching('askCoach')}
+                </Button>
+              )}
+              <Button variant="outline" size="sm" asChild>
+                <a href={game.url} target="_blank" rel="noopener noreferrer">
+                  <ExternalLinkIcon className="size-4" />
+                  {t('viewGame')}
+                </a>
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>

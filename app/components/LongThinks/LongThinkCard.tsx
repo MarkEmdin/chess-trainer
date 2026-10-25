@@ -9,6 +9,7 @@ import type { Game, GamePlayer } from '@/lib/games/types';
 import type { ThreadStatus } from '@/lib/coaching/status';
 import { Card, CardContent } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
+import SectionLabel from '@/app/components/SectionLabel';
 import { cn } from '@/lib/utils';
 
 type Props = {
@@ -16,10 +17,12 @@ type Props = {
   game: Game;
   onClick: () => void;
   // Coaching surface — only meaningful for signed-in users. Once asked,
-  // `threadStatus` adds a badge and flips "Ask coach" into "View thread";
-  // `onAskCoach` opens the modal regardless.
+  // `threadStatus` adds a badge and `thread` previews the question and the
+  // latest answer in place of the "Ask coach" button; the card click then
+  // opens the thread (the container decides, spec 013).
   showCoachingButton: boolean;
   threadStatus: ThreadStatus;
+  thread?: { body: string; responses: { body: string }[] };
   // An answer the student hasn't opened yet (spec 012).
   hasNewAnswer: boolean;
   onAskCoach: () => void;
@@ -72,6 +75,7 @@ export default function LongThinkCard({
   onClick,
   showCoachingButton,
   threadStatus,
+  thread,
   hasNewAnswer,
   onAskCoach,
 }: Props) {
@@ -80,6 +84,7 @@ export default function LongThinkCard({
   const tTile = useTranslations('games.tile');
   const format = useFormatter();
   const dateStr = format.dateTime(game.endTime, { dateStyle: 'medium' });
+  const latestResponse = thread?.responses.at(-1);
 
   // Board is oriented so the user is at the bottom — opponent labels the top
   // row, user labels the bottom row. Each player's piece color flips with
@@ -178,7 +183,27 @@ export default function LongThinkCard({
               <p className="text-xs text-muted-foreground">
                 {tTile(`timeClass.${game.timeClass}`)} · {dateStr}
               </p>
-              {showCoachingButton && (
+              {thread && (
+                <>
+                  <SectionLabel label={tCoaching('yourQuestion')}>
+                    <p className="text-sm text-foreground line-clamp-2">
+                      {thread.body}
+                    </p>
+                  </SectionLabel>
+                  <SectionLabel label={tCoaching('coachResponse')}>
+                    {latestResponse ? (
+                      <p className="text-sm text-foreground line-clamp-2">
+                        {latestResponse.body}
+                      </p>
+                    ) : (
+                      <p className="text-sm text-muted-foreground italic">
+                        {tCoaching('awaitingReply')}
+                      </p>
+                    )}
+                  </SectionLabel>
+                </>
+              )}
+              {showCoachingButton && !thread && (
                 <Button
                   type="button"
                   variant="outline"
@@ -190,9 +215,7 @@ export default function LongThinkCard({
                   className="self-start mt-1"
                 >
                   <MessageSquareIcon className="size-3.5" />
-                  {threadStatus !== 'none'
-                    ? tCoaching('viewThread')
-                    : tCoaching('askCoach')}
+                  {tCoaching('askCoach')}
                 </Button>
               )}
             </div>

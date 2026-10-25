@@ -3,11 +3,17 @@ import LongThinks from '@/app/components/LongThinks';
 
 const FEN = 'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 2 3';
 
+// Both modals load through next/dynamic, so one stub stands in for each;
+// it exposes the game modal's "Ask coach" handler when it gets one.
 jest.mock(
   'next/dynamic',
   () => () =>
-    function ModalStub() {
-      return <div data-testid="modal" />;
+    function ModalStub({ onAskCoach }: { onAskCoach?: () => void }) {
+      return (
+        <div data-testid="modal">
+          {onAskCoach && <button onClick={onAskCoach}>modal ask</button>}
+        </div>
+      );
     },
 );
 
@@ -49,17 +55,27 @@ jest.mock('@/lib/chesscom/useStoredThreshold', () => ({
 
 jest.mock('@/app/components/LongThinks/LongThinkCard', () => ({
   __esModule: true,
-  default: (props: { hasNewAnswer: boolean; onAskCoach: () => void }) => (
-    <button data-new={String(props.hasNewAnswer)} onClick={props.onAskCoach}>
-      ask
-    </button>
+  default: (props: {
+    hasNewAnswer: boolean;
+    onAskCoach: () => void;
+    onClick: () => void;
+  }) => (
+    <>
+      <button data-new={String(props.hasNewAnswer)} onClick={props.onAskCoach}>
+        ask
+      </button>
+      <button onClick={props.onClick}>open</button>
+    </>
   ),
 }));
 
-let request: Record<string, unknown> = {};
+let request: Record<string, unknown> | undefined = {};
 const mutate = jest.fn();
 jest.mock('@/lib/coaching/useMyCoachingRequests', () => ({
-  useMyCoachingRequests: () => ({ data: { [FEN]: request }, mutate }),
+  useMyCoachingRequests: () => ({
+    data: request ? { [FEN]: request } : {},
+    mutate,
+  }),
 }));
 
 const markResponseSeen = jest.fn();
@@ -115,5 +131,43 @@ describe('<LongThinks /> new answers', () => {
       fireEvent.click(screen.getByRole('button', { name: 'ask' }));
     });
     expect(markResponseSeen).not.toHaveBeenCalled();
+  });
+});
+
+describe('<LongThinks /> card click', () => {
+  it('opens the thread from a card that has one', async () => {
+    request = { ...answered, response_seen_at: null };
+    renderIt();
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'open' }));
+    });
+    expect(markResponseSeen).toHaveBeenCalledWith('r1');
+    expect(screen.getByTestId('modal')).toBeInTheDocument();
+  });
+
+  it('opens the game from a card without a thread', async () => {
+    request = undefined;
+    renderIt();
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'open' }));
+    });
+    expect(markResponseSeen).not.toHaveBeenCalled();
+    expect(screen.getByTestId('modal')).toBeInTheDocument();
+  });
+
+  it('asks the coach from the game modal', async () => {
+    request = undefined;
+    renderIt();
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'open' }));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'modal ask' }));
+    });
+    // Game modal swapped for the coaching one, which has no ask handler.
+    expect(screen.getAllByTestId('modal')).toHaveLength(1);
+    expect(
+      screen.queryByRole('button', { name: 'modal ask' }),
+    ).not.toBeInTheDocument();
   });
 });
