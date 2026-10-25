@@ -107,6 +107,7 @@ export default function LongThinks({
               const thread = requestsByFen?.[item.think.fenBefore];
               return {
                 ...item,
+                thread,
                 status: threadStatus(thread),
                 hasNewAnswer: !!thread && isUnseen(thread),
               };
@@ -153,18 +154,27 @@ export default function LongThinks({
                 </p>
               ) : (
                 <div className="flex flex-col gap-3">
-                  {shown.map(({ think, game, status, hasNewAnswer }) => (
-                    <LongThinkCard
-                      key={`${game.id}-${think.moveIndex}`}
-                      think={think}
-                      game={game}
-                      onClick={() => setSelected({ think, game })}
-                      showCoachingButton={isAuthenticated}
-                      threadStatus={status}
-                      hasNewAnswer={hasNewAnswer}
-                      onAskCoach={() => openCoaching({ think, game })}
-                    />
-                  ))}
+                  {shown.map(
+                    ({ think, game, thread, status, hasNewAnswer }) => (
+                      <LongThinkCard
+                        key={`${game.id}-${think.moveIndex}`}
+                        think={think}
+                        game={game}
+                        // Asked positions open the thread (it browses the
+                        // game too); the rest open the game (spec 013).
+                        onClick={() =>
+                          thread
+                            ? openCoaching({ think, game })
+                            : setSelected({ think, game })
+                        }
+                        showCoachingButton={isAuthenticated}
+                        threadStatus={status}
+                        thread={thread}
+                        hasNewAnswer={hasNewAnswer}
+                        onAskCoach={() => openCoaching({ think, game })}
+                      />
+                    ),
+                  )}
                 </div>
               )}
             </div>

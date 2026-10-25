@@ -1,6 +1,6 @@
 # Spec: Question & answer preview on key-position cards
 
-Status: in-progress
+Status: done
 Branch: feature/thread-preview-card
 
 ## Problem
@@ -44,9 +44,9 @@ Card without a thread: unchanged.
 
 ## Acceptance criteria
 
-- [ ] Card with a thread shows the question and the latest answer (or "Awaiting reply."), no button
-- [ ] Clicking a card with a thread opens the coaching modal and marks an unseen answer seen
-- [ ] Clicking a card without a thread still opens the game modal; "Ask coach" still works
-- [ ] `npm run lint` passes with zero warnings
-- [ ] `npm run build` passes
-- [ ] Tests under `tests/app/components/LongThinks/`
+- [x] Card with a thread shows the question and the latest answer (or "Awaiting reply."), no button
+- [x] Clicking a card with a thread opens the coaching modal and marks an unseen answer seen
+- [x] Clicking a card without a thread still opens the game modal; "Ask coach" still works
+- [x] `npm run lint` passes with zero warnings
+- [x] `npm run build` passes
+- [x] Tests under `tests/app/components/LongThinks/`
