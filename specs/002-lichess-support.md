@@ -1,6 +1,6 @@
 # Spec: Lichess support for Games / Key Positions
 
-Status: draft
+Status: done
 Branch: feature/lichess-support
 
 ## Problem
