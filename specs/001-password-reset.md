@@ -1,6 +1,6 @@
 # Spec: Password reset
 
-Status: draft
+Status: done
 Branch: feature/password-reset
 
 ## Problem
