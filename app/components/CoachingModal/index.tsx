@@ -495,7 +495,8 @@ function MessageBody({ message, fen, id, viewingKey, onView }: MessageProps) {
           onView({
             sans: content.lines[segment.line],
             line: segment.line,
-            startPly: segment.to,
+            // The chip's first move, so the reader steps forward through it.
+            startPly: segment.from + 1,
             drawings: content.drawings,
             key: `${id}:${index}`,
           })

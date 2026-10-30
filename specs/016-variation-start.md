@@ -1,6 +1,6 @@
 # Spec: open a variation at its start
 
-Status: approved
+Status: done
 Branch: feature/variation-start
 
 ## Problem
@@ -24,6 +24,6 @@ Clicking a chip opens the board on the chip's first move: that move is played an
 
 ## Acceptance criteria
 
-- [ ] Clicking a chip shows the position after the chip's first move
-- [ ] A chip that continues a line after text (from > 0) opens on its own first move, not the line's
-- [ ] `npm run lint`, `npm run build`, `npm test` pass
+- [x] Clicking a chip shows the position after the chip's first move
+- [x] A chip that continues a line after text (from > 0) opens on its own first move, not the line's
+- [x] `npm run lint`, `npm run build`, `npm test` pass
