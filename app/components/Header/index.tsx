@@ -27,7 +27,7 @@ export default async function Header() {
 
   return (
     <header className="bg-card text-card-foreground border-b border-border">
-      <nav className="max-w-5xl mx-auto flex items-center justify-between gap-4 px-6 py-4">
+      <nav className="max-w-5xl mx-auto flex items-center justify-between gap-3 px-4 py-4 sm:gap-4 sm:px-6">
         <Link
           href="/"
           className="text-lg font-bold hover:text-muted-foreground transition-colors"
@@ -35,7 +35,7 @@ export default async function Header() {
           ♔ Chess Fundamentals
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <NotificationBell />
           {user ? (
             <AccountMenu
