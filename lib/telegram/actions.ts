@@ -33,12 +33,14 @@ export async function disconnectTelegram(): Promise<void> {
 
 export async function setTelegramPromptDismissed(
   dismissed: boolean,
-): Promise<void> {
+): Promise<{ ok: boolean }> {
+  if (typeof dismissed !== 'boolean') return { ok: false };
   const user = await getAuthedUser();
-  if (!user) return;
+  if (!user) return { ok: false };
   const supabase = await createClient();
-  await supabase
+  const { error } = await supabase
     .from('user_profiles')
     .update({ telegram_prompt_dismissed: dismissed })
     .eq('id', user.id);
+  return { ok: !error };
 }

@@ -120,9 +120,20 @@ describe('setTelegramPromptDismissed', () => {
     expect(eq).toHaveBeenCalledWith('id', 'u1');
   });
 
+  it('reports success', async () => {
+    expect(await setTelegramPromptDismissed(true)).toEqual({ ok: true });
+  });
+
   it('does nothing when signed out', async () => {
     getAuthedUser.mockResolvedValue(null);
-    await setTelegramPromptDismissed(true);
+    expect(await setTelegramPromptDismissed(true)).toEqual({ ok: false });
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it('rejects a non-boolean value', async () => {
+    expect(
+      await setTelegramPromptDismissed('yes' as unknown as boolean),
+    ).toEqual({ ok: false });
     expect(update).not.toHaveBeenCalled();
   });
 });

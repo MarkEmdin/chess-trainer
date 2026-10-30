@@ -29,8 +29,8 @@ export default function AccountMenu({ nickname, isAdmin }: Props) {
       <DropdownMenuTrigger
         aria-label={t('accountMenu')}
         className={cn(
-          buttonVariants({ variant: 'ghost', size: 'icon' }),
-          'rounded-full bg-primary font-semibold text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground',
+          buttonVariants({ size: 'icon' }),
+          'rounded-full font-semibold hover:bg-primary/90',
         )}
       >
         {nickname.charAt(0).toUpperCase() || '?'}

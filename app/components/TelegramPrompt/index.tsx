@@ -13,9 +13,14 @@ export default function TelegramPrompt() {
   const { connect, pending, error } = useTelegramConnect();
   const [dismissed, setDismissed] = useState(false);
 
+  // A failed save unticks the box so the student isn't told they opted out.
   function toggle(value: boolean) {
     setDismissed(value);
-    void setTelegramPromptDismissed(value);
+    setTelegramPromptDismissed(value)
+      .catch(() => ({ ok: false }))
+      .then(({ ok }) => {
+        if (!ok) setDismissed(!value);
+      });
   }
 
   return (
@@ -24,7 +29,11 @@ export default function TelegramPrompt() {
       <Button type="button" size="sm" disabled={pending} onClick={connect}>
         {t('prompt.connect')}
       </Button>
-      {error && <p className="text-destructive">{error}</p>}
+      {error && (
+        <p role="alert" className="text-destructive">
+          {error}
+        </p>
+      )}
       <label className="flex items-center gap-2 text-muted-foreground">
         <input
           type="checkbox"

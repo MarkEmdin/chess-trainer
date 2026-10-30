@@ -38,6 +38,14 @@ describe('AccountMenu', () => {
     expect(trigger()).toHaveTextContent(initial);
   });
 
+  // Ghost-button classes turned the circle grey while open and on dark hover.
+  it('keeps the primary circle colours in every state', () => {
+    renderWithIntl(<AccountMenu nickname="ann" isAdmin={false} />);
+    expect(trigger().className).not.toMatch(
+      /aria-expanded:bg-muted|hover:bg-muted/,
+    );
+  });
+
   it('lists the nickname, profile, questions and logout', async () => {
     await open({ nickname: 'ann', isAdmin: false });
     expect(screen.getByText('ann')).toBeInTheDocument();
@@ -48,7 +56,9 @@ describe('AccountMenu', () => {
     expect(
       screen.getByRole('menuitem', { name: 'My coaching' }),
     ).toHaveAttribute('href', '/coaching');
-    expect(screen.getByRole('menuitem', { name: 'Logout' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('menuitem', { name: 'Logout' }),
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole('menuitem', { name: 'Admin' }),
     ).not.toBeInTheDocument();
