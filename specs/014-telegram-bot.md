@@ -1,6 +1,6 @@
 # Spec: Telegram bot notifications
 
-Status: approved
+Status: done
 Branch: feature/telegram-bot
 
 ## Problem
@@ -154,6 +154,6 @@ Bot texts (namespace `telegram.bot`): `connected`, `expired`, `startNoCode`, `he
 - [x] User text in bot messages is HTML-escaped (test)
 - [x] `/admin?request=<id>` opens the right tab and that card's modal (test)
 - [x] Message language follows `preferred_locale` (test)
-- [ ] Manual check with a real dev bot: connect from `/profile`, ask a question as a student → admin gets it → tap the button → modal opens → answer → student gets the message
+- [x] Manual check with a real dev bot through a Cloudflare tunnel: link via `/start <code>`, new-question message to the admin, `/new` list, chat moved to the student, "answered" message, `/stop`; all delivered (2026-10-30). Found and fixed: webhook button links used `localhost`. Not exercised live: the `/admin?request=` button opening the modal (covered by tests)
 - [x] `npm run lint`, `npm test`, `npm run build` pass
 - [ ] Prod: migration applied (`npx supabase db push --linked`), env vars set in Vercel, `scripts/telegram-setup.mjs` run against the prod URL
