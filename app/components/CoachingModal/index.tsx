@@ -20,6 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/app/components/ui/dialog';
+import TelegramPrompt from '@/app/components/TelegramPrompt';
 import {
   createCoachingRequest,
   respondToRequest,
@@ -355,6 +356,11 @@ export default function CoachingModal({
                 {mode === 'student' ? t('submitted') : tAdmin('sent')}
               </p>
             )}
+
+            {mode === 'student' &&
+              askState &&
+              'success' in askState &&
+              askState.telegramPrompt && <TelegramPrompt />}
 
             {canWrite && (
               <form

@@ -79,7 +79,9 @@
       "title": "Email confirmed",
       "body": "You're logged in. Welcome!",
       "cta": "Start learning"
-    }
+    },
+    "accountMenu": "Account menu",
+    "profile": "Profile"
   },
   "coaching": {
     "askCoach": "Ask coach",
@@ -474,6 +476,11 @@
       "openAnswer": "Open answer",
       "openAdmin": "All questions",
       "openProfile": "Open profile"
+    },
+    "prompt": {
+      "text": "Want to know when the coach answers? We'll message you in Telegram.",
+      "connect": "Connect Telegram",
+      "dontRemind": "Don't remind me"
     }
   },
   "metadata": {

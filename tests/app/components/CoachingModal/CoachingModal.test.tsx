@@ -118,6 +118,11 @@ jest.mock('@/lib/coaching/actions', () => ({
   respondToRequest: (prev: unknown, fd: FormData) => respondToRequest(prev, fd),
 }));
 
+jest.mock('@/app/components/TelegramPrompt', () => ({
+  __esModule: true,
+  default: () => <div data-testid="telegram-prompt" />,
+}));
+
 const FEN = 'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 3 3';
 
 function thread(
@@ -173,6 +178,42 @@ beforeEach(() => {
 });
 
 describe('CoachingModal', () => {
+  it.each([
+    [true, true],
+    [false, false],
+  ])(
+    'offers Telegram after a question when the server says %s',
+    async (telegramPrompt, shown) => {
+      createCoachingRequest.mockResolvedValue({
+        success: true,
+        requestId: 'r1',
+        telegramPrompt,
+      });
+      renderWithIntl(
+        <CoachingModal
+          {...baseProps}
+          mode="student"
+          thread={undefined}
+          ask={{ gameUrl: 'https://lichess.org/abc', moveIndex: 5 }}
+        />,
+      );
+      fireEvent.change(editor(), { target: { value: 'Why?' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Send to coach' }));
+      await screen.findByRole('status');
+      expect(!!screen.queryByTestId('telegram-prompt')).toBe(shown);
+    },
+  );
+
+  it('never offers Telegram after a coach reply', async () => {
+    renderWithIntl(
+      <CoachingModal {...baseProps} mode="coach" thread={thread()} />,
+    );
+    fireEvent.change(editor(), { target: { value: 'Play Nf6' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Send reply' }));
+    await screen.findByRole('status');
+    expect(screen.queryByTestId('telegram-prompt')).not.toBeInTheDocument();
+  });
+
   it('lets the student ask with text and moves played on the board', async () => {
     renderWithIntl(
       <CoachingModal
