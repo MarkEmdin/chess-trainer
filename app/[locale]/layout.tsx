@@ -7,8 +7,8 @@ import { routing } from '@/i18n/routing';
 import '@/app/globals.css';
 import Header from '@/app/components/Header';
 import ThemeProvider from '@/app/components/ThemeProvider';
+import { SITE_URL } from '@/lib/site';
 
-const SITE_URL = 'https://chess-trainer-amber.vercel.app';
 const BRAND = 'Chess Fundamentals';
 
 const geistSans = Geist({
