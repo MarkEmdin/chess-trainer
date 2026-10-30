@@ -30,3 +30,15 @@ export async function disconnectTelegram(): Promise<void> {
   await supabase.from('telegram_links').delete().eq('user_id', user.id);
   revalidatePath('/[locale]/profile', 'page');
 }
+
+export async function setTelegramPromptDismissed(
+  dismissed: boolean,
+): Promise<void> {
+  const user = await getAuthedUser();
+  if (!user) return;
+  const supabase = await createClient();
+  await supabase
+    .from('user_profiles')
+    .update({ telegram_prompt_dismissed: dismissed })
+    .eq('id', user.id);
+}

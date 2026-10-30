@@ -74,6 +74,11 @@ jest.mock('@/lib/telegram/notify', () => ({
   notifyStudentOfAnswer: (...a: unknown[]) => notifyStudentOfAnswer(...a),
 }));
 
+const shouldOfferTelegram = jest.fn();
+jest.mock('@/lib/telegram/prompt', () => ({
+  shouldOfferTelegram: (...a: unknown[]) => shouldOfferTelegram(...a),
+}));
+
 jest.mock('next-intl/server', () => ({
   getTranslations: async (namespace: string) => (key: string) =>
     `${namespace}.${key}`,
@@ -122,15 +127,31 @@ beforeEach(() => {
   requestRow = { fen: BLACK_TO_MOVE };
   existingResponse = null;
   getAuthedUser.mockResolvedValue({ id: 'c1', role: 'admin' });
+  shouldOfferTelegram.mockReset().mockResolvedValue(true);
 });
 
 describe('createCoachingRequest', () => {
+  it('returns whether to offer Telegram for the asking user', async () => {
+    shouldOfferTelegram.mockResolvedValue(false);
+    const result = await createCoachingRequest(undefined, askForm());
+    expect(result).toEqual({
+      success: true,
+      requestId: 'new-id',
+      telegramPrompt: false,
+    });
+    expect(shouldOfferTelegram).toHaveBeenCalledWith('u1');
+  });
+
   it('stores a valid variation', async () => {
     const result = await createCoachingRequest(
       undefined,
       askForm({ variation: '["Nf6"]' }),
     );
-    expect(result).toEqual({ success: true, requestId: 'new-id' });
+    expect(result).toEqual({
+      success: true,
+      requestId: 'new-id',
+      telegramPrompt: true,
+    });
     expect(insert).toHaveBeenCalledWith(
       'coaching_requests',
       expect.objectContaining({ variation: ['Nf6'] }),
@@ -150,7 +171,11 @@ describe('createCoachingRequest', () => {
       undefined,
       askForm({ fen: RUY_KEY_FEN, move_index: '5', pgn: RUY_PGN }),
     );
-    expect(result).toEqual({ success: true, requestId: 'new-id' });
+    expect(result).toEqual({
+      success: true,
+      requestId: 'new-id',
+      telegramPrompt: true,
+    });
     expect(insertedPgn()).toBe(RUY_PGN);
   });
 
@@ -159,7 +184,11 @@ describe('createCoachingRequest', () => {
       undefined,
       askForm({ pgn: RUY_PGN }),
     );
-    expect(result).toEqual({ success: true, requestId: 'new-id' });
+    expect(result).toEqual({
+      success: true,
+      requestId: 'new-id',
+      telegramPrompt: true,
+    });
     expect(insertedPgn()).toBeNull();
   });
 
@@ -174,7 +203,11 @@ describe('createCoachingRequest', () => {
       undefined,
       askForm({ fen: RUY_KEY_FEN, move_index: '5', pgn: padded }),
     );
-    expect(result).toEqual({ success: true, requestId: 'new-id' });
+    expect(result).toEqual({
+      success: true,
+      requestId: 'new-id',
+      telegramPrompt: true,
+    });
     expect(insertedPgn()).toBeNull();
   });
 
@@ -183,7 +216,11 @@ describe('createCoachingRequest', () => {
       undefined,
       askForm({ body: LONG_CRLF_BODY }),
     );
-    expect(result).toEqual({ success: true, requestId: 'new-id' });
+    expect(result).toEqual({
+      success: true,
+      requestId: 'new-id',
+      telegramPrompt: true,
+    });
     expect(insertedBody()).not.toContain('\r');
   });
 
@@ -276,7 +313,11 @@ describe('inline-move content', () => {
       undefined,
       askForm({ body: 'ignored', content: D6_CONTENT }),
     );
-    expect(result).toEqual({ success: true, requestId: 'new-id' });
+    expect(result).toEqual({
+      success: true,
+      requestId: 'new-id',
+      telegramPrompt: true,
+    });
     expect(insert).toHaveBeenCalledWith(
       'coaching_requests',
       expect.objectContaining({
@@ -319,7 +360,11 @@ describe('inline-move content', () => {
         }),
       }),
     );
-    expect(result).toEqual({ success: true, requestId: 'new-id' });
+    expect(result).toEqual({
+      success: true,
+      requestId: 'new-id',
+      telegramPrompt: true,
+    });
     expect(insertedBody()).toBe('3… d6');
   });
 
@@ -394,6 +439,7 @@ describe('telegram notifications', () => {
     expect(await createCoachingRequest(undefined, askForm())).toEqual({
       success: true,
       requestId: 'new-id',
+      telegramPrompt: true,
     });
     expect(await respondToRequest(undefined, replyForm())).toEqual({
       success: true,

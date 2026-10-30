@@ -1,11 +1,25 @@
 import { revalidatePath } from 'next/cache';
-import { disconnectTelegram, startTelegramLink } from '@/lib/telegram/actions';
+import {
+  disconnectTelegram,
+  setTelegramPromptDismissed,
+  startTelegramLink,
+} from '@/lib/telegram/actions';
 
 const del = jest.fn();
+const update = jest.fn();
 const eq = jest.fn();
 jest.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
     from: (table: string) => ({
+      update: (values: unknown) => {
+        update(table, values);
+        return {
+          eq: async (...args: unknown[]) => {
+            eq(...args);
+            return { error: null };
+          },
+        };
+      },
       delete: () => {
         del(table);
         return {
@@ -94,5 +108,21 @@ describe('disconnectTelegram', () => {
     getAuthedUser.mockResolvedValue(null);
     await disconnectTelegram();
     expect(del).not.toHaveBeenCalled();
+  });
+});
+
+describe('setTelegramPromptDismissed', () => {
+  it.each([true, false])('saves %s on the own profile row', async (value) => {
+    await setTelegramPromptDismissed(value);
+    expect(update).toHaveBeenCalledWith('user_profiles', {
+      telegram_prompt_dismissed: value,
+    });
+    expect(eq).toHaveBeenCalledWith('id', 'u1');
+  });
+
+  it('does nothing when signed out', async () => {
+    getAuthedUser.mockResolvedValue(null);
+    await setTelegramPromptDismissed(true);
+    expect(update).not.toHaveBeenCalled();
   });
 });

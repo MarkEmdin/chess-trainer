@@ -6,6 +6,7 @@ import { after } from 'next/server';
 import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { SITE_URL } from '@/lib/site';
+import { shouldOfferTelegram } from '@/lib/telegram/prompt';
 import {
   notifyAdminsOfQuestion,
   notifyStudentOfAnswer,
@@ -22,7 +23,7 @@ import {
 
 export type CoachingRequestState =
   | { error: string }
-  | { success: true; requestId: string }
+  | { success: true; requestId: string; telegramPrompt: boolean }
   | undefined;
 
 export type RespondState = { error: string } | { success: true } | undefined;
@@ -150,7 +151,11 @@ export async function createCoachingRequest(
 
   const origin = (await headers()).get('origin') ?? SITE_URL;
   after(() => notifyAdminsOfQuestion(data.id, origin));
-  return { success: true, requestId: data.id };
+  return {
+    success: true,
+    requestId: data.id,
+    telegramPrompt: await shouldOfferTelegram(user.id),
+  };
 }
 
 // Admin-side: write a response to a coaching request. Belt-and-suspenders
