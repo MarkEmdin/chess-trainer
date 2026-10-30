@@ -444,6 +444,37 @@
       "retry": "Try again"
     }
   },
+  "telegram": {
+    "title": "Telegram",
+    "descriptionStudent": "Get a Telegram message when the coach answers your question.",
+    "descriptionAdmin": "Get a Telegram message for every new student question, and when your own questions are answered.",
+    "connect": "Connect Telegram",
+    "pendingHint": "Pressed Start in Telegram? Refresh this page.",
+    "connected": "Connected",
+    "disconnect": "Disconnect",
+    "errors": {
+      "notAuthenticated": "You must be signed in"
+    },
+    "bot": {
+      "connected": "Done! Telegram is connected to the account {nickname}.",
+      "connectedStudent": "I'll write when the coach answers your questions.",
+      "connectedAdmin": "I'll write about every new student question. /new shows the unanswered ones.",
+      "expired": "This link has expired. Open your profile and press Connect Telegram again.",
+      "startNoCode": "Hi! To get notifications, open your profile on the site and press Connect Telegram.",
+      "help": "I send notifications from Chess Fundamentals. Commands: /new (admins only), /stop.",
+      "helpUnlinked": "Hi! To get notifications, open your profile on the site and press Connect Telegram.",
+      "stopped": "Notifications are off. You can reconnect from your profile.",
+      "newQuestion": "❓ New question from {nickname}\nMove: {move}\n\n{body}",
+      "answered": "✅ The coach answered your question about move {move}.",
+      "listTitle": "Unanswered questions: {count}",
+      "listEmpty": "No unanswered questions 🎉",
+      "listMore": "…and {count} more",
+      "openAndAnswer": "Open and answer",
+      "openAnswer": "Open answer",
+      "openAdmin": "All questions",
+      "openProfile": "Open profile"
+    }
+  },
   "metadata": {
     "description": "Learn to analyze chess positions yourself — find the key moments in your games and discuss them with a coach."
   }
