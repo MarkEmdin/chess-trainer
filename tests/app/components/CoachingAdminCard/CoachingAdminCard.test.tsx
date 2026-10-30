@@ -24,6 +24,8 @@ jest.mock(
       );
     },
 );
+// The server actions pull in next/server, which needs a Request global.
+jest.mock('@/lib/coaching/actions', () => ({}));
 jest.mock('@/app/components/ChessboardContainer', () => ({
   __esModule: true,
   default: () => <div data-testid="board" />,

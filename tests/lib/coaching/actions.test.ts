@@ -53,6 +53,27 @@ jest.mock('@/lib/auth/getUser', () => ({
 
 jest.mock('next/cache', () => ({ revalidatePath: jest.fn() }));
 
+// Run `after` callbacks immediately; a rejecting callback must not escape.
+jest.mock('next/server', () => ({
+  after: (fn: () => unknown) => {
+    try {
+      void Promise.resolve(fn()).catch(() => {});
+    } catch {
+      // swallowed like Next does
+    }
+  },
+}));
+jest.mock('next/headers', () => ({
+  headers: async () => ({ get: () => 'https://site.test' }),
+}));
+
+const notifyAdminsOfQuestion = jest.fn();
+const notifyStudentOfAnswer = jest.fn();
+jest.mock('@/lib/telegram/notify', () => ({
+  notifyAdminsOfQuestion: (...a: unknown[]) => notifyAdminsOfQuestion(...a),
+  notifyStudentOfAnswer: (...a: unknown[]) => notifyStudentOfAnswer(...a),
+}));
+
 jest.mock('next-intl/server', () => ({
   getTranslations: async (namespace: string) => (key: string) =>
     `${namespace}.${key}`,
@@ -96,6 +117,8 @@ function insertedBody(): string {
 
 beforeEach(() => {
   insert.mockClear();
+  notifyAdminsOfQuestion.mockReset();
+  notifyStudentOfAnswer.mockReset();
   requestRow = { fen: BLACK_TO_MOVE };
   existingResponse = null;
   getAuthedUser.mockResolvedValue({ id: 'c1', role: 'admin' });
@@ -337,6 +360,43 @@ describe('inline-move content', () => {
       body: 'Хотел 3… d6',
       variation: null,
       content: JSON.parse(D6_CONTENT),
+    });
+  });
+});
+
+describe('telegram notifications', () => {
+  it('notifies admins after a question is stored', async () => {
+    await createCoachingRequest(undefined, askForm());
+    expect(notifyAdminsOfQuestion).toHaveBeenCalledWith(
+      'new-id',
+      'https://site.test',
+    );
+  });
+
+  it('notifies the student after an answer is stored', async () => {
+    await respondToRequest(undefined, replyForm());
+    expect(notifyStudentOfAnswer).toHaveBeenCalledWith(
+      'r1',
+      'https://site.test',
+    );
+  });
+
+  it('does not notify on a validation error', async () => {
+    await createCoachingRequest(undefined, askForm({ variation: 'nope' }));
+    await respondToRequest(undefined, replyForm({ variation: '["e4"]' }));
+    expect(notifyAdminsOfQuestion).not.toHaveBeenCalled();
+    expect(notifyStudentOfAnswer).not.toHaveBeenCalled();
+  });
+
+  it('still succeeds when a notification rejects', async () => {
+    notifyAdminsOfQuestion.mockRejectedValue(new Error('boom'));
+    notifyStudentOfAnswer.mockRejectedValue(new Error('boom'));
+    expect(await createCoachingRequest(undefined, askForm())).toEqual({
+      success: true,
+      requestId: 'new-id',
+    });
+    expect(await respondToRequest(undefined, replyForm())).toEqual({
+      success: true,
     });
   });
 });
