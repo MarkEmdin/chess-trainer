@@ -1,6 +1,6 @@
 # Spec: account menu and Telegram prompt
 
-Status: in-progress
+Status: done
 Branch: feature/account-menu
 
 ## Problem
@@ -79,7 +79,7 @@ Reuse existing `auth.myCoaching`, `auth.admin`, `auth.signIn`, `auth.signUp`, `a
 - [x] After sending a question, an unlinked student without the dismissal sees the Telegram prompt; a linked student does not
 - [x] Ticking "Don't remind me" hides the prompt on the next question, including after a reload and on another browser
 - [x] The prompt never renders when the bot is not configured
-- [ ] Prod migration applied (`npx supabase db push --linked`)
+- [x] Prod migration applied (`npx supabase db push --linked`)
 - [x] `npm run lint` passes with zero warnings
 - [x] `npm run build` passes
 - [x] Tests added under `tests/<mirrored path>` for new logic/components
