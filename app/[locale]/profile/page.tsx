@@ -4,6 +4,9 @@ import { getAuthedUser } from '@/lib/auth/getUser';
 import { createClient } from '@/lib/supabase/server';
 import PageLayout from '@/app/components/PageLayout';
 import ProfileForm from '@/app/components/ProfileForm';
+import TelegramConnect from '@/app/components/TelegramConnect';
+import { Card, CardContent } from '@/app/components/ui/card';
+import { telegramConfig } from '@/lib/telegram/config';
 
 export default async function ProfilePage() {
   const [user, locale] = await Promise.all([getAuthedUser(), getLocale()]);
@@ -16,6 +19,15 @@ export default async function ProfilePage() {
     .eq('id', user!.id)
     .single();
 
+  const showTelegram = telegramConfig() !== null;
+  const { data: link } = showTelegram
+    ? await supabase
+        .from('telegram_links')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .maybeSingle()
+    : { data: null };
+
   const t = await getTranslations('profile');
 
   return (
@@ -26,6 +38,16 @@ export default async function ProfilePage() {
           lichess: profile?.lichess_username ?? '',
         }}
       />
+      {showTelegram && (
+        <Card className="mt-8">
+          <CardContent>
+            <TelegramConnect
+              connected={link !== null}
+              isAdmin={user.role === 'admin'}
+            />
+          </CardContent>
+        </Card>
+      )}
     </PageLayout>
   );
 }

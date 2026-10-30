@@ -24,6 +24,8 @@ jest.mock(
       );
     },
 );
+// The server actions pull in next/server, which needs a Request global.
+jest.mock('@/lib/coaching/actions', () => ({}));
 jest.mock('@/app/components/ChessboardContainer', () => ({
   __esModule: true,
   default: () => <div data-testid="board" />,
@@ -136,5 +138,21 @@ describe('CoachingAdminCard', () => {
       <CoachingAdminCard request={request({ variation: ['Nf6', 'Nc3'] })} />,
     );
     expect(screen.getByText('3… Nf6 4. Nc3')).toBeInTheDocument();
+  });
+
+  it('autoOpen opens the modal on mount and scrolls the card into view', () => {
+    const scrollIntoView = jest.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    renderWithIntl(<CoachingAdminCard request={request()} autoOpen />);
+    expect(screen.getByTestId('coaching-modal')).toBeInTheDocument();
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'center' });
+  });
+
+  it('stays closed without autoOpen', () => {
+    const scrollIntoView = jest.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    renderWithIntl(<CoachingAdminCard request={request()} />);
+    expect(screen.queryByTestId('coaching-modal')).not.toBeInTheDocument();
+    expect(scrollIntoView).not.toHaveBeenCalled();
   });
 });

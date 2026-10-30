@@ -1,8 +1,15 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { headers } from 'next/headers';
+import { after } from 'next/server';
 import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
+import { SITE_URL } from '@/lib/site';
+import {
+  notifyAdminsOfQuestion,
+  notifyStudentOfAnswer,
+} from '@/lib/telegram/notify';
 import { getAuthedUser } from '@/lib/auth/getUser';
 import { replayAroundKey } from '@/lib/chess/replay';
 import { parseVariationField, playVariation } from '@/lib/chess/variation';
@@ -141,6 +148,8 @@ export async function createCoachingRequest(
     return { error: error.message };
   }
 
+  const origin = (await headers()).get('origin') ?? SITE_URL;
+  after(() => notifyAdminsOfQuestion(data.id, origin));
   return { success: true, requestId: data.id };
 }
 
@@ -209,6 +218,8 @@ export async function respondToRequest(
   revalidatePath('/[locale]/admin', 'page');
   revalidatePath('/[locale]/coaching', 'page');
   revalidatePath('/[locale]', 'layout');
+  const origin = (await headers()).get('origin') ?? SITE_URL;
+  after(() => notifyStudentOfAnswer(request_id, origin));
   return { success: true };
 }
 

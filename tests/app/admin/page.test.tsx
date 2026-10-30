@@ -48,7 +48,9 @@ jest.mock('@/app/components/CoachingAdminCard', () => ({
   __esModule: true,
   default: ({
     request,
+    autoOpen,
   }: {
+    autoOpen?: boolean;
     request: {
       id: string;
       content?: unknown;
@@ -57,6 +59,7 @@ jest.mock('@/app/components/CoachingAdminCard', () => ({
   }) => (
     <div
       data-testid="card"
+      data-autoopen={String(!!autoOpen)}
       data-content={JSON.stringify(request.content ?? null)}
       data-response-content={JSON.stringify(
         request.responses[0]?.content ?? null,
@@ -118,11 +121,14 @@ jest.mock('@/lib/supabase/server', () => ({
   }),
 }));
 
-const render$ = async (tab?: string) =>
+const render$ = async (tab?: string, request?: string) =>
   render(
     await AdminPage({
       params: Promise.resolve({ locale: 'en' }),
-      searchParams: Promise.resolve(tab ? { tab } : {}),
+      searchParams: Promise.resolve({
+        ...(tab ? { tab } : {}),
+        ...(request ? { request } : {}),
+      }),
     }),
   );
 
@@ -172,5 +178,42 @@ describe('admin page', () => {
     expect(JSON.parse(card.dataset.responseContent!)).toMatchObject({
       segments: [{ t: 'text', text: 'ok' }],
     });
+  });
+
+  it('?request=<answered id> selects the answered tab and auto-opens that card', async () => {
+    await render$(undefined, 'done-1');
+    const cards = screen.getAllByTestId('card');
+    expect(cards.map((c) => c.textContent)).toEqual(['done-1']);
+    expect(cards[0]).toHaveAttribute('data-autoopen', 'true');
+    expect(
+      screen.getByRole('tab', { name: 'coachingAdmin.tabs.answered(1)' }),
+    ).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('auto-opens only the requested card', async () => {
+    await render$(undefined, 'new-2');
+    expect(
+      screen
+        .getAllByTestId('card')
+        .map((c) => [c.textContent, c.dataset.autoopen]),
+    ).toEqual([
+      ['new-1', 'false'],
+      ['new-2', 'true'],
+    ]);
+  });
+
+  it('?request=<unknown> behaves as today', async () => {
+    await render$('answered', 'nope');
+    const cards = screen.getAllByTestId('card');
+    expect(cards.map((c) => c.textContent)).toEqual(['done-1']);
+    expect(cards[0]).toHaveAttribute('data-autoopen', 'false');
+  });
+
+  it('overrides an explicit ?tab only when the request matches', async () => {
+    await render$('answered', 'new-1');
+    expect(screen.getAllByTestId('card').map((c) => c.textContent)).toEqual([
+      'new-1',
+      'new-2',
+    ]);
   });
 });
