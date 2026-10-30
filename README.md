@@ -37,3 +37,13 @@ The project combines my background as a former competitive chess player and coac
 ## Transactional email
 
 Auth emails (sign-up confirmation, password reset) are sent from `chesstrainer.notify@gmail.com`.
+
+## Telegram bot
+
+Admins get a Telegram message for each new question, and students get one when it is answered. Users connect from `/profile`.
+
+1. Create two bots in [@BotFather](https://t.me/BotFather): one for dev, one for prod.
+2. Set `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME` and `TELEGRAM_WEBHOOK_SECRET` (any random string) in `.env.local` and in Vercel (prod bot).
+3. After deploy, register the webhook and commands with the site URL:
+   `node --env-file=.env.local scripts/telegram-setup.mjs https://<site>`
+4. Locally, Telegram can't reach `localhost`, so for the webhook use a tunnel (e.g. `npx ngrok http 3000`) and run the script with the tunnel URL. Outgoing messages work from localhost without it.

@@ -143,17 +143,17 @@ Bot texts (namespace `telegram.bot`): `connected`, `expired`, `startNoCode`, `he
 
 ## Acceptance criteria
 
-- [ ] `/profile` shows Connect when not linked and Connected + Disconnect when linked. Hidden when env vars are missing (test)
-- [ ] `startTelegramLink` creates a 15-minute token and returns a `t.me/<bot>?start=<token>` URL (test)
-- [ ] Webhook: wrong or missing secret → 401. `/start <valid>` links the chat and replies with the nickname. Expired or used code → expired reply. `/start` alone → help. `/stop` → unlinks (test)
-- [ ] Linking a chat already used by another account moves it. Re-linking an account replaces its old chat (test)
-- [ ] New question → every linked admin except the asker gets the message with a button to `/<locale>/admin?request=<id>` (test)
-- [ ] Answer → the linked asker gets the message with a button to `/<locale>/coaching?tab=answered`. Unlinked asker → nothing sent (test)
-- [ ] `/new` from an admin → up to 10 oldest unanswered with buttons, "…and N more" above 10, empty-state text at 0. From a non-admin → help (test)
-- [ ] Telegram down / 500 → question and answer still save, the form shows success (test). 403 → the link is deleted (test)
-- [ ] User text in bot messages is HTML-escaped (test)
-- [ ] `/admin?request=<id>` opens the right tab and that card's modal (test)
-- [ ] Message language follows `preferred_locale` (test)
+- [x] `/profile` shows Connect when not linked and Connected + Disconnect when linked. Hidden when env vars are missing (test)
+- [x] `startTelegramLink` creates a 15-minute token and returns a `t.me/<bot>?start=<token>` URL (test)
+- [x] Webhook: wrong or missing secret → 401. `/start <valid>` links the chat and replies with the nickname. Expired or used code → expired reply. `/start` alone → help. `/stop` → unlinks (test)
+- [x] Linking a chat already used by another account moves it. Re-linking an account replaces its old chat (test)
+- [x] New question → every linked admin except the asker gets the message with a button to `/<locale>/admin?request=<id>` (test)
+- [x] Answer → the linked asker gets the message with a button to `/<locale>/coaching?tab=answered`. Unlinked asker → nothing sent (test)
+- [x] `/new` from an admin → up to 10 oldest unanswered with buttons, "…and N more" above 10, empty-state text at 0. From a non-admin → help (test)
+- [x] Telegram down / 500 → question and answer still save, the form shows success (test). 403 → the link is deleted (test)
+- [x] User text in bot messages is HTML-escaped (test)
+- [x] `/admin?request=<id>` opens the right tab and that card's modal (test)
+- [x] Message language follows `preferred_locale` (test)
 - [ ] Manual check with a real dev bot: connect from `/profile`, ask a question as a student → admin gets it → tap the button → modal opens → answer → student gets the message
-- [ ] `npm run lint`, `npm test`, `npm run build` pass
+- [x] `npm run lint`, `npm test`, `npm run build` pass
 - [ ] Prod: migration applied (`npx supabase db push --linked`), env vars set in Vercel, `scripts/telegram-setup.mjs` run against the prod URL
