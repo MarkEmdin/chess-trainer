@@ -21,7 +21,8 @@ export default async function AdminPage({
 
   const t = await getTranslations('coachingAdmin');
   // The tab lives in the URL so reloads and back/forward keep it.
-  const tab: Tab = (await searchParams).tab === 'answered' ? 'answered' : 'new';
+  const params = await searchParams;
+  const requestId = typeof params.request === 'string' ? params.request : '';
 
   // Two queries instead of a single join: coaching_requests.user_id has
   // a FK to auth.users.id, not user_profiles.id, so PostgREST can't
@@ -81,6 +82,14 @@ export default async function AdminPage({
     new: cards.filter((c) => c.responses.length === 0),
     answered: cards.filter((c) => c.responses.length > 0),
   };
+  // A link to one question (the Telegram button) wins over ?tab.
+  const tab: Tab = byTab.answered.some((c) => c.id === requestId)
+    ? 'answered'
+    : byTab.new.some((c) => c.id === requestId)
+      ? 'new'
+      : params.tab === 'answered'
+        ? 'answered'
+        : 'new';
   const shown = byTab[tab];
 
   return (
@@ -108,7 +117,11 @@ export default async function AdminPage({
       ) : (
         <div className="flex flex-col gap-3">
           {shown.map((card) => (
-            <CoachingAdminCard key={card.id} request={card} />
+            <CoachingAdminCard
+              key={card.id}
+              request={card}
+              autoOpen={card.id === requestId}
+            />
           ))}
         </div>
       )}

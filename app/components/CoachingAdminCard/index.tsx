@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import dynamic from 'next/dynamic';
 import { useFormatter, useTranslations } from 'next-intl';
 import { ExternalLinkIcon } from 'lucide-react';
@@ -26,13 +26,18 @@ export type AdminCoachingRequest = CoachingThreadData & {
 
 type Props = {
   request: AdminCoachingRequest;
+  autoOpen?: boolean;
 };
 
-export default function CoachingAdminCard({ request }: Props) {
+export default function CoachingAdminCard({ request, autoOpen }: Props) {
   const t = useTranslations('coachingAdmin');
   const tCoaching = useTranslations('coaching');
   const format = useFormatter();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(autoOpen ?? false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (autoOpen) ref.current?.scrollIntoView({ block: 'center' });
+  }, [autoOpen]);
   // Date and time, in the coach's own time zone. The server doesn't know
   // that zone, so its HTML carries only the date and the time appears once
   // hydrated; rendering both on the server would mismatch on hydration.
@@ -55,7 +60,7 @@ export default function CoachingAdminCard({ request }: Props) {
   const answered = request.responses.length > 0;
 
   return (
-    <Card>
+    <Card ref={ref}>
       <CardContent>
         <div className="flex flex-col sm:flex-row gap-4">
           <ChessboardContainer

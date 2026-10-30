@@ -139,4 +139,20 @@ describe('CoachingAdminCard', () => {
     );
     expect(screen.getByText('3… Nf6 4. Nc3')).toBeInTheDocument();
   });
+
+  it('autoOpen opens the modal on mount and scrolls the card into view', () => {
+    const scrollIntoView = jest.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    renderWithIntl(<CoachingAdminCard request={request()} autoOpen />);
+    expect(screen.getByTestId('coaching-modal')).toBeInTheDocument();
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'center' });
+  });
+
+  it('stays closed without autoOpen', () => {
+    const scrollIntoView = jest.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    renderWithIntl(<CoachingAdminCard request={request()} />);
+    expect(screen.queryByTestId('coaching-modal')).not.toBeInTheDocument();
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
 });
