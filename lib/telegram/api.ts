@@ -27,9 +27,13 @@ export async function sendMessage(
         }),
         link_preview_options: { is_disabled: true },
       }),
+      signal: AbortSignal.timeout(5000),
     });
     if (res.ok) return 'ok';
-    return res.status === 403 ? 'blocked' : 'error';
+    if (res.status === 403) return 'blocked';
+    const body = await res.text().catch(() => '');
+    console.error('telegram sendMessage failed', res.status, body);
+    return 'error';
   } catch {
     return 'error';
   }

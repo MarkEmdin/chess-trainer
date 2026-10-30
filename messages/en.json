@@ -453,7 +453,8 @@
     "connected": "Connected",
     "disconnect": "Disconnect",
     "errors": {
-      "notAuthenticated": "You must be signed in"
+      "notAuthenticated": "You must be signed in",
+      "connectFailed": "Couldn't start the connection. Please try again."
     },
     "bot": {
       "connected": "Done! Telegram is connected to the account {nickname}.",

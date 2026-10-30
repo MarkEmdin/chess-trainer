@@ -62,7 +62,16 @@ describe('startTelegramLink', () => {
 
   it('returns an error when the bot is not configured', async () => {
     telegramConfig.mockReturnValue(null);
-    expect(await startTelegramLink()).toHaveProperty('error');
+    expect(await startTelegramLink()).toEqual({
+      error: 'telegram.errors.connectFailed',
+    });
+  });
+
+  it('returns connectFailed when creating the token throws', async () => {
+    createLinkToken.mockRejectedValue(new Error('db down'));
+    expect(await startTelegramLink()).toEqual({
+      error: 'telegram.errors.connectFailed',
+    });
   });
 
   it('returns the bot deep link with a fresh token', async () => {

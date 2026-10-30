@@ -12,12 +12,15 @@ export async function startTelegramLink(): Promise<
 > {
   const user = await getAuthedUser();
   const config = telegramConfig();
-  if (!user || !config) {
-    const t = await getTranslations('telegram.errors');
-    return { error: t('notAuthenticated') };
+  const t = await getTranslations('telegram.errors');
+  if (!user) return { error: t('notAuthenticated') };
+  if (!config) return { error: t('connectFailed') };
+  try {
+    const token = await createLinkToken(user.id);
+    return { url: `https://t.me/${config.username}?start=${token}` };
+  } catch {
+    return { error: t('connectFailed') };
   }
-  const token = await createLinkToken(user.id);
-  return { url: `https://t.me/${config.username}?start=${token}` };
 }
 
 export async function disconnectTelegram(): Promise<void> {

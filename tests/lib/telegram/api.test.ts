@@ -57,6 +57,24 @@ describe('telegram api', () => {
     expect(await sendMessage(1, { text: 'x' })).toBe('error');
   });
 
+  it('passes an abort signal and returns error on timeout', async () => {
+    fetchMock.mockRejectedValue(new DOMException('timed out', 'TimeoutError'));
+    expect(await sendMessage(1, { text: 'x' })).toBe('error');
+    expect(fetchMock.mock.calls[0][1].signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it('logs status and body on a 400 without the token', async () => {
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      fetchMock.mockResolvedValue({ ok: false, status: 400, text: async () => 'bad button url' });
+      expect(await sendMessage(1, { text: 'x' })).toBe('error');
+      expect(spy).toHaveBeenCalledWith('telegram sendMessage failed', 400, 'bad button url');
+      expect(JSON.stringify(spy.mock.calls)).not.toContain('tok');
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
   it("returns 'error' without calling fetch when config is null", async () => {
     for (const k of KEYS) delete process.env[k];
     expect(await sendMessage(1, { text: 'x' })).toBe('error');

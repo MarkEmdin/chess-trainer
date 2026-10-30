@@ -56,6 +56,18 @@ describe('TelegramConnect', () => {
     expect(tab.close).toHaveBeenCalled();
   });
 
+  it('closes the tab and shows an error when the action rejects', async () => {
+    startTelegramLink.mockRejectedValue(new Error('boom'));
+    renderWithIntl(<TelegramConnect connected={false} isAdmin={false} />);
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Connect Telegram' }),
+    );
+    expect(
+      await screen.findByText(/Couldn't start the connection/),
+    ).toBeInTheDocument();
+    expect(tab.close).toHaveBeenCalled();
+  });
+
   it('when connected shows Connected and disconnects on click', async () => {
     disconnectTelegram.mockResolvedValue(undefined);
     renderWithIntl(<TelegramConnect connected isAdmin={false} />);

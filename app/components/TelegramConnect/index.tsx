@@ -18,13 +18,21 @@ export default function TelegramConnect({ connected, isAdmin }: Props) {
     const tab = window.open('', '_blank');
     setError(null);
     startTransition(async () => {
-      const result = await startTelegramLink();
+      let result;
+      try {
+        result = await startTelegramLink();
+      } catch {
+        result = { error: t('errors.connectFailed') };
+      }
       if ('error' in result) {
         tab?.close();
         setError(result.error);
         return;
       }
-      if (tab) tab.location.href = result.url;
+      if (tab) {
+        tab.opener = null;
+        tab.location.href = result.url;
+      }
       else window.location.href = result.url;
       setStarted(true);
     });

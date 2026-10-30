@@ -46,4 +46,4 @@ Admins get a Telegram message for each new question, and students get one when i
 2. Set `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME` and `TELEGRAM_WEBHOOK_SECRET` (any random string) in `.env.local` and in Vercel (prod bot).
 3. After deploy, register the webhook and commands with the site URL:
    `node --env-file=.env.local scripts/telegram-setup.mjs https://<site>`
-4. Locally, Telegram can't reach `localhost`, so for the webhook use a tunnel (e.g. `npx ngrok http 3000`) and run the script with the tunnel URL. Outgoing messages work from localhost without it.
+4. Locally, Telegram can't reach `localhost`, so for the webhook use a tunnel (e.g. `npx ngrok http 3000`) and run the script with the tunnel URL. For a local manual check, also open the site through the tunnel URL rather than `localhost`: message buttons are built from the page's origin and Telegram rejects `localhost` button URLs.

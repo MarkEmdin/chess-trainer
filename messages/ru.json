@@ -453,7 +453,8 @@
     "connected": "Подключено",
     "disconnect": "Отключить",
     "errors": {
-      "notAuthenticated": "Нужно войти в аккаунт"
+      "notAuthenticated": "Нужно войти в аккаунт",
+      "connectFailed": "Не удалось начать подключение. Попробуйте ещё раз."
     },
     "bot": {
       "connected": "Готово! Telegram подключён к аккаунту {nickname}.",
