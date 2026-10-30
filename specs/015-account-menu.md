@@ -1,6 +1,6 @@
 # Spec: account menu and Telegram prompt
 
-Status: approved
+Status: in-progress
 Branch: feature/account-menu
 
 ## Problem
@@ -74,12 +74,12 @@ Reuse existing `auth.myCoaching`, `auth.admin`, `auth.signIn`, `auth.signUp`, `a
 
 ## Acceptance criteria
 
-- [ ] Signed in, at 375px and 1280px wide: the account button is visible in the header and the dropdown links to Profile, My questions and Sign out; Admin appears only for admins
-- [ ] Signed out: "Sign in" is visible in the header without opening the drawer
-- [ ] After sending a question, an unlinked student without the dismissal sees the Telegram prompt; a linked student does not
-- [ ] Ticking "Don't remind me" hides the prompt on the next question, including after a reload and on another browser
-- [ ] The prompt never renders when the bot is not configured
+- [x] Signed in, at 375px and 1280px wide: the account button is visible in the header and the dropdown links to Profile, My questions and Sign out; Admin appears only for admins
+- [x] Signed out: "Sign in" is visible in the header without opening the drawer
+- [x] After sending a question, an unlinked student without the dismissal sees the Telegram prompt; a linked student does not
+- [x] Ticking "Don't remind me" hides the prompt on the next question, including after a reload and on another browser
+- [x] The prompt never renders when the bot is not configured
 - [ ] Prod migration applied (`npx supabase db push --linked`)
-- [ ] `npm run lint` passes with zero warnings
-- [ ] `npm run build` passes
-- [ ] Tests added under `tests/<mirrored path>` for new logic/components
+- [x] `npm run lint` passes with zero warnings
+- [x] `npm run build` passes
+- [x] Tests added under `tests/<mirrored path>` for new logic/components
