@@ -21,6 +21,16 @@ type Update = {
   };
 };
 
+// Behind a proxy (Vercel, a dev tunnel) `req.url` carries the server's own
+// address, but Telegram buttons need the public one. Spoofing these headers
+// takes the webhook secret, which the caller has already proven.
+function publicOrigin(req: NextRequest): string {
+  const host = req.headers.get('x-forwarded-host') ?? req.headers.get('host');
+  if (!host) return new URL(req.url).origin;
+  const proto = req.headers.get('x-forwarded-proto') ?? 'https';
+  return `${proto}://${host}`;
+}
+
 export async function POST(req: NextRequest): Promise<Response> {
   const config = telegramConfig();
   if (!config) return new Response(null, { status: 404 });
@@ -37,7 +47,7 @@ export async function POST(req: NextRequest): Promise<Response> {
       return new Response(null, { status: 200 });
     }
 
-    const origin = new URL(req.url).origin;
+    const origin = publicOrigin(req);
     const [first = '', arg] = text.trim().split(/\s+/);
     const command = first.split('@')[0];
 

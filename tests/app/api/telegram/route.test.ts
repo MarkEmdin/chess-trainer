@@ -24,8 +24,12 @@ jest.mock('@/lib/telegram/api', () => ({
 const PROFILE = 'https://example.com/ru/profile';
 const PROFILE_EN = 'https://example.com/en/profile';
 
-function post(body: unknown, secret: string | null = 's3cret') {
-  const headers: Record<string, string> = {};
+function post(
+  body: unknown,
+  secret: string | null = 's3cret',
+  extraHeaders: Record<string, string> = {},
+) {
+  const headers: Record<string, string> = { ...extraHeaders };
   if (secret !== null) headers['X-Telegram-Bot-Api-Secret-Token'] = secret;
   return POST(
     new NextRequest('https://example.com/api/telegram', {
@@ -94,6 +98,25 @@ describe('POST /api/telegram', () => {
     expect(sendMessage).toHaveBeenCalledWith(
       7,
       infoMessage('ru', 'startNoCode', PROFILE),
+    );
+  });
+
+  it('builds links from the forwarded public host behind a proxy', async () => {
+    await post(msg('/start'), 's3cret', {
+      'x-forwarded-host': 'public.test',
+      'x-forwarded-proto': 'https',
+    });
+    expect(sendMessage).toHaveBeenCalledWith(
+      7,
+      infoMessage('ru', 'startNoCode', 'https://public.test/ru/profile'),
+    );
+  });
+
+  it('falls back to the Host header', async () => {
+    await post(msg('/start'), 's3cret', { host: 'tunnel.test' });
+    expect(sendMessage).toHaveBeenCalledWith(
+      7,
+      infoMessage('ru', 'startNoCode', 'https://tunnel.test/ru/profile'),
     );
   });
 
