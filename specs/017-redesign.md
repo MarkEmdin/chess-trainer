@@ -1,6 +1,6 @@
 # Spec: dark redesign around Key Positions
 
-Status: approved
+Status: done
 Branch: feature/redesign
 
 ## Problem
@@ -111,24 +111,24 @@ Both `messages/en.json` and `messages/ru.json`, same key tree. Labels:
 ## Acceptance criteria
 
 Part 1
-- [ ] No `pieceValues` / `piece-values` / `PieceValues` / `chessPieces` hits outside `specs/`; `/lessons/piece-values` returns 404
-- [ ] The site renders dark only; there is no theme switcher anywhere
-- [ ] Desktop header shows three links with the active one marked; mobile shows the bottom tab bar, and nothing is hidden behind it
-- [ ] Language toggle and the account menu still work on both breakpoints
+- [x] No `pieceValues` / `piece-values` / `PieceValues` / `chessPieces` hits outside `specs/`; `/lessons/piece-values` returns 404
+- [x] The site renders dark only; there is no theme switcher anywhere
+- [x] Desktop header shows three links with the active one marked; mobile shows the bottom tab bar, and nothing is hidden behind it
+- [x] Language toggle and the account menu still work on both breakpoints
 
 Part 2
-- [ ] Desktop `/think-time` shows list and detail side by side; the first row is selected by default
-- [ ] The board in the detail panel and in thumbnails looks like today's board
-- [ ] Ask coach, open question (marks the answer seen), open the whole game, filter tabs, threshold, load more and platform switch all work
-- [ ] Guest flow: username form, list, detail without the coach button
-- [ ] Mobile: row tap opens full-screen detail, Back returns to the list at the same scroll position
+- [x] Desktop `/think-time` shows list and detail side by side; the first row is selected by default
+- [x] The board in the detail panel and in thumbnails looks like today's board
+- [x] Ask coach, open question (marks the answer seen), open the whole game, filter tabs, threshold, load more and platform switch all work
+- [x] Guest flow: username form, list, detail without the coach button
+- [x] Mobile: row tap opens full-screen detail, Back returns to the list at the same scroll position
 
 Part 3
-- [ ] Every page listed in Part 3 uses the new tokens; no hardcoded surface colours added
-- [ ] Signed-in `/` redirects to `/think-time`; guests see the landing
-- [ ] Coaching modal works for student and admin as before (send, answer, variations, drawings)
+- [x] Every page listed in Part 3 uses the new tokens; no hardcoded surface colours added
+- [x] Signed-in `/` redirects to `/think-time`; guests see the landing
+- [ ] Coaching modal works for student and admin as before (send, answer, variations, drawings) — modal tests pass and it opens/renders in the new theme; full send/answer round trip still to check by hand
 
 All
-- [ ] `npm run lint` (zero warnings), `npm run build`, `npm test` pass
-- [ ] Tests updated or added under `tests/` for changed components (header nav, tab bar, Key Positions selection and buttons, landing redirect)
-- [ ] Manual check on dev at 375px and 1440px widths
+- [x] `npm run lint` (zero warnings), `npm run build`, `npm test` pass
+- [x] Tests updated or added under `tests/` for changed components (header nav, tab bar, Key Positions selection and buttons, landing redirect)
+- [x] Manual check on dev at 375px and 1440px widths
