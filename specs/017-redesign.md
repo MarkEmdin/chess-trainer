@@ -42,9 +42,9 @@ One PR, three parts, each its own commit series and checkable on dev before the 
 
 Layout from the mockup.
 
-- **Desktop (`lg` and up):** two columns. Left (about 360px): title with count, a source chip (platform and username; opens the existing username / platform controls) and a threshold chip (the existing `ThresholdSelector` values), the existing filter tabs `all / unasked / asked` with counts, then the list. Right: the selected position.
+- **Desktop (`lg` and up):** two columns. Left (about 360px): the existing `GamesShell` controls (platform toggle, status line, change user) restyled compactly, the existing `ThresholdSelector`, the existing filter tabs `all / unasked / asked` with counts, then the list and load more. Right: the selected position, sticky while the list scrolls. (Builder's call: the mockup's source/threshold chips are replaced by the existing controls, so no new pickers.)
 - **List row:** a small board thumbnail of the position before the move, the move (`17. Nf5` / `23… Rxe4`), think time in `m:ss`, and either the status pill (`asked` = waiting, `answered`, plus the existing unseen-answer marker) or "vs opponent · time control · date". The selected row is highlighted. Order and the "load more" behaviour stay as today.
-- **Detail panel:** large board at the position before the long think, with the played move highlighted. Under the board, prev/next buttons step through the game (same stepping as `GameModal`). On the right: "You thought 2:14 over 17. Nf5", both players with ratings, time control, date and result. Then the buttons:
+- **Detail panel:** large board at the position before the long think, with the opponent's last move highlighted (same as today's card). No step buttons under the board: "Open the whole game" is the way to step through it (builder's call; keeps the board code untouched). On the right: "You thought 2:14 over 17. Nf5", both players with ratings, time control, date and result. Then the buttons:
   - Signed in, no thread: primary "Ask coach" opens `CoachingModal` as today.
   - Signed in, thread exists: primary "Open question" opens `CoachingModal` and marks an unseen answer as seen (same logic as `openCoaching` today). Show a short preview of the latest message, as the card does now (spec 013).
   - Guest: no coach button. Show a short sign-in hint instead.
