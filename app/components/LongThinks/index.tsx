@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useDeferredValue, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useState } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { Loader2Icon } from 'lucide-react';
@@ -77,6 +77,22 @@ export default function LongThinks({
   const isPending = threshold !== deferredThreshold;
   const t = useTranslations('thinkTime');
   const format = useFormatter();
+
+  // While the mobile full-screen detail is up, the page behind it must not
+  // scroll and Escape closes it — unless a modal on top owns Escape.
+  const modalOpen = !!gameTarget || !!coachingTarget;
+  useEffect(() => {
+    if (!mobileOpen) return;
+    document.body.classList.add('max-lg:overflow-hidden');
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !modalOpen) setMobileOpen(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.classList.remove('max-lg:overflow-hidden');
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [mobileOpen, modalOpen]);
 
   const selectRow = useCallback((think: LongThink, game: Game) => {
     setSelectedKey(thinkKey({ think, game }));

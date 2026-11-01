@@ -221,4 +221,29 @@ describe('<LongThinks /> actions', () => {
     fireEvent.click(screen.getByRole('button', { name: 'back' }));
     expect(wrapper()).toHaveAttribute('data-mobile-open', 'false');
   });
+
+  it('closes full-screen detail with Escape', () => {
+    renderIt();
+    const wrapper = () => screen.getByTestId('detail').parentElement!;
+    fireEvent.click(screen.getByRole('button', { name: 'row g2' }));
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(wrapper()).toHaveAttribute('data-mobile-open', 'false');
+  });
+
+  it('leaves Escape to an open modal', () => {
+    renderIt();
+    const wrapper = () => screen.getByTestId('detail').parentElement!;
+    fireEvent.click(screen.getByRole('button', { name: 'row g2' }));
+    fireEvent.click(screen.getByRole('button', { name: 'game' }));
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(wrapper()).toHaveAttribute('data-mobile-open', 'true');
+  });
+
+  it('locks page scroll behind full-screen detail', () => {
+    renderIt();
+    fireEvent.click(screen.getByRole('button', { name: 'row g2' }));
+    expect(document.body).toHaveClass('max-lg:overflow-hidden');
+    fireEvent.click(screen.getByRole('button', { name: 'back' }));
+    expect(document.body).not.toHaveClass('max-lg:overflow-hidden');
+  });
 });
