@@ -103,7 +103,8 @@
   --destructive: #f26d6d;
   --info: #8ea2ff;
   --border: #262a33;
-  --input: #262a33;
+  /* Lighter than --border so fields stay visible on bg-card panels. */
+  --input: #3a404c;
   --ring: #6fcf97;
   --chart-1: oklch(0.92 0 0);
   --chart-2: oklch(0.78 0 0);
