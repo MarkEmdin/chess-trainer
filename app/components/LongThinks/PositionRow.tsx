@@ -50,7 +50,12 @@ export default memo(function PositionRow({
           : 'border-border hover:border-foreground/20',
       )}
     >
-      <div className="pointer-events-none w-[52px] shrink-0 overflow-hidden rounded-[3px]">
+      {/* Decorative: the board's own drag instructions would otherwise be
+          read out as part of every row's name. */}
+      <div
+        aria-hidden
+        className="pointer-events-none w-[52px] shrink-0 overflow-hidden rounded-[3px]"
+      >
         <ChessboardWithNotation
           position={think.fenBefore}
           boardOrientation={game.userColor}

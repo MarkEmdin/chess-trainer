@@ -4,8 +4,10 @@ import PositionRow from '@/app/components/LongThinks/PositionRow';
 import type { LongThink } from '@/lib/games/longThinks';
 import type { Game } from '@/lib/games/types';
 
+// The real board renders dnd-kit screen-reader instructions; stand in for
+// them so the row's accessible name can be checked.
 jest.mock('react-chessboard', () => ({
-  Chessboard: () => <div data-testid="board" />,
+  Chessboard: () => <div data-testid="board">To pick up a draggable item</div>,
 }));
 
 const think: LongThink = {
@@ -85,5 +87,15 @@ describe('<PositionRow />', () => {
     // One stable handler for every row (memoised rows, spec 017): the row
     // says which position it is.
     expect(onSelect).toHaveBeenCalledWith(think, game);
+  });
+
+  it('keeps the thumbnail out of the accessible name', () => {
+    row();
+    expect(screen.getByRole('button')).toHaveAccessibleName(
+      expect.not.stringContaining('draggable'),
+    );
+    expect(screen.getByRole('button')).toHaveAccessibleName(
+      expect.stringContaining('17. Nf5'),
+    );
   });
 });
