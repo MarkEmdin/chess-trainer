@@ -1,10 +1,9 @@
 {
   "nav": {
-    "worldChampions": "World Champions",
-    "theory": "Theory",
+    "positions": "Positions",
     "games": "Games",
-    "thinkTime": "Key Positions",
-    "openMenu": "Open menu"
+    "learn": "Learn",
+    "main": "Main navigation"
   },
   "auth": {
     "signIn": "Login",

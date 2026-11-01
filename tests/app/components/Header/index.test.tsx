@@ -1,4 +1,3 @@
-import userEvent from '@testing-library/user-event';
 import { renderWithIntl, screen, within } from '@/tests/test-utils';
 import Header from '@/app/components/Header';
 
@@ -7,7 +6,7 @@ jest.mock('next-intl/server', () => ({
     `${namespace}.${key}`,
 }));
 
-// The drawer embeds LanguageToggle, which calls useRouter() on render.
+// The header embeds LanguageToggle, which calls useRouter() on render.
 jest.mock('@/i18n/navigation', () => ({
   Link: ({
     href,
@@ -46,11 +45,6 @@ async function renderHeader() {
   return renderWithIntl(<>{ui}</>);
 }
 
-async function openDrawer() {
-  await userEvent.click(screen.getByRole('button', { name: /open menu/i }));
-  return screen.getByRole('dialog');
-}
-
 describe('<Header />', () => {
   it('shows the account menu, not a login link, when signed in', async () => {
     getAuthedUser.mockResolvedValue(ann);
@@ -75,27 +69,21 @@ describe('<Header />', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('keeps login and register out of a signed-in drawer', async () => {
-    getAuthedUser.mockResolvedValue(ann);
-    await renderHeader();
-    const drawer = await openDrawer();
-    expect(
-      within(drawer).queryByRole('link', { name: 'auth.signIn' }),
-    ).not.toBeInTheDocument();
-    expect(
-      within(drawer).queryByRole('link', { name: 'auth.signUp' }),
-    ).not.toBeInTheDocument();
-  });
-
-  it('offers login and register in a signed-out drawer', async () => {
+  it('shows the language toggle in the header', async () => {
     getAuthedUser.mockResolvedValue(null);
     await renderHeader();
-    const drawer = await openDrawer();
     expect(
-      within(drawer).getByRole('link', { name: 'auth.signIn' }),
-    ).toHaveAttribute('href', '/login');
+      screen.getByRole('button', { name: 'Toggle language' }),
+    ).toBeInTheDocument();
+  });
+
+  it('shows the main nav links', async () => {
+    getAuthedUser.mockResolvedValue(ann);
+    await renderHeader();
     expect(
-      within(drawer).getByRole('link', { name: 'auth.signUp' }),
-    ).toHaveAttribute('href', '/register');
+      within(screen.getByTestId('site-nav-desktop')).getByRole('link', {
+        name: 'Positions',
+      }),
+    ).toHaveAttribute('href', '/think-time');
   });
 });

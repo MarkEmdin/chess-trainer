@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { CheckIcon, LanguagesIcon } from 'lucide-react';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
-import { Button } from '@/app/components/ui/button';
+import { buttonVariants } from '@/app/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,15 +38,14 @@ export default function LanguageToggle() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label={t('toggleLanguage')}
-          disabled={isPending}
-        >
-          <LanguagesIcon />
-        </Button>
+      {/* No asChild: it lives in the server-rendered header now, where the
+          radix Slot chain can mismatch on hydration (known-issues.md). */}
+      <DropdownMenuTrigger
+        aria-label={t('toggleLanguage')}
+        disabled={isPending}
+        className={buttonVariants({ variant: 'ghost', size: 'icon' })}
+      >
+        <LanguagesIcon />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {routing.locales.map((l) => (

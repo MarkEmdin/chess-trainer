@@ -30,7 +30,7 @@ with the trace pointing at `app/components/ThemeProvider/index.tsx` (the `<NextT
 **Impact:** dev console errors; in extreme cases (SheetClose + Link) the inner element doesn't render server-side and the drawer is empty until JS hydrates.
 
 **Workaround:**
-- For triggers: drop `asChild`, render the trigger as its own element and apply shadcn styling via `cn(buttonVariants(...), ...)` on the className. See `app/components/MobileNav/index.tsx` for the trigger.
-- For close-wrapped children (`SheetClose asChild` around an interactive child): lift the open state to React via `useState` + `<Sheet open onOpenChange>` and call `setOpen(false)` from each child's own `onClick`. See the same MobileNav for the close pattern.
+- For triggers: drop `asChild`, render the trigger as its own element and apply shadcn styling via `cn(buttonVariants(...), ...)` on the className. The removed `MobileNav` (spec 017, see git history) was the example.
+- For close-wrapped children (`SheetClose asChild` around an interactive child): lift the open state to React via `useState` + `<Sheet open onOpenChange>` and call `setOpen(false)` from each child's own `onClick`. Same removed `MobileNav` for the close pattern.
 
 **Revisit when:** updating past `radix-ui@1.4.3` — verify against a minimal Sheet/Trigger reproducer before re-introducing asChild.
