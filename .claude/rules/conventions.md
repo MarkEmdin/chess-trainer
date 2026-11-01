@@ -38,7 +38,7 @@
 ## i18n
 
 - All user-facing copy goes through next-intl. Server components: `getTranslations('namespace')`. Client components: `useTranslations('namespace')`. Date/number formatting: `useFormatter()` / `format.dateTime(...)`.
-- Translation strings live in `messages/{en,ru}.json` under topic namespaces (`nav`, `home`, `lessons`, `theory`, `champions`, `pieces`, `pieceValues`, `games`, `thinkTime`, `videoModal`, `common`, `metadata`). Keep both files structurally identical — same key tree, different values.
+- Translation strings live in `messages/{en,ru}.json` under topic namespaces (`nav`, `home`, `lessons`, `theory`, `champions`, `games`, `thinkTime`, `videoModal`, `common`, `metadata`). Keep both files structurally identical — same key tree, different values.
 - Brand name "Chess Fundamentals" is the explicit exception: left as a literal in both locales, not a translation key.
 - For features with their own UI surface (forms, modals, lists), put strings under one feature namespace (e.g. `games.usernameForm.*`, `games.modal.*`). Don't sprinkle generic keys into `common` unless they're genuinely reusable across features.
 - Page `<title>`/`<meta>` come from `generateMetadata` (async function in the layout/page), not the static `metadata` const, when the description needs translation.
