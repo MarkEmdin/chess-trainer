@@ -357,8 +357,14 @@ describe('CoachingModal', () => {
       />,
     );
     fireEvent.click(screen.getByRole('button', { name: '3… Nf6 4. Nc3' }));
+    // Opens on the chip's first move (spec 016), not its last.
     const after = new Chess(FEN);
     after.move('Nf6');
+    expect(screen.getByTestId('board')).toHaveAttribute(
+      'data-position',
+      after.fen(),
+    );
+    fireEvent.keyDown(document, { key: 'ArrowRight' });
     after.move('Nc3');
     expect(screen.getByTestId('board')).toHaveAttribute(
       'data-position',
@@ -366,6 +372,43 @@ describe('CoachingModal', () => {
     );
     expect(screen.getByRole('button', { name: '3… Nf6 4. Nc3' })).toHaveClass(
       'ring-2',
+    );
+  });
+
+  it('opens a chip that continues a line on its own first move', () => {
+    const content: MessageContent = {
+      v: 1,
+      segments: [
+        { t: 'moves', line: 'l1', from: 0, to: 1 },
+        { t: 'text', text: ' then ' },
+        { t: 'moves', line: 'l1', from: 1, to: 3 },
+      ],
+      lines: { l1: ['Nf6', 'Nc3', 'Bb4'] },
+      drawings: {},
+    };
+    renderWithIntl(
+      <CoachingModal
+        {...baseProps}
+        mode="student"
+        thread={thread({
+          responses: [
+            {
+              body: '3… Nf6 then 4. Nc3 Bb4',
+              created_at: '2026-10-21T10:00:00Z',
+              variation: null,
+              content,
+            },
+          ],
+        })}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: '4. Nc3 Bb4' }));
+    const after = new Chess(FEN);
+    after.move('Nf6');
+    after.move('Nc3');
+    expect(screen.getByTestId('board')).toHaveAttribute(
+      'data-position',
+      after.fen(),
     );
   });
 
