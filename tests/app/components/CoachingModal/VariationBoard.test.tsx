@@ -71,7 +71,7 @@ describe('VariationBoard', () => {
     expect(
       screen.getByText('Click the text field to start recording'),
     ).toBeInTheDocument();
-    expect(frame()).not.toHaveClass('ring-green-600');
+    expect(frame()).not.toHaveClass('ring-primary');
     expect(board.allowDragging).toBeFalsy();
   });
 
@@ -85,7 +85,7 @@ describe('VariationBoard', () => {
   it('glows green and plays moves while writing', () => {
     const w = writing();
     setup({ writing: w });
-    expect(frame()).toHaveClass('ring-green-600');
+    expect(frame()).toHaveClass('ring-primary');
     expect(
       screen.getByText('● Recording — moves go into the text'),
     ).toBeInTheDocument();

@@ -75,7 +75,7 @@ export default async function Home() {
                 href={feature.href}
                 className="rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
               >
-                <Card className="h-full transition-shadow hover:shadow-md">
+                <Card className="h-full transition-colors hover:border-foreground/20">
                   <CardContent>
                     <CardTitle>{t(`features.${feature.key}.title`)}</CardTitle>
                     <CardDescription className="mt-1">

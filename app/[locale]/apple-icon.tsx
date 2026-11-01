@@ -18,7 +18,7 @@ export default function AppleIcon() {
           height: '100%',
           display: 'flex',
           flexWrap: 'wrap',
-          background: '#1c1517',
+          background: '#0f1115',
           padding: 18,
         }}
       >
@@ -28,7 +28,7 @@ export default function AppleIcon() {
             style={{
               width: `${100 / 6}%`,
               height: `${100 / 6}%`,
-              background: light ? '#fdf2f4' : '#e85a72',
+              background: light ? '#e8eaed' : '#6fcf97',
             }}
           />
         ))}

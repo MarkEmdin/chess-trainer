@@ -26,7 +26,7 @@ export default function Icon() {
             style={{
               width: '25%',
               height: '25%',
-              background: light ? '#fdf2f4' : '#e85a72',
+              background: light ? '#e8eaed' : '#6fcf97',
             }}
           />
         ))}

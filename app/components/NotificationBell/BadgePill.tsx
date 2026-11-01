@@ -17,8 +17,10 @@ export default function BadgePill({ count, tone, inline = false }: Props) {
     <span
       aria-hidden
       className={cn(
-        'flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[11px] font-bold leading-none text-white ring-2 ring-card',
-        tone === 'red' ? 'bg-destructive' : 'bg-green-600',
+        'flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[11px] font-bold leading-none ring-2 ring-card',
+        tone === 'red'
+          ? 'bg-destructive text-white'
+          : 'bg-primary text-primary-foreground',
         !inline && 'absolute -top-1.5',
         !inline && (tone === 'red' ? '-right-1.5' : '-left-1.5'),
       )}
