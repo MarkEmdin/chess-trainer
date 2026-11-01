@@ -6,7 +6,6 @@ import { MenuIcon } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { buttonVariants } from '@/app/components/ui/button';
 import LanguageToggle from '@/app/components/LanguageToggle';
-import ThemeToggle from '@/app/components/ThemeToggle';
 import {
   Sheet,
   SheetContent,
@@ -62,7 +61,6 @@ export default function MobileNav({ navLinks, authMenu }: Props) {
           )}
           <div className="flex items-center gap-2 pt-4 mt-2 border-t border-border">
             <LanguageToggle />
-            <ThemeToggle />
           </div>
         </nav>
       </SheetContent>

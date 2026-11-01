@@ -398,13 +398,7 @@
     "watchVideo": "Watch video"
   },
   "common": {
-    "toggleTheme": "Toggle theme",
     "toggleLanguage": "Toggle language",
-    "theme": {
-      "light": "Light",
-      "dark": "Dark",
-      "rose": "Rose"
-    },
     "games": {
       "loading": "Loading games…",
       "errorGeneric": "Could not load games. Try again.",

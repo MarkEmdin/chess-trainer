@@ -83,8 +83,10 @@ export default async function LocaleLayout({
         <NextIntlClientProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="rose"
-            themes={['light', 'dark', 'rose']}
+            // One dark theme for now (spec 017); more themes come back later.
+            forcedTheme="dark"
+            defaultTheme="dark"
+            themes={['dark']}
             enableSystem={false}
             disableTransitionOnChange
           >
