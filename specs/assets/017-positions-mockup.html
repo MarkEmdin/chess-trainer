@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8"><title>Ключевые позиции v2</title>
+<style>
+  body{margin:0;background:#08090b;color:#e8eaed;font-family:Inter,system-ui,sans-serif;padding:28px}
+  h2{margin:0 0 4px} .sub{color:#8b919c;margin:0 0 20px}
+  .frame{border:1px solid #262a33;border-radius:14px;overflow:hidden;margin-bottom:24px}
+  .cap{font-size:12px;color:#8b919c;padding:8px 14px;background:#121418;border-bottom:1px solid #262a33}
+  .app{--bg:#0f1115;--sf:#171a20;--sf2:#1d2129;--bd:#262a33;--tx:#e8eaed;--mu:#8b919c;--ac:#6fcf97;--acd:#173326;--in:#8ea2ff;
+       background:var(--bg);color:var(--tx);font-size:13px}
+  .pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:1px 7px;font-size:11px;font-weight:600}
+  .row{border:1px solid var(--bd);border-radius:10px;padding:8px;display:flex;gap:10px;align-items:center;background:var(--sf)}
+  .row.on{border-color:#2f6b4b;background:#162019}
+  .btn{border-radius:9px;padding:9px 14px;font-weight:700;text-align:center}
+  .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);font-weight:600}
+  /* board, mimicking ChessboardWithNotation: react-chessboard colours, labels outside */
+  .nb{display:grid;grid-template-columns:auto 1fr;grid-template-rows:1fr auto}
+  .nb .rk{display:grid;grid-template-rows:repeat(8,1fr);color:var(--mu);font-size:13px}
+  .nb .rk span{display:flex;align-items:center;justify-content:flex-end;padding-right:6px}
+  .nb .fl{grid-column:2;display:grid;grid-template-columns:repeat(8,1fr);color:var(--mu);font-size:13px;text-align:center;padding-top:2px}
+  .sq-grid{display:grid;grid-template-columns:repeat(8,1fr);aspect-ratio:1}
+  .sq-grid div{position:relative}
+  .sq-grid img{position:absolute;inset:0;width:100%;height:100%}
+  .l{background:#f0d9b5}.d{background:#b58863}
+  .hlt{box-shadow:inset 0 0 0 999px rgba(255,255,0,.4)}
+  .tabs{display:flex;gap:4px;background:var(--sf);border:1px solid var(--bd);border-radius:9px;padding:3px}
+  .tabs span{flex:1;text-align:center;padding:5px;border-radius:7px;color:var(--mu)}
+  .tabs span.on{background:var(--sf2);color:var(--tx);font-weight:600}
+</style></head><body>
+
+<h2>«Ключевые позиции» v2</h2>
+<p class="sub">Доска нарисована как сейчас: цвета react-chessboard, стандартные фигуры, координаты снаружи слева и снизу, подсветка хода жёлтым. Группировки по датам нет, порядок как сейчас.</p>
+
+<div class="frame">
+  <div class="cap">Компьютер: /think-time</div>
+  <div class="app">
+    <div style="display:flex;align-items:center;gap:22px;padding:12px 20px;border-bottom:1px solid var(--bd);background:var(--sf)">
+      <b style="font-size:15px">♔ Chess Fundamentals</b>
+      <span style="font-weight:600;box-shadow:inset 0 -2px 0 var(--ac);padding-bottom:4px">Позиции</span>
+      <span style="color:var(--mu)">Партии</span><span style="color:var(--mu)">Обучение</span>
+      <span style="margin-left:auto;color:var(--mu)">🔔<sup style="color:var(--ac)">●</sup></span>
+      <span style="display:flex;align-items:center;gap:6px"><span style="width:24px;height:24px;border-radius:50%;background:#2a3140;display:inline-flex;align-items:center;justify-content:center;font-weight:700">M</span>mark ▾</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:360px 1fr;min-height:540px">
+      <div style="border-right:1px solid var(--bd);padding:16px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:baseline;justify-content:space-between">
+          <div style="font-size:20px;font-weight:800">Ключевые позиции</div><span style="color:var(--mu)">24</span>
+        </div>
+        <div style="display:flex;gap:6px">
+          <span class="pill" style="background:var(--sf2);color:var(--tx);padding:3px 9px">chess.com · mark_e ▾</span>
+          <span class="pill" style="background:var(--sf2);color:var(--tx);padding:3px 9px">дольше 45 сек ▾</span>
+        </div>
+        <div class="tabs"><span class="on">Все</span><span>Спросил · 2</span><span>Ответ · <b style="color:var(--ac)">1</b></span></div>
+
+        <div class="row on"><div class="board mini" data-fen="r1bq1rk1/pp3ppp/2n1pn2/3p1N2/1b1P4/2NBP3/PP3PPP/R2QK2R" data-hl="f5,e3" style="width:52px"></div>
+          <div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between"><b>17. Nf5</b><span style="color:var(--ac)">2:14</span></div>
+          <div style="color:var(--mu);font-size:11px">vs hikaru · блиц 3+2 · 12 окт</div></div></div>
+        <div class="row"><div class="board mini" data-fen="3r2k1/pp3ppp/8/8/4r3/2P5/PP3PPP/3RR1K1" data-hl="e4,e8" style="width:52px"></div>
+          <div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between"><b>23… Rxe4</b><span style="color:var(--mu)">1:32</span></div>
+          <span class="pill" style="background:var(--acd);color:var(--ac)">✓ Ответ тренера</span></div></div>
+        <div class="row"><div class="board mini" data-fen="r1b1kb1r/pppp1ppp/2n2n2/4p3/3Q4/2N5/PPP1PPPP/R1B1KBNR" data-hl="d4,d1" style="width:52px"></div>
+          <div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between"><b>9. Qd4</b><span style="color:var(--mu)">0:58</span></div>
+          <span class="pill" style="background:#232845;color:var(--in)">Ждёт ответа</span></div></div>
+        <div class="row"><div class="board mini" data-fen="r4rk1/pp3pp1/2p2B1p/8/3P4/2N5/PPQ2PPP/R4RK1" data-hl="h6,f6" style="width:52px"></div>
+          <div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between"><b>31. Bxh6</b><span style="color:var(--mu)">0:51</span></div>
+          <div style="color:var(--mu);font-size:11px">vs anna_k · рапид 10+0 · 10 окт</div></div></div>
+        <div style="text-align:center;color:var(--mu);font-size:12px;padding:6px">Показать ещё</div>
+      </div>
+
+      <div style="padding:20px 24px;display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:24px;align-items:start">
+        <div style="max-width:460px;width:100%">
+          <div class="board labels" data-fen="r1bq1rk1/pp3ppp/2n1pn2/3p1N2/1b1P4/2NBP3/PP3PPP/R2QK2R" data-hl="f5,e3"></div>
+          <div style="display:flex;justify-content:center;gap:6px;margin-top:10px">
+            <span class="btn" style="background:var(--sf2);padding:6px 14px">⏮</span><span class="btn" style="background:var(--sf2);padding:6px 14px">◀</span>
+            <span class="btn" style="background:var(--sf2);padding:6px 14px">▶</span><span class="btn" style="background:var(--sf2);padding:6px 14px">⏭</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div><div class="lbl">Ты думал</div>
+            <div style="font-size:30px;font-weight:800;color:var(--ac)">2:14</div>
+            <div style="color:var(--mu)">над ходом <b style="color:var(--tx)">17. Nf5</b></div></div>
+          <div style="border-top:1px solid var(--bd);padding-top:10px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;justify-content:space-between"><span>⚪ mark_e</span><span style="color:var(--mu)">1712</span></div>
+            <div style="display:flex;justify-content:space-between"><span>⚫ hikaru</span><span style="color:var(--mu)">1745</span></div>
+            <div style="color:var(--mu);font-size:11px">Блиц 3+2 · 12 октября · 0–1</div></div>
+          <div class="btn" style="background:var(--ac);color:#0b1a12">💬 Спросить тренера</div>
+          <div class="btn" style="background:var(--sf2)">Открыть всю партию</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+  <div class="frame"><div class="cap">Телефон: список</div>
+    <div style="display:flex;justify-content:center;padding:16px;background:#0b0c0f">
+      <div class="app" style="width:310px;border:1px solid #262a33;border-radius:14px;overflow:hidden">
+        <div style="display:flex;padding:10px 12px;border-bottom:1px solid var(--bd);background:var(--sf)"><b>♔ CF</b><span style="margin-left:auto;color:var(--mu)">🔔 &nbsp; M</span></div>
+        <div style="padding:12px;display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:18px;font-weight:800">Ключевые позиции</div>
+          <div class="tabs" style="font-size:11px"><span class="on">Все</span><span>Спросил</span><span>Ответ · <b style="color:var(--ac)">1</b></span></div>
+          <div class="row"><div class="board" data-fen="r1bq1rk1/pp3ppp/2n1pn2/3p1N2/1b1P4/2NBP3/PP3PPP/R2QK2R" data-hl="f5,e3" style="width:52px"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><b>17. Nf5</b><span style="color:var(--ac)">2:14</span></div><div style="color:var(--mu);font-size:11px">vs hikaru · блиц</div></div></div>
+          <div class="row"><div class="board" data-fen="3r2k1/pp3ppp/8/8/4r3/2P5/PP3PPP/3RR1K1" data-hl="e4,e8" style="width:52px"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><b>23… Rxe4</b><span style="color:var(--mu)">1:32</span></div><span class="pill" style="background:var(--acd);color:var(--ac)">✓ Ответ</span></div></div>
+          <div class="row"><div class="board" data-fen="r1b1kb1r/pppp1ppp/2n2n2/4p3/3Q4/2N5/PPP1PPPP/R1B1KBNR" data-hl="d4,d1" style="width:52px"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><b>9. Qd4</b><span style="color:var(--mu)">0:58</span></div><span class="pill" style="background:#232845;color:var(--in)">Ждёт ответа</span></div></div>
+        </div>
+        <div style="display:flex;justify-content:space-around;border-top:1px solid var(--bd);padding:10px 0;background:var(--sf);font-size:11px">
+          <span style="color:var(--ac);font-weight:700">◎ Позиции</span><span style="color:var(--mu)">▦ Партии</span><span style="color:var(--mu)">▶ Обучение</span></div>
+      </div></div></div>
+  <div class="frame"><div class="cap">Телефон: позиция (по тапу)</div>
+    <div style="display:flex;justify-content:center;padding:16px;background:#0b0c0f">
+      <div class="app" style="width:310px;border:1px solid #262a33;border-radius:14px;overflow:hidden">
+        <div style="display:flex;padding:10px 12px;border-bottom:1px solid var(--bd);background:var(--sf)"><span>← Назад</span><span style="margin-left:auto;color:var(--mu)">1 / 24</span></div>
+        <div style="padding:12px;display:flex;flex-direction:column;gap:10px">
+          <div class="board labels" data-fen="r1bq1rk1/pp3ppp/2n1pn2/3p1N2/1b1P4/2NBP3/PP3PPP/R2QK2R" data-hl="f5,e3"></div>
+          <div><div class="lbl">Ты думал</div><b style="font-size:22px;color:var(--ac)">2:14</b> <span style="color:var(--mu)">над 17. Nf5</span></div>
+          <div style="color:var(--mu);font-size:11px">vs hikaru (1745) · блиц 3+2 · 0–1</div>
+          <div class="btn" style="background:var(--ac);color:#0b1a12">💬 Спросить тренера</div>
+          <div class="btn" style="background:var(--sf2)">Открыть всю партию</div>
+        </div>
+      </div></div></div>
+</div>
+
+<script>
+  // Render each .board from its FEN with cburnett pieces (react-chessboard's default set).
+  const P = {k:'K',q:'Q',r:'R',b:'B',n:'N',p:'P'};
+  const files = 'abcdefgh';
+  document.querySelectorAll('.board').forEach(el => {
+    const hl = (el.dataset.hl || '').split(',');
+    const grid = document.createElement('div'); grid.className = 'sq-grid';
+    el.dataset.fen.split('/').forEach((row, r) => {
+      let c = 0;
+      for (const ch of row) {
+        if (/\d/.test(ch)) { for (let i = 0; i < +ch; i++) grid.appendChild(sq(r, c++)); continue; }
+        const s = sq(r, c++);
+        const img = document.createElement('img');
+        img.src = `https://lichess1.org/assets/piece/cburnett/${ch === ch.toUpperCase() ? 'w' : 'b'}${P[ch.toLowerCase()]}.svg`;
+        s.appendChild(img); grid.appendChild(s);
+      }
+    });
+    function sq(r, c) {
+      const d = document.createElement('div');
+      d.className = (r + c) % 2 ? 'd' : 'l';
+      if (hl.includes(files[c] + (8 - r))) d.classList.add('hlt');
+      return d;
+    }
+    if (el.classList.contains('labels')) {
+      const nb = document.createElement('div'); nb.className = 'nb';
+      nb.innerHTML = '<div class="rk">' + [8,7,6,5,4,3,2,1].map(n => `<span>${n}</span>`).join('') + '</div>';
+      nb.appendChild(grid);
+      nb.insertAdjacentHTML('beforeend', '<div class="fl">' + [...files].map(f => `<span>${f}</span>`).join('') + '</div>');
+      el.appendChild(nb);
+    } else { grid.style.borderRadius = '3px'; grid.style.overflow = 'hidden'; el.appendChild(grid); }
+  });
+</script>
+</body></html>
