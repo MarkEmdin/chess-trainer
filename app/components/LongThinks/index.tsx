@@ -1,6 +1,6 @@
 'use client';
 
-import { useDeferredValue, useState } from 'react';
+import { useCallback, useDeferredValue, useState } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { Loader2Icon } from 'lucide-react';
@@ -77,6 +77,11 @@ export default function LongThinks({
   const isPending = threshold !== deferredThreshold;
   const t = useTranslations('thinkTime');
   const format = useFormatter();
+
+  const selectRow = useCallback((think: LongThink, game: Game) => {
+    setSelectedKey(thinkKey({ think, game }));
+    setMobileOpen(true);
+  }, []);
 
   // Opening the thread shows the coach's answer in full, so an unseen one
   // counts as read (spec 012); refetch so the badge drops.
@@ -185,10 +190,7 @@ export default function LongThinks({
                           status={item.status}
                           hasNewAnswer={item.hasNewAnswer}
                           selected={item === selected}
-                          onSelect={() => {
-                            setSelectedKey(thinkKey(item));
-                            setMobileOpen(true);
-                          }}
+                          onSelect={selectRow}
                         />
                       </li>
                     ))}

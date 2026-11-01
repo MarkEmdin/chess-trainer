@@ -82,6 +82,8 @@ describe('<PositionRow />', () => {
     const button = screen.getByRole('button');
     expect(button).toHaveAttribute('aria-pressed', 'true');
     await userEvent.click(button);
-    expect(onSelect).toHaveBeenCalled();
+    // One stable handler for every row (memoised rows, spec 017): the row
+    // says which position it is.
+    expect(onSelect).toHaveBeenCalledWith(think, game);
   });
 });

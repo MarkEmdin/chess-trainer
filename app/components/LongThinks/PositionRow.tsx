@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import ChessboardWithNotation from '@/app/components/ChessboardWithNotation';
 import { formatSeconds } from '@/lib/chesscom/format';
@@ -16,12 +17,15 @@ type Props = {
   // An answer the student hasn't opened yet (spec 012).
   hasNewAnswer: boolean;
   selected: boolean;
-  onSelect: () => void;
+  // Shared by every row so memo() can skip rows whose data didn't change.
+  onSelect: (think: LongThink, game: Game) => void;
 };
 
 const pill = 'rounded-full px-2 py-px text-[11px] font-semibold';
 
-export default function PositionRow({
+// Each row holds a full react-chessboard; re-rendering all of them on every
+// selection made clicks lag, so unchanged rows are skipped (spec 017).
+export default memo(function PositionRow({
   think,
   game,
   status,
@@ -38,7 +42,7 @@ export default function PositionRow({
     <button
       type="button"
       aria-pressed={selected}
-      onClick={onSelect}
+      onClick={() => onSelect(think, game)}
       className={cn(
         'flex w-full items-center gap-3 rounded-[10px] border bg-card p-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         selected
@@ -96,4 +100,4 @@ export default function PositionRow({
       </div>
     </button>
   );
-}
+});

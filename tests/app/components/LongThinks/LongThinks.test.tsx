@@ -61,15 +61,16 @@ jest.mock('@/lib/chesscom/useStoredThreshold', () => ({
 jest.mock('@/app/components/LongThinks/PositionRow', () => ({
   __esModule: true,
   default: (props: {
+    think: unknown;
     game: { id: string };
     selected: boolean;
     hasNewAnswer: boolean;
-    onSelect: () => void;
+    onSelect: (think: unknown, game: unknown) => void;
   }) => (
     <button
       aria-pressed={props.selected}
       data-new={String(props.hasNewAnswer)}
-      onClick={props.onSelect}
+      onClick={() => props.onSelect(props.think, props.game)}
     >
       row {props.game.id}
     </button>
