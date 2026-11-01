@@ -392,7 +392,16 @@
     },
     "emptyUnasked": "You've asked about every position here.",
     "emptyAsked": "You haven't asked about any of these positions yet.",
-    "versus": "vs {name}"
+    "versus": "vs {name}",
+    "detail": {
+      "youThought": "You thought",
+      "overMove": "over",
+      "openQuestion": "Open question",
+      "openGame": "Open the whole game",
+      "signInToAsk": "Sign in to ask a coach about this position.",
+      "back": "Back",
+      "counter": "{n} / {total}"
+    }
   },
   "videoModal": {
     "watchVideo": "Watch video"
