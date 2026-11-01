@@ -391,7 +391,8 @@
       "asked": "Asked ({count})"
     },
     "emptyUnasked": "You've asked about every position here.",
-    "emptyAsked": "You haven't asked about any of these positions yet."
+    "emptyAsked": "You haven't asked about any of these positions yet.",
+    "versus": "vs {name}"
   },
   "videoModal": {
     "watchVideo": "Watch video"
