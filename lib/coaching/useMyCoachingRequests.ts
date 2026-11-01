@@ -6,7 +6,7 @@ import type { CoachingThreadData } from '@/lib/coaching/types';
 
 export type MyCoachingRequest = CoachingThreadData;
 
-// Keyed by fen so each LongThinkCard can answer "do I have a request
+// Keyed by fen so each key-position row can answer "do I have a request
 // for this position?" with a single hash lookup.
 export type CoachingRequestsByFen = Record<string, MyCoachingRequest>;
 

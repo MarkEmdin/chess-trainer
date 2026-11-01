@@ -25,7 +25,7 @@ export default async function ThinkTimePage() {
 
   return (
     <div className="flex flex-col flex-1 bg-background font-sans px-6 py-12">
-      <div className="max-w-3xl mx-auto w-full">
+      <div className="max-w-6xl mx-auto w-full">
         <h1 className="text-3xl font-bold text-foreground mb-2">{t('title')}</h1>
         <p className="text-muted-foreground mb-8">{t('subtitle')}</p>
         <LongThinks

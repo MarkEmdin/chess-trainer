@@ -379,10 +379,9 @@
   },
   "thinkTime": {
     "title": "Key Positions",
-    "subtitle": "Positions where you spent extra time thinking. Click a card to open the full game.",
+    "subtitle": "Moves you spent extra time on. Pick one to see the position and ask a coach about it.",
     "empty": "No moves crossed the {threshold}s threshold in the loaded games.",
     "showing": "{count, plural, one {# long think} other {# long thinks}} across {gameCount, plural, one {# game} other {# games}}",
-    "thoughtFor": "Thought {duration}",
     "thresholdLabel": "Threshold",
     "secondsShort": "{value}s",
     "askedFilter": {
