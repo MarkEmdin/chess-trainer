@@ -1,5 +1,5 @@
 import userEvent from '@testing-library/user-event';
-import { renderWithIntl, screen } from '@/tests/test-utils';
+import { renderWithIntl, screen, within } from '@/tests/test-utils';
 import GamesShell from '@/app/components/GamesShell';
 import { useChessComGames } from '@/lib/chesscom/useChessComGames';
 import { useLichessGames } from '@/lib/lichess/useLichessGames';
@@ -274,6 +274,30 @@ describe('<GamesShell />', () => {
       shell(() => null);
       expect(
         screen.getByRole('button', { name: /load more games/i }),
+      ).toBeInTheDocument();
+    });
+
+    it('lets the consumer place load more', () => {
+      loaded({ hasMore: true });
+      renderWithIntl(
+        <GamesShell
+          isAuthenticated={false}
+          initialChesscomUsername={null}
+          initialLichessUsername={null}
+          emptyMessage="no-games-here"
+          renderStatus={({ games }) => `status-${games.length}`}
+          loadMoreInChildren
+        >
+          {({ loadMore }) => <div data-testid="kids">{loadMore}</div>}
+        </GamesShell>,
+      );
+      expect(
+        screen.getAllByRole('button', { name: /load more games/i }),
+      ).toHaveLength(1);
+      expect(
+        within(screen.getByTestId('kids')).getByRole('button', {
+          name: /load more games/i,
+        }),
       ).toBeInTheDocument();
     });
 

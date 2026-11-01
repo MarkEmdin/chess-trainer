@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/app/components/ui/card';
 import GameMatchup from '@/app/components/GameMatchup';
 
 const RESULT_STYLES: Record<Game['result'], string> = {
-  win: 'bg-green-600/10 text-green-700 dark:text-green-400',
+  win: 'bg-primary/15 text-primary',
   loss: 'bg-destructive/10 text-destructive',
   draw: 'bg-muted text-muted-foreground',
 };
@@ -27,7 +27,7 @@ export default function GameTile({ game, onClick }: Props) {
       onClick={onClick}
       className="block w-full text-left appearance-none bg-transparent p-0 border-0 cursor-pointer"
     >
-      <Card className="hover:shadow-md transition-shadow">
+      <Card className="transition-colors hover:border-foreground/20">
         <CardContent>
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-3">
             <div className="flex flex-col gap-1">

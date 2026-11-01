@@ -5,16 +5,16 @@ export const alt = 'Chess Fundamentals — learn the basics of chess';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
-const CREAM = '#fdf2f4';
-const ROSE = '#e85a72';
-const INK = '#1c1517';
+const LIGHT = '#e8eaed';
+const ACCENT = '#6fcf97';
+const INK = '#0f1115';
 
 // Knight outline from public/pieces/knight.svg, recolored for the dark card.
 function Knight({ size }: { size: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 45 45">
       <g
-        fill={CREAM}
+        fill={LIGHT}
         stroke={INK}
         strokeWidth={1.5}
         strokeLinecap="round"
@@ -48,7 +48,7 @@ function Dot({ left, top, size }: { left: number; top: number; size: number }) {
         width: size,
         height: size,
         borderRadius: size,
-        background: CREAM,
+        background: LIGHT,
       }}
     />
   );
@@ -70,7 +70,7 @@ export default async function Image({
         display: 'flex',
         position: 'relative',
         background: INK,
-        color: CREAM,
+        color: LIGHT,
         fontFamily: 'sans-serif',
         overflow: 'hidden',
       }}
@@ -96,11 +96,11 @@ export default async function Image({
           width: 150,
           height: 112,
           borderRadius: 56,
-          background: CREAM,
+          background: LIGHT,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: ROSE,
+          color: ACCENT,
           fontSize: 84,
           lineHeight: 1,
         }}
@@ -115,7 +115,7 @@ export default async function Image({
           top: 0,
           width: 16,
           height: '100%',
-          background: ROSE,
+          background: ACCENT,
         }}
       />
       <div
@@ -128,7 +128,7 @@ export default async function Image({
           paddingLeft: 96,
         }}
       >
-        <div style={{ fontSize: 30, color: ROSE, letterSpacing: 6 }}>
+        <div style={{ fontSize: 30, color: ACCENT, letterSpacing: 6 }}>
           CHESS FUNDAMENTALS
         </div>
         <div style={{ fontSize: 40, lineHeight: 1.3 }}>{t('description')}</div>

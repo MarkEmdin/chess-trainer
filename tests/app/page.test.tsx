@@ -1,7 +1,9 @@
 import { render, screen, within } from '@testing-library/react';
 import Home from '@/app/[locale]/page';
 
+const redirect = jest.fn();
 jest.mock('@/i18n/navigation', () => ({
+  redirect: (args: unknown) => redirect(args),
   Link: ({
     href,
     children,
@@ -20,9 +22,38 @@ jest.mock('@/i18n/navigation', () => ({
 jest.mock('next-intl/server', () => ({
   getTranslations: async (namespace: string) => (key: string) =>
     `${namespace}.${key}`,
+  getLocale: async () => 'en',
 }));
 
+const getAuthedUser = jest.fn();
+jest.mock('@/lib/auth/getUser', () => ({
+  getAuthedUser: () => getAuthedUser(),
+}));
+
+beforeEach(() => {
+  redirect.mockClear();
+  getAuthedUser.mockResolvedValue(null);
+});
+
 describe('home page', () => {
+  it('sends signed-in users to key positions', async () => {
+    getAuthedUser.mockResolvedValue({
+      id: 'u1',
+      nickname: 'ann',
+      role: 'user',
+    });
+    await Home();
+    expect(redirect).toHaveBeenCalledWith({
+      href: '/think-time',
+      locale: 'en',
+    });
+  });
+
+  it('shows guests the landing', async () => {
+    render(await Home());
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
   it('shows the brand and the project idea', async () => {
     render(await Home());
     expect(

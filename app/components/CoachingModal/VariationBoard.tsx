@@ -280,7 +280,7 @@ function Frame({
       className={cn(
         'rounded-md p-1 transition-shadow',
         recording &&
-          'ring-2 ring-green-600 shadow-[0_0_16px] shadow-green-600/50',
+          'ring-2 ring-primary shadow-[0_0_16px] shadow-primary/50',
       )}
     >
       {children}
@@ -330,7 +330,7 @@ function Writer({
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-sm font-medium text-green-600">
+      <span className="text-sm font-medium text-primary">
         {t('recording')}
       </span>
       <Frame recording>

@@ -1,5 +1,6 @@
-import { getTranslations } from 'next-intl/server';
-import { Link } from '@/i18n/navigation';
+import { getLocale, getTranslations } from 'next-intl/server';
+import { Link, redirect } from '@/i18n/navigation';
+import { getAuthedUser } from '@/lib/auth/getUser';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/app/components/ui/button';
 import {
@@ -19,13 +20,20 @@ const features = [
 ] as const;
 
 export default async function Home() {
+  // The landing is for guests; signed-in users go straight to the product
+  // (spec 017).
+  const user = await getAuthedUser();
+  if (user) {
+    redirect({ href: '/think-time', locale: await getLocale() });
+  }
+
   const t = await getTranslations('home');
   return (
     <main className="flex flex-col flex-1 bg-background font-sans">
       <div className="max-w-4xl mx-auto w-full px-6 py-12 flex flex-col gap-16">
         <section className="flex flex-col items-center text-center gap-4">
-          <div className="text-6xl">♔</div>
-          <h1 className="text-4xl font-bold text-foreground">
+          <div className="text-6xl text-primary">♔</div>
+          <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
             Chess Fundamentals
           </h1>
           <p className="text-lg text-foreground">{t('tagline')}</p>
@@ -75,7 +83,7 @@ export default async function Home() {
                 href={feature.href}
                 className="rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
               >
-                <Card className="h-full transition-shadow hover:shadow-md">
+                <Card className="h-full transition-colors hover:border-foreground/20">
                   <CardContent>
                     <CardTitle>{t(`features.${feature.key}.title`)}</CardTitle>
                     <CardDescription className="mt-1">

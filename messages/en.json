@@ -1,11 +1,9 @@
 {
   "nav": {
-    "worldChampions": "World Champions",
-    "theory": "Theory",
-    "pieceValues": "Piece Values",
+    "positions": "Positions",
     "games": "Games",
-    "thinkTime": "Key Positions",
-    "openMenu": "Open menu"
+    "learn": "Learn",
+    "main": "Main navigation"
   },
   "auth": {
     "signIn": "Login",
@@ -231,7 +229,7 @@
       },
       "lessons": {
         "title": "Learning materials",
-        "description": "Theory, piece values and world champions. Currently in Russian only."
+        "description": "Theory and world champions. Currently in Russian only."
       }
     },
     "future": {
@@ -245,21 +243,9 @@
       "title": "Theory",
       "description": "Basic checkmates: two rooks, queen, rook."
     },
-    "pieceValues": {
-      "title": "Piece Values",
-      "description": "Understand the relative value of each chess piece and why it matters."
-    },
     "worldChampions": {
       "title": "World Champions USSR history",
       "description": "World Champions USSR history."
-    },
-    "games": {
-      "title": "Games",
-      "description": "Browse and replay the recent games of any Chess.com or Lichess player."
-    },
-    "thinkTime": {
-      "title": "Key Positions",
-      "description": "Surface every move where you spent 45+ seconds thinking."
     }
   },
   "theory": {
@@ -341,22 +327,6 @@
       }
     }
   },
-  "pieces": {
-    "pawn": "Pawn",
-    "knight": "Knight",
-    "bishop": "Bishop",
-    "rook": "Rook",
-    "queen": "Queen",
-    "king": "King"
-  },
-  "pieceValues": {
-    "title": "Piece Values",
-    "howTo": "Pick a combination of pieces whose point values add up to the target number.",
-    "reset": "Reset",
-    "checkAnswer": "Check Answer",
-    "correct": "Correct!",
-    "wrong": "Wrong, try again"
-  },
   "games": {
     "title": "Games",
     "subtitle": "Browse your recent games on Chess.com or Lichess.",
@@ -409,10 +379,9 @@
   },
   "thinkTime": {
     "title": "Key Positions",
-    "subtitle": "Positions where you spent extra time thinking. Click a card to open the full game.",
+    "subtitle": "Moves you spent extra time on. Pick one to see the position and ask a coach about it.",
     "empty": "No moves crossed the {threshold}s threshold in the loaded games.",
     "showing": "{count, plural, one {# long think} other {# long thinks}} across {gameCount, plural, one {# game} other {# games}}",
-    "thoughtFor": "Thought {duration}",
     "thresholdLabel": "Threshold",
     "secondsShort": "{value}s",
     "askedFilter": {
@@ -421,19 +390,23 @@
       "asked": "Asked ({count})"
     },
     "emptyUnasked": "You've asked about every position here.",
-    "emptyAsked": "You haven't asked about any of these positions yet."
+    "emptyAsked": "You haven't asked about any of these positions yet.",
+    "versus": "vs {name}",
+    "detail": {
+      "youThought": "You thought",
+      "overMove": "over",
+      "openQuestion": "Open question",
+      "openGame": "Open the whole game",
+      "signInToAsk": "Sign in to ask a coach about this position.",
+      "back": "Back",
+      "counter": "{n} / {total}"
+    }
   },
   "videoModal": {
     "watchVideo": "Watch video"
   },
   "common": {
-    "toggleTheme": "Toggle theme",
     "toggleLanguage": "Toggle language",
-    "theme": {
-      "light": "Light",
-      "dark": "Dark",
-      "rose": "Rose"
-    },
     "games": {
       "loading": "Loading games…",
       "errorGeneric": "Could not load games. Try again.",

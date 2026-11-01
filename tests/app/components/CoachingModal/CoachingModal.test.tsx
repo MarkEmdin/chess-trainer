@@ -248,12 +248,12 @@ describe('CoachingModal', () => {
         ask={{ gameUrl: 'https://lichess.org/abc', moveIndex: 5 }}
       />,
     );
-    expect(frame()).not.toHaveClass('ring-green-600');
+    expect(frame()).not.toHaveClass('ring-primary');
     expect(board.onPieceDrop).toBeUndefined();
     fireEvent.focus(editor());
-    expect(frame()).toHaveClass('ring-green-600');
+    expect(frame()).toHaveClass('ring-primary');
     fireEvent.pointerDown(screen.getByText('Ask the coach'));
-    expect(frame()).not.toHaveClass('ring-green-600');
+    expect(frame()).not.toHaveClass('ring-primary');
   });
 
   it('keeps recording through clicks on the board', () => {
@@ -267,7 +267,7 @@ describe('CoachingModal', () => {
     );
     fireEvent.focus(editor());
     fireEvent.pointerDown(screen.getByTestId('board'));
-    expect(frame()).toHaveClass('ring-green-600');
+    expect(frame()).toHaveClass('ring-primary');
   });
 
   it('keeps the text when the server returns an error', async () => {

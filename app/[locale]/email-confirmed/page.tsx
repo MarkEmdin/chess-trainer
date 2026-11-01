@@ -24,7 +24,7 @@ export default async function EmailConfirmedPage() {
 
   const t = await getTranslations('auth.emailConfirmed');
   return (
-    <div className="mx-auto w-full max-w-sm flex flex-col gap-6 px-4 py-12 text-center">
+    <div className="mx-auto my-12 flex w-[calc(100%-2rem)] max-w-sm flex-col gap-6 rounded-[10px] border border-border bg-card px-6 py-8 sm:my-16 text-center">
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold text-foreground">{t('title')}</h1>
         <p className="text-sm text-muted-foreground">{t('body')}</p>

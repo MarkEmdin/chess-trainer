@@ -1,6 +1,6 @@
 'use client';
 
-import { useDeferredValue, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useState } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { Loader2Icon } from 'lucide-react';
@@ -16,10 +16,12 @@ import {
   matchesAskedFilter,
   type AskedFilter,
 } from '@/lib/coaching/askedFilter';
-import { Button } from '@/app/components/ui/button';
 import GamesShell from '@/app/components/GamesShell';
-import LongThinkCard from './LongThinkCard';
+import { cn } from '@/lib/utils';
+import PositionRow from './PositionRow';
+import PositionDetail from './PositionDetail';
 import ThresholdSelector from './ThresholdSelector';
+import { formatThinkMove } from './format';
 
 // Same chunk as /games — Turbopack/webpack dedupes, so opening the modal
 // from either route pays for the chess engine just once.
@@ -37,11 +39,8 @@ const CoachingModal = dynamic(() => import('@/app/components/CoachingModal'), {
 
 type EnrichedThink = { think: LongThink; game: Game };
 
-function formatThinkMove(think: LongThink): string {
-  return think.color === 'white'
-    ? `${think.fullMoveNumber}. ${think.san}`
-    : `${think.fullMoveNumber}… ${think.san}`;
-}
+const thinkKey = ({ think, game }: EnrichedThink) =>
+  `${game.id}-${think.moveIndex}`;
 
 type Props = {
   isAuthenticated: boolean;
@@ -49,19 +48,24 @@ type Props = {
   initialLichessUsername: string | null;
 };
 
+// List of long thinks on the left, the chosen position on the right
+// (spec 017). Under `lg` only the list shows; picking a row opens the
+// detail full screen on top of it, so the list keeps its scroll position.
 export default function LongThinks({
   isAuthenticated,
   initialChesscomUsername,
   initialLichessUsername,
 }: Props) {
-  const [selected, setSelected] = useState<EnrichedThink | null>(null);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [gameTarget, setGameTarget] = useState<EnrichedThink | null>(null);
   const [coachingTarget, setCoachingTarget] = useState<EnrichedThink | null>(
     null,
   );
   const [threshold, setThreshold] = useStoredThreshold();
   const [askedFilter, setAskedFilter] = useState<AskedFilter>('all');
   // Only fetched when signed in (the hook handles the gating). Map is
-  // keyed by fen so each card can do an O(1) "do I have a thread for
+  // keyed by fen so each row can do an O(1) "do I have a thread for
   // this position?" lookup.
   const { data: requestsByFen, mutate: refreshRequests } =
     useMyCoachingRequests(isAuthenticated);
@@ -73,6 +77,27 @@ export default function LongThinks({
   const isPending = threshold !== deferredThreshold;
   const t = useTranslations('thinkTime');
   const format = useFormatter();
+
+  // While the mobile full-screen detail is up, the page behind it must not
+  // scroll and Escape closes it — unless a modal on top owns Escape.
+  const modalOpen = !!gameTarget || !!coachingTarget;
+  useEffect(() => {
+    if (!mobileOpen) return;
+    document.body.classList.add('max-lg:overflow-hidden');
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !modalOpen) setMobileOpen(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.classList.remove('max-lg:overflow-hidden');
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [mobileOpen, modalOpen]);
+
+  const selectRow = useCallback((think: LongThink, game: Game) => {
+    setSelectedKey(thinkKey({ think, game }));
+    setMobileOpen(true);
+  }, []);
 
   // Opening the thread shows the coach's answer in full, so an unseen one
   // counts as read (spec 012); refetch so the badge drops.
@@ -100,8 +125,9 @@ export default function LongThinks({
             gameCount: games.length,
           })
         }
+        loadMoreInChildren
       >
-        {({ games }) => {
+        {({ games, loadMore }) => {
           const enriched = collectLongThinks(games, deferredThreshold).map(
             (item) => {
               const thread = requestsByFen?.[item.think.fenBefore];
@@ -116,65 +142,98 @@ export default function LongThinks({
           const shown = enriched.filter((item) =>
             matchesAskedFilter(item.status, askedFilter),
           );
+          // A selection the filter or threshold has hidden falls back to
+          // the first visible row.
+          const selectedIndex = Math.max(
+            0,
+            shown.findIndex((item) => thinkKey(item) === selectedKey),
+          );
+          const selected = shown[selectedIndex];
+
           return (
-            <div className="flex flex-col gap-4">
-              <ThresholdSelector value={threshold} onChange={setThreshold} />
-              {isAuthenticated && enriched.length > 0 && (
-                <div className="flex gap-2 flex-wrap" role="tablist">
-                  {ASKED_FILTERS.map((key) => (
-                    <Button
-                      key={key}
-                      type="button"
-                      role="tab"
-                      aria-selected={askedFilter === key}
-                      variant={askedFilter === key ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setAskedFilter(key)}
-                    >
-                      {t(`askedFilter.${key}`, {
-                        count: enriched.filter((item) =>
-                          matchesAskedFilter(item.status, key),
-                        ).length,
-                      })}
-                    </Button>
-                  ))}
-                </div>
-              )}
-              {isPending ? (
-                <div className="flex items-center justify-center py-12 text-muted-foreground">
-                  <Loader2Icon aria-hidden className="size-6 animate-spin" />
-                </div>
-              ) : enriched.length === 0 ? (
-                <p className="text-muted-foreground">
-                  {t('empty', { threshold: deferredThreshold })}
-                </p>
-              ) : shown.length === 0 ? (
-                <p className="text-muted-foreground">
-                  {t(askedFilter === 'unasked' ? 'emptyUnasked' : 'emptyAsked')}
-                </p>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  {shown.map(
-                    ({ think, game, thread, status, hasNewAnswer }) => (
-                      <LongThinkCard
-                        key={`${game.id}-${think.moveIndex}`}
-                        think={think}
-                        game={game}
-                        // Asked positions open the thread (it browses the
-                        // game too); the rest open the game (spec 013).
-                        onClick={() =>
-                          thread
-                            ? openCoaching({ think, game })
-                            : setSelected({ think, game })
-                        }
-                        showCoachingButton={isAuthenticated}
-                        threadStatus={status}
-                        thread={thread}
-                        hasNewAnswer={hasNewAnswer}
-                        onAskCoach={() => openCoaching({ think, game })}
-                      />
-                    ),
+            <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+              <div className="flex flex-col gap-3">
+                <ThresholdSelector value={threshold} onChange={setThreshold} />
+                {isAuthenticated && enriched.length > 0 && (
+                  <div
+                    role="tablist"
+                    className="flex gap-1 rounded-[9px] border border-border bg-card p-[3px]"
+                  >
+                    {ASKED_FILTERS.map((key) => (
+                      <button
+                        key={key}
+                        type="button"
+                        role="tab"
+                        aria-selected={askedFilter === key}
+                        onClick={() => setAskedFilter(key)}
+                        className={cn(
+                          'flex-1 rounded-[7px] px-2 py-1.5 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                          askedFilter === key
+                            ? 'bg-secondary font-semibold text-foreground'
+                            : 'text-muted-foreground hover:text-foreground',
+                        )}
+                      >
+                        {t(`askedFilter.${key}`, {
+                          count: enriched.filter((item) =>
+                            matchesAskedFilter(item.status, key),
+                          ).length,
+                        })}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {isPending ? (
+                  <div className="flex items-center justify-center py-12 text-muted-foreground">
+                    <Loader2Icon aria-hidden className="size-6 animate-spin" />
+                  </div>
+                ) : enriched.length === 0 ? (
+                  <p className="text-muted-foreground">
+                    {t('empty', { threshold: deferredThreshold })}
+                  </p>
+                ) : shown.length === 0 ? (
+                  <p className="text-muted-foreground">
+                    {t(
+                      askedFilter === 'unasked' ? 'emptyUnasked' : 'emptyAsked',
+                    )}
+                  </p>
+                ) : (
+                  <ul className="flex flex-col gap-2">
+                    {shown.map((item) => (
+                      <li key={thinkKey(item)}>
+                        <PositionRow
+                          think={item.think}
+                          game={item.game}
+                          status={item.status}
+                          hasNewAnswer={item.hasNewAnswer}
+                          selected={item === selected}
+                          onSelect={selectRow}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {loadMore}
+              </div>
+
+              {selected && !isPending && (
+                <div
+                  data-mobile-open={String(mobileOpen)}
+                  className={cn(
+                    'hidden lg:block lg:sticky lg:top-6 lg:self-start',
+                    mobileOpen &&
+                      'fixed inset-0 z-50 block overflow-y-auto bg-background p-4 lg:static lg:z-auto lg:overflow-visible lg:bg-transparent lg:p-0',
                   )}
+                >
+                  <PositionDetail
+                    think={selected.think}
+                    game={selected.game}
+                    thread={selected.thread}
+                    isAuthenticated={isAuthenticated}
+                    onAskCoach={() => openCoaching(selected)}
+                    onOpenGame={() => setGameTarget(selected)}
+                    onBack={() => setMobileOpen(false)}
+                    counter={{ n: selectedIndex + 1, total: shown.length }}
+                  />
                 </div>
               )}
             </div>
@@ -182,16 +241,16 @@ export default function LongThinks({
         }}
       </GamesShell>
 
-      {selected && (
+      {gameTarget && (
         <GameModal
-          game={selected.game}
-          initialIndex={selected.think.moveIndex - 1}
-          onClose={() => setSelected(null)}
+          game={gameTarget.game}
+          initialIndex={gameTarget.think.moveIndex - 1}
+          onClose={() => setGameTarget(null)}
           onAskCoach={
             isAuthenticated
               ? () => {
-                  setSelected(null);
-                  openCoaching(selected);
+                  setGameTarget(null);
+                  openCoaching(gameTarget);
                 }
               : undefined
           }

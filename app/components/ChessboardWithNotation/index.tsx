@@ -24,6 +24,8 @@ type Props = {
   // right-click on one square reports from === to (a circle).
   arrows?: [string, string][];
   onRightDrag?: (from: string, to: string) => void;
+  // Thumbnails are too small for labels (spec 017).
+  showCoordinates?: boolean;
 };
 
 export default function ChessboardWithNotation({
@@ -35,6 +37,7 @@ export default function ChessboardWithNotation({
   onSquareClick,
   arrows,
   onRightDrag,
+  showCoordinates = true,
 }: Props) {
   // react-chessboard keeps the first handlers it is given, so a later render
   // with new state would still call stale ones. Route every event through a
@@ -55,18 +58,21 @@ export default function ChessboardWithNotation({
   return (
     <div
       className="grid w-full"
-      style={{
-        gridTemplateColumns: 'auto 1fr',
-        gridTemplateRows: '1fr auto',
-      }}
+      style={
+        showCoordinates
+          ? { gridTemplateColumns: 'auto 1fr', gridTemplateRows: '1fr auto' }
+          : undefined
+      }
     >
-      <div className="grid grid-rows-8 text-sm text-muted-foreground">
-        {ranks.map((r) => (
-          <span key={r} className="flex items-center justify-end pr-1.5">
-            {r}
-          </span>
-        ))}
-      </div>
+      {showCoordinates && (
+        <div className="grid grid-rows-8 text-sm text-muted-foreground">
+          {ranks.map((r) => (
+            <span key={r} className="flex items-center justify-end pr-1.5">
+              {r}
+            </span>
+          ))}
+        </div>
+      )}
       <div>
         <Chessboard
           options={{
@@ -100,14 +106,18 @@ export default function ChessboardWithNotation({
           }}
         />
       </div>
-      <div />
-      <div className="grid grid-cols-8 text-sm text-muted-foreground pt-1">
-        {files.map((f) => (
-          <span key={f} className="text-center">
-            {f}
-          </span>
-        ))}
-      </div>
+      {showCoordinates && (
+        <>
+          <div />
+          <div className="grid grid-cols-8 text-sm text-muted-foreground pt-1">
+            {files.map((f) => (
+              <span key={f} className="text-center">
+                {f}
+              </span>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

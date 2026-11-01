@@ -79,12 +79,14 @@ export default async function LocaleLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col pb-16 sm:pb-0">
         <NextIntlClientProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="rose"
-            themes={['light', 'dark', 'rose']}
+            // One dark theme for now (spec 017); more themes come back later.
+            forcedTheme="dark"
+            defaultTheme="dark"
+            themes={['dark']}
             enableSystem={false}
             disableTransitionOnChange
           >

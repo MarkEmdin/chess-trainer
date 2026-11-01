@@ -19,6 +19,9 @@ import UsernameForm from '@/app/components/UsernameForm';
 type RenderProps = {
   games: Game[];
   username: string;
+  // Load-more button or its error/retry row (null when there's nothing
+  // more). Only rendered by the shell itself unless `loadMoreInChildren`.
+  loadMore: React.ReactNode;
 };
 
 type Props = {
@@ -30,9 +33,12 @@ type Props = {
   // Ignored for guests, who read from localStorage.
   initialChesscomUsername: string | null;
   initialLichessUsername: string | null;
-  renderStatus: (props: RenderProps) => React.ReactNode;
+  renderStatus: (props: Omit<RenderProps, 'loadMore'>) => React.ReactNode;
   emptyMessage: string;
   children: (props: RenderProps) => React.ReactNode;
+  // Hand the load-more controls to `children` instead of rendering them
+  // under everything (Key Positions puts them under its list column).
+  loadMoreInChildren?: boolean;
 };
 
 // Common scaffolding for any feature that consumes the user's recent games
@@ -46,16 +52,19 @@ export default function GamesShell({
   renderStatus,
   emptyMessage,
   children,
+  loadMoreInChildren = false,
 }: Props) {
   // All four branches always render — conditional hooks are illegal.
   const [storedChesscomUsername, setStoredChesscomUsername] =
     useStoredUsername();
   const [storedLichessUsername, setStoredLichessUsername] =
     useStoredLichessUsername();
-  const [profileChesscomUsername, setProfileChesscomUsername] =
-    useState<string | null>(initialChesscomUsername);
-  const [profileLichessUsername, setProfileLichessUsername] =
-    useState<string | null>(initialLichessUsername);
+  const [profileChesscomUsername, setProfileChesscomUsername] = useState<
+    string | null
+  >(initialChesscomUsername);
+  const [profileLichessUsername, setProfileLichessUsername] = useState<
+    string | null
+  >(initialLichessUsername);
 
   const chesscomUsername = isAuthenticated
     ? profileChesscomUsername
@@ -67,9 +76,7 @@ export default function GamesShell({
   const [platform, setPlatform] = useState<Platform>('chesscom');
   // Platform whose username was just cleared via "change user". Pins the
   // form to that platform even if the other one still has a saved username.
-  const [editingPlatform, setEditingPlatform] = useState<Platform | null>(
-    null,
-  );
+  const [editingPlatform, setEditingPlatform] = useState<Platform | null>(null);
 
   // When exactly one platform has a saved username, that one always wins —
   // no toggle, no stale state to reconcile. The toggle only matters when
@@ -139,6 +146,25 @@ export default function GamesShell({
   const tForm = useTranslations('games.usernameForm');
   const tLoadMore = useTranslations('games.loadMore');
 
+  const loadMoreControls = !games?.length ? null : loadMoreError ? (
+    <div className="flex items-center gap-3 flex-wrap">
+      <p className="text-destructive">{tLoadMore('error')}</p>
+      <Button variant="outline" size="sm" onClick={loadMore}>
+        {tLoadMore('retry')}
+      </Button>
+    </div>
+  ) : hasMore ? (
+    <Button
+      variant="outline"
+      className="w-full sm:w-auto sm:self-center"
+      disabled={isLoadingMore}
+      onClick={loadMore}
+    >
+      {isLoadingMore && <Loader2Icon className="size-4 animate-spin" />}
+      {tLoadMore('button')}
+    </Button>
+  ) : null;
+
   if (!username) {
     return (
       <div className="flex flex-col gap-3">
@@ -168,11 +194,7 @@ export default function GamesShell({
             </p>
           )}
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setUsername(null)}
-        >
+        <Button variant="outline" size="sm" onClick={() => setUsername(null)}>
           {tForm('change')}
         </Button>
       </div>
@@ -194,28 +216,11 @@ export default function GamesShell({
         <p className="text-muted-foreground">{emptyMessage}</p>
       )}
 
-      {games && games.length > 0 && children({ games, username })}
+      {games &&
+        games.length > 0 &&
+        children({ games, username, loadMore: loadMoreControls })}
 
-      {games && games.length > 0 && loadMoreError && (
-        <div className="flex items-center gap-3 flex-wrap">
-          <p className="text-destructive">{tLoadMore('error')}</p>
-          <Button variant="outline" size="sm" onClick={loadMore}>
-            {tLoadMore('retry')}
-          </Button>
-        </div>
-      )}
-
-      {games && games.length > 0 && hasMore && !loadMoreError && (
-        <Button
-          variant="outline"
-          className="w-full sm:w-auto sm:self-center"
-          disabled={isLoadingMore}
-          onClick={loadMore}
-        >
-          {isLoadingMore && <Loader2Icon className="size-4 animate-spin" />}
-          {tLoadMore('button')}
-        </Button>
-      )}
+      {!loadMoreInChildren && loadMoreControls}
     </div>
   );
 }

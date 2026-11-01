@@ -88,7 +88,7 @@ describe('<NotificationBell />', () => {
     const trigger = screen.getByRole('button', {
       name: 'notifications.bellLabel(1,3)',
     });
-    expect(within(trigger).getByText('3')).toHaveClass('bg-green-600');
+    expect(within(trigger).getByText('3')).toHaveClass('bg-primary');
     expect(within(trigger).getByText('1')).toHaveClass('bg-destructive');
 
     await userEvent.click(trigger);
