@@ -308,3 +308,74 @@ describe('<GamesShell />', () => {
     });
   });
 });
+
+describe('<GamesShell /> time-control filter', () => {
+  const withClass = (id: string, timeClass: Game['timeClass']): Game => ({
+    ...makeGame(id),
+    timeClass,
+  });
+
+  function loaded(games: Game[], extra: Partial<UseGamesResult> = {}) {
+    localStorage.setItem('chesscom-username', 'alice');
+    mockUseChessComGames.mockReturnValue({ ...idleResult(), games, ...extra });
+    mockUseLichessGames.mockReturnValue(idleResult());
+  }
+
+  function filteredShell() {
+    return renderWithIntl(
+      <GamesShell
+        isAuthenticated={false}
+        initialChesscomUsername={null}
+        initialLichessUsername={null}
+        emptyMessage="no-games-here"
+        renderStatus={({ games }) => `status-${games.length}`}
+      >
+        {({ games, timeFilter }) => (
+          <div>
+            {timeFilter}
+            <ul>
+              {games.map((g) => (
+                <li key={g.id}>game-{g.id}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </GamesShell>,
+    );
+  }
+
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it('never passes daily games to children or status', () => {
+    loaded([withClass('z', 'blitz'), withClass('d', 'daily')]);
+    filteredShell();
+    expect(screen.getByText('game-z')).toBeInTheDocument();
+    expect(screen.queryByText('game-d')).toBeNull();
+    expect(screen.getByText('status-1')).toBeInTheDocument();
+  });
+
+  it('hides games of a time control the user turned off', async () => {
+    loaded([withClass('b', 'bullet'), withClass('z', 'blitz')]);
+    filteredShell();
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Bullet' }));
+    expect(screen.queryByText('game-b')).toBeNull();
+    expect(screen.getByText('game-z')).toBeInTheDocument();
+    expect(screen.getByText('status-1')).toBeInTheDocument();
+    expect(localStorage.getItem('games-time-classes')).toBe('["blitz","rapid"]');
+  });
+
+  it('keeps chips and load-more visible when nothing loaded matches', () => {
+    localStorage.setItem('games-time-classes', '["rapid"]');
+    loaded([withClass('b', 'bullet')], { hasMore: true });
+    filteredShell();
+    expect(screen.queryByText('game-b')).toBeNull();
+    expect(
+      screen.getByText(/no games with the selected time controls/i),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Rapid' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /load more/i })).toBeInTheDocument();
+    expect(screen.queryByText('no-games-here')).toBeNull();
+  });
+});

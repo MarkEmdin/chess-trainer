@@ -38,8 +38,11 @@ export default function ChessComGames({
           t('showing', { username, count: games.length })
         }
       >
-        {({ games }) => (
-          <GamesList games={games} onSelect={setSelectedGame} />
+        {({ games, timeFilter }) => (
+          <div className="flex flex-col gap-4">
+            {timeFilter}
+            <GamesList games={games} onSelect={setSelectedGame} />
+          </div>
         )}
       </GamesShell>
 

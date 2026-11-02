@@ -6,6 +6,8 @@ import { useTranslations } from 'next-intl';
 import { useChessComGames } from '@/lib/chesscom/useChessComGames';
 import { useStoredUsername } from '@/lib/chesscom/useStoredUsername';
 import { useLichessGames } from '@/lib/lichess/useLichessGames';
+import { filterByTimeClass } from '@/lib/games/timeClassFilter';
+import { useStoredTimeClasses } from '@/lib/games/useStoredTimeClasses';
 import { useStoredLichessUsername } from '@/lib/lichess/useStoredLichessUsername';
 import {
   updateChesscomUsername,
@@ -14,6 +16,7 @@ import {
 import type { Game, Platform } from '@/lib/games/types';
 import { Button } from '@/app/components/ui/button';
 import PlatformToggle from '@/app/components/PlatformToggle';
+import TimeClassFilter from '@/app/components/TimeClassFilter';
 import UsernameForm from '@/app/components/UsernameForm';
 
 type RenderProps = {
@@ -22,6 +25,9 @@ type RenderProps = {
   // Load-more button or its error/retry row (null when there's nothing
   // more). Only rendered by the shell itself unless `loadMoreInChildren`.
   loadMore: React.ReactNode;
+  // Bullet/blitz/rapid chips (spec 018); `games` is already filtered by
+  // them. Children decide where the chips sit.
+  timeFilter: React.ReactNode;
 };
 
 type Props = {
@@ -33,7 +39,9 @@ type Props = {
   // Ignored for guests, who read from localStorage.
   initialChesscomUsername: string | null;
   initialLichessUsername: string | null;
-  renderStatus: (props: Omit<RenderProps, 'loadMore'>) => React.ReactNode;
+  renderStatus: (
+    props: Omit<RenderProps, 'loadMore' | 'timeFilter'>,
+  ) => React.ReactNode;
   emptyMessage: string;
   children: (props: RenderProps) => React.ReactNode;
   // Hand the load-more controls to `children` instead of rendering them
@@ -132,7 +140,7 @@ export default function GamesShell({
     effectivePlatform === 'lichess' ? username : null,
   );
   const {
-    games,
+    games: allGames,
     error,
     isLoading,
     isNotFound,
@@ -142,11 +150,17 @@ export default function GamesShell({
     loadMore,
   } = effectivePlatform === 'chesscom' ? chesscomResult : lichessResult;
 
+  const [timeClasses, setTimeClasses] = useStoredTimeClasses();
+  const games = allGames && filterByTimeClass(allGames, timeClasses);
+  const timeFilter = (
+    <TimeClassFilter value={timeClasses} onChange={setTimeClasses} />
+  );
+
   const tCommon = useTranslations('common.games');
   const tForm = useTranslations('games.usernameForm');
   const tLoadMore = useTranslations('games.loadMore');
 
-  const loadMoreControls = !games?.length ? null : loadMoreError ? (
+  const loadMoreControls = !allGames?.length ? null : loadMoreError ? (
     <div className="flex items-center gap-3 flex-wrap">
       <p className="text-destructive">{tLoadMore('error')}</p>
       <Button variant="outline" size="sm" onClick={loadMore}>
@@ -212,13 +226,23 @@ export default function GamesShell({
         </p>
       )}
 
-      {games && !isLoading && games.length === 0 && (
+      {allGames && !isLoading && allGames.length === 0 && (
         <p className="text-muted-foreground">{emptyMessage}</p>
+      )}
+
+      {/* Games loaded, but none of the chosen time controls: keep the chips
+          and load-more reachable so the user can widen or dig further. */}
+      {games && allGames && allGames.length > 0 && games.length === 0 && (
+        <div className="flex flex-col gap-3">
+          {timeFilter}
+          <p className="text-muted-foreground">{tCommon('emptyFiltered')}</p>
+          {loadMoreInChildren && loadMoreControls}
+        </div>
       )}
 
       {games &&
         games.length > 0 &&
-        children({ games, username, loadMore: loadMoreControls })}
+        children({ games, username, loadMore: loadMoreControls, timeFilter })}
 
       {!loadMoreInChildren && loadMoreControls}
     </div>

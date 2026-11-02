@@ -26,8 +26,17 @@ jest.mock('@/app/components/GamesShell', () => ({
     children: (v: {
       games: unknown[];
       loadMore: React.ReactNode;
+      timeFilter: React.ReactNode;
     }) => React.ReactNode;
-  }) => <>{children({ games: [], loadMore: <button>load more</button> })}</>,
+  }) => (
+    <>
+      {children({
+        games: [],
+        loadMore: <button>load more</button>,
+        timeFilter: <div>time chips</div>,
+      })}
+    </>
+  ),
 }));
 
 const item = (gameId: string, fen: string) => ({
@@ -127,6 +136,11 @@ beforeEach(() => {
 });
 
 describe('<LongThinks /> selection', () => {
+  it('shows the time-control chips in the list column', () => {
+    renderIt();
+    expect(screen.getByText('time chips')).toBeInTheDocument();
+  });
+
   it('selects the first position by default', () => {
     renderIt();
     expect(detailText()).toContain('detail g1');
