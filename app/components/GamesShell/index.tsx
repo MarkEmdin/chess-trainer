@@ -31,6 +31,9 @@ type RenderProps = {
   // Bullet/blitz/rapid chips (spec 018); `games` is already filtered by
   // them. Children decide where the chips sit.
   timeFilter: React.ReactNode;
+  // Set only when games loaded but the chips hide all of them; children
+  // show it where their list would be. Null otherwise.
+  filterNotice: React.ReactNode;
 };
 
 type Props = {
@@ -43,7 +46,7 @@ type Props = {
   initialChesscomUsername: string | null;
   initialLichessUsername: string | null;
   renderStatus: (
-    props: Omit<RenderProps, 'loadMore' | 'timeFilter'>,
+    props: Omit<RenderProps, 'loadMore' | 'timeFilter' | 'filterNotice'>,
   ) => React.ReactNode;
   emptyMessage: string;
   children: (props: RenderProps) => React.ReactNode;
@@ -160,6 +163,18 @@ export default function GamesShell({
   );
 
   const tCommon = useTranslations('common.games');
+  const filterNotice =
+    allGames && allGames.length > 0 && games?.length === 0 ? (
+      <p className="text-muted-foreground">
+        {/* With every chip on, only daily games can be left — the chips
+            can't bring those back, so don't suggest they would. */}
+        {tCommon(
+          timeClasses.length === FILTER_TIME_CLASSES.length
+            ? 'emptyOnlyDaily'
+            : 'emptyFiltered',
+        )}
+      </p>
+    ) : null;
   const tForm = useTranslations('games.usernameForm');
   const tLoadMore = useTranslations('games.loadMore');
 
@@ -233,27 +248,18 @@ export default function GamesShell({
         <p className="text-muted-foreground">{emptyMessage}</p>
       )}
 
-      {/* Games loaded, but none of the chosen time controls: keep the chips
-          and load-more reachable so the user can widen or dig further. */}
-      {games && allGames && allGames.length > 0 && games.length === 0 && (
-        <div className="flex flex-col gap-3">
-          {timeFilter}
-          <p className="text-muted-foreground">
-            {/* With every chip on, only daily games can be left — the chips
-                can't bring those back, so don't suggest they would. */}
-            {tCommon(
-              timeClasses.length === FILTER_TIME_CLASSES.length
-                ? 'emptyOnlyDaily'
-                : 'emptyFiltered',
-            )}
-          </p>
-          {loadMoreInChildren && loadMoreControls}
-        </div>
-      )}
-
+      {/* Children still render when the chips hide every loaded game, so
+          their own controls (chips, threshold, load-more) stay in place. */}
       {games &&
-        games.length > 0 &&
-        children({ games, username, loadMore: loadMoreControls, timeFilter })}
+        allGames &&
+        allGames.length > 0 &&
+        children({
+          games,
+          username,
+          loadMore: loadMoreControls,
+          timeFilter,
+          filterNotice,
+        })}
 
       {!loadMoreInChildren && loadMoreControls}
     </div>

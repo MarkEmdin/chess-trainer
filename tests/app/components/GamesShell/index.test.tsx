@@ -321,7 +321,7 @@ describe('<GamesShell /> time-control filter', () => {
     mockUseLichessGames.mockReturnValue(idleResult());
   }
 
-  function filteredShell() {
+  function filteredShell(loadMoreInChildren = false) {
     return renderWithIntl(
       <GamesShell
         isAuthenticated={false}
@@ -329,10 +329,13 @@ describe('<GamesShell /> time-control filter', () => {
         initialLichessUsername={null}
         emptyMessage="no-games-here"
         renderStatus={({ games }) => `status-${games.length}`}
+        loadMoreInChildren={loadMoreInChildren}
       >
-        {({ games, timeFilter }) => (
+        {({ games, timeFilter, filterNotice, loadMore }) => (
           <div>
             {timeFilter}
+            {filterNotice}
+            {loadMoreInChildren && <div data-testid="child-load-more">{loadMore}</div>}
             <ul>
               {games.map((g) => (
                 <li key={g.id}>game-{g.id}</li>
@@ -377,6 +380,30 @@ describe('<GamesShell /> time-control filter', () => {
     expect(screen.getByRole('button', { name: 'Rapid' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /load more/i })).toBeInTheDocument();
     expect(screen.queryByText('no-games-here')).toBeNull();
+  });
+
+  it('hands the notice and load-more to children when they own load-more', () => {
+    localStorage.setItem('games-time-classes', '["rapid"]');
+    loaded([withClass('b', 'bullet')], { hasMore: true });
+    filteredShell(true);
+    expect(
+      screen.getByText(/no games with the selected time controls/i),
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('child-load-more')).getByRole('button', {
+        name: /load more/i,
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /load more/i })).toHaveLength(1);
+    expect(screen.getAllByRole('group', { name: 'Time controls' })).toHaveLength(1);
+  });
+
+  it('passes no notice while some games match', () => {
+    loaded([withClass('z', 'blitz')]);
+    filteredShell();
+    expect(
+      screen.queryByText(/no games with the selected time controls/i),
+    ).toBeNull();
   });
 
   it('says only daily games were found when every chip is already on', () => {

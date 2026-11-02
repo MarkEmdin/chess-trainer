@@ -27,6 +27,7 @@ jest.mock('@/app/components/GamesShell', () => ({
       games: unknown[];
       loadMore: React.ReactNode;
       timeFilter: React.ReactNode;
+      filterNotice: React.ReactNode;
     }) => React.ReactNode;
   }) => (
     <>
@@ -34,10 +35,13 @@ jest.mock('@/app/components/GamesShell', () => ({
         games: [],
         loadMore: <button>load more</button>,
         timeFilter: <div>time chips</div>,
+        filterNotice: mockFilterNotice,
       })}
     </>
   ),
 }));
+
+let mockFilterNotice: React.ReactNode = null;
 
 const item = (gameId: string, fen: string) => ({
   think: {
@@ -128,6 +132,7 @@ const renderIt = () =>
 const detailText = () => screen.getByTestId('detail').textContent;
 
 beforeEach(() => {
+  mockFilterNotice = null;
   thinks = [item('g1', FEN_A), item('g2', FEN_B)];
   requests = {};
   markResponseSeen.mockReset();
@@ -177,6 +182,20 @@ describe('<LongThinks /> selection', () => {
     expect(
       screen.getByRole('button', { name: 'load more' }),
     ).toBeInTheDocument();
+  });
+
+  it('keeps its controls and shows the filter notice when the time filter hides every game', () => {
+    thinks = [];
+    mockFilterNotice = <p>filter hid everything</p>;
+    renderIt();
+    expect(screen.getByText('filter hid everything')).toBeInTheDocument();
+    expect(screen.queryByText(/no moves crossed/i)).toBeNull();
+    expect(screen.getByRole('radiogroup')).toBeInTheDocument();
+    expect(screen.getByText('time chips')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'load more' }),
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('detail')).toBeNull();
   });
 });
 

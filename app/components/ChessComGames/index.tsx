@@ -38,9 +38,10 @@ export default function ChessComGames({
           t('showing', { username, count: games.length })
         }
       >
-        {({ games, timeFilter }) => (
+        {({ games, timeFilter, filterNotice }) => (
           <div className="flex flex-col gap-4">
             {timeFilter}
+            {filterNotice}
             <GamesList games={games} onSelect={setSelectedGame} />
           </div>
         )}
