@@ -459,6 +459,31 @@
       "dontRemind": "Don't remind me"
     }
   },
+  "about": {
+    "metaTitle": "About — Chess Fundamentals",
+    "title": "About",
+    "why": {
+      "title": "Why this project",
+      "p1": "Most chess players play hundreds of fast games and hardly ever review them. Experience piles up, understanding does not: the same mistakes repeat from game to game.",
+      "p2": "Chess Fundamentals offers another way. It finds the positions in your games where you thought the longest — that is where the game was decided. Work through them yourself, without an engine, write down your thinking and discuss it with a coach. That is how you grow your thinking at the board, not just your game count."
+    },
+    "author": {
+      "title": "Author",
+      "text": "I'm Mark Emdin, a chess player and developer. I built this site myself and I answer students' questions in the coaching section."
+    },
+    "contact": {
+      "title": "Contact",
+      "text": "Questions, ideas and bug reports are welcome at"
+    },
+    "source": {
+      "title": "Source code",
+      "text": "The project is open source — the code is on",
+      "link": "GitHub"
+    }
+  },
+  "footer": {
+    "about": "About"
+  },
   "metadata": {
     "description": "Learn to analyze chess positions yourself — find the key moments in your games and discuss them with a coach."
   }
