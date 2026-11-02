@@ -6,7 +6,10 @@ import { useTranslations } from 'next-intl';
 import { useChessComGames } from '@/lib/chesscom/useChessComGames';
 import { useStoredUsername } from '@/lib/chesscom/useStoredUsername';
 import { useLichessGames } from '@/lib/lichess/useLichessGames';
-import { filterByTimeClass } from '@/lib/games/timeClassFilter';
+import {
+  FILTER_TIME_CLASSES,
+  filterByTimeClass,
+} from '@/lib/games/timeClassFilter';
 import { useStoredTimeClasses } from '@/lib/games/useStoredTimeClasses';
 import { useStoredLichessUsername } from '@/lib/lichess/useStoredLichessUsername';
 import {
@@ -235,7 +238,15 @@ export default function GamesShell({
       {games && allGames && allGames.length > 0 && games.length === 0 && (
         <div className="flex flex-col gap-3">
           {timeFilter}
-          <p className="text-muted-foreground">{tCommon('emptyFiltered')}</p>
+          <p className="text-muted-foreground">
+            {/* With every chip on, only daily games can be left — the chips
+                can't bring those back, so don't suggest they would. */}
+            {tCommon(
+              timeClasses.length === FILTER_TIME_CLASSES.length
+                ? 'emptyOnlyDaily'
+                : 'emptyFiltered',
+            )}
+          </p>
           {loadMoreInChildren && loadMoreControls}
         </div>
       )}

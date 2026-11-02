@@ -413,7 +413,8 @@
       "errorNotFound": "Player not found.",
       "emptyGames": "This player has no games yet.",
       "timeFilterLabel": "Time controls",
-      "emptyFiltered": "No games with the selected time controls among the loaded ones."
+      "emptyFiltered": "No games with the selected time controls among the loaded ones.",
+      "emptyOnlyDaily": "Only daily games among the loaded ones. They aren't shown here."
     },
     "error": {
       "title": "Something went wrong",

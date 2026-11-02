@@ -378,4 +378,13 @@ describe('<GamesShell /> time-control filter', () => {
     expect(screen.getByRole('button', { name: /load more/i })).toBeInTheDocument();
     expect(screen.queryByText('no-games-here')).toBeNull();
   });
+
+  it('says only daily games were found when every chip is already on', () => {
+    loaded([withClass('d', 'daily')]);
+    filteredShell();
+    expect(screen.getByText(/only daily games/i)).toBeInTheDocument();
+    expect(
+      screen.queryByText(/no games with the selected time controls/i),
+    ).toBeNull();
+  });
 });

@@ -1,6 +1,6 @@
 # Spec: filter games by time control
 
-Status: in-progress
+Status: done
 Branch: feature/time-class-filter
 
 ## Problem
@@ -39,14 +39,15 @@ Three toggle chips — Bullet, Blitz, Rapid — each with an icon and label. Onl
 ## i18n
 
 - `common.games.timeFilterLabel` — "Time controls" / "Режимы"
-- `common.games.emptyFiltered` — "No games with the selected time controls in the loaded games." / "В загруженных партиях нет партий выбранных режимов."
+- `common.games.emptyFiltered` — "No games with the selected time controls among the loaded ones." / "Среди загруженных нет партий выбранных режимов."
+- `common.games.emptyOnlyDaily` (all chips on, only daily loaded) — "Only daily games among the loaded ones. They aren't shown here." / "Среди загруженных только заочные партии. Здесь они не показываются."
 - Chip labels reuse `games.tile.timeClass.*`.
 
 ## Acceptance criteria
 
-- [ ] Turning a chip off hides its games on `/games` and its positions on `/think-time`
-- [ ] Choice persists across reload and is shared between the pages
-- [ ] Last selected chip can't be turned off
-- [ ] Daily games never show
-- [ ] Nothing-matches state keeps chips and load-more visible
-- [ ] `npm run lint`, `npm test`, `npm run build` pass
+- [x] Turning a chip off hides its games on `/games` and its positions on `/think-time`
+- [x] Choice persists across reload and is shared between the pages
+- [x] Last selected chip can't be turned off
+- [x] Daily games never show
+- [x] Nothing-matches state keeps chips and load-more visible
+- [x] `npm run lint`, `npm test`, `npm run build` pass
