@@ -127,7 +127,7 @@ export default function LongThinks({
         }
         loadMoreInChildren
       >
-        {({ games, loadMore }) => {
+        {({ games, loadMore, timeFilter, filterNotice }) => {
           const enriched = collectLongThinks(games, deferredThreshold).map(
             (item) => {
               const thread = requestsByFen?.[item.think.fenBefore];
@@ -154,6 +154,7 @@ export default function LongThinks({
             <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
               <div className="flex flex-col gap-3">
                 <ThresholdSelector value={threshold} onChange={setThreshold} />
+                {timeFilter}
                 {isAuthenticated && enriched.length > 0 && (
                   <div
                     role="tablist"
@@ -187,9 +188,11 @@ export default function LongThinks({
                     <Loader2Icon aria-hidden className="size-6 animate-spin" />
                   </div>
                 ) : enriched.length === 0 ? (
-                  <p className="text-muted-foreground">
-                    {t('empty', { threshold: deferredThreshold })}
-                  </p>
+                  (filterNotice ?? (
+                    <p className="text-muted-foreground">
+                      {t('empty', { threshold: deferredThreshold })}
+                    </p>
+                  ))
                 ) : shown.length === 0 ? (
                   <p className="text-muted-foreground">
                     {t(
