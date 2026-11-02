@@ -411,7 +411,9 @@
       "loading": "Loading games…",
       "errorGeneric": "Could not load games. Try again.",
       "errorNotFound": "Player not found.",
-      "emptyGames": "This player has no games yet."
+      "emptyGames": "This player has no games yet.",
+      "timeFilterLabel": "Time controls",
+      "emptyFiltered": "No games with the selected time controls among the loaded ones."
     },
     "error": {
       "title": "Something went wrong",
