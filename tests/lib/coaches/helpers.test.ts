@@ -131,9 +131,9 @@ describe('parseApplication', () => {
     });
   });
   it('needs at least one chess account', () => {
-    expect(
-      parseApplication(form({ ...valid, chesscom_username: '' })),
-    ).toEqual({ ok: false, errors: { accounts: 'needAccount' } });
+    expect(parseApplication(form({ ...valid, chesscom_username: '' }))).toEqual(
+      { ok: false, errors: { accounts: 'needAccount' } },
+    );
   });
   it('rejects an unknown title', () => {
     expect(parseApplication(form({ ...valid, title: 'XX' }))).toEqual({
