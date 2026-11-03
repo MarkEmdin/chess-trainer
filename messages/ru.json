@@ -177,7 +177,8 @@
     "bellLabel": "Уведомления: новых ответов — {answers}, новых вопросов — {questions}",
     "bellLabelStudent": "Уведомления: новых ответов — {answers}",
     "newQuestions": "Новые вопросы учеников",
-    "myAnswers": "Ответы на мои вопросы"
+    "myAnswers": "Ответы на мои вопросы",
+    "applications": "Заявки тренеров"
   },
   "profile": {
     "title": "Профиль",

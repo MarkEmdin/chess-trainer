@@ -1,5 +1,5 @@
 // What the header bell counts (spec 012).
-import type { Role } from '@/lib/auth/roles';
+import { isStaff, type Role } from '@/lib/auth/roles';
 
 export type NotificationRow = {
   user_id: string;
@@ -10,8 +10,10 @@ export type NotificationRow = {
 export type NotificationCounts = {
   // The user's own answers they haven't opened yet.
   unseenAnswers: number;
-  // Questions with no response yet; null for non-admins.
+  // Visible questions with no response yet; null for students.
   newQuestions: number | null;
+  // Coach applications waiting for review; null for everyone but the admin.
+  pendingApplications: number | null;
 };
 
 // An answer nobody opened. `undefined` means the read state wasn't loaded,
@@ -28,11 +30,12 @@ export function formatBadgeCount(n: number): string | null {
   return n > 9 ? '9+' : String(n);
 }
 
-// Admins read every request (RLS), so own answers are picked by `user_id`.
+// Staff read every request they may answer (RLS), so own answers are picked
+// by `user_id`.
 export function countNotifications(
   rows: readonly NotificationRow[],
   user: { id: string; role: Role },
-): NotificationCounts {
+): Omit<NotificationCounts, 'pendingApplications'> {
   const unseenAnswers = rows.filter(
     (r) =>
       r.user_id === user.id &&
@@ -42,7 +45,7 @@ export function countNotifications(
       }),
   ).length;
   const newQuestions =
-    user.role === 'admin'
+    isStaff(user.role)
       ? rows.filter((r) => r.coaching_responses.length === 0).length
       : null;
   return { unseenAnswers, newQuestions };

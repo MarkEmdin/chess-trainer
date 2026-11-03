@@ -114,8 +114,8 @@ All errors render inline next to the control; success re-renders the page
 
 - Open to admin and coach. Title "Student questions" stays.
 - Lists the questions the viewer can see (RLS does the filtering).
-- Tabs unchanged: New / Answered. New = unanswered and not asked by me.
-  (The viewer's own questions are on `/coaching` already.)
+- Tabs unchanged: New / Answered. The viewer's own questions stay in the
+  list (spec 012 behaviour; a coach may answer their own question).
 - A coach's own students' cards get a **"My student"** badge and sort first
   within each tab. Admin sees a "Coach: <display name>" note on assigned
   students' cards instead.
@@ -131,7 +131,7 @@ All errors render inline next to the control; success re-renders the page
 ### Notifications
 
 - **Bell:** staff get the green "new questions" count = unanswered visible
-  questions not asked by me. Menu item label "Student questions" → `/admin`.
+  questions (own included, as in spec 012). Menu item label "Student questions" → `/admin`.
   Admin's menu also gets "Coach applications" with the pending count (only
   when > 0, and the green pill counts it too).
 - **Telegram on a new question:** admin(s) always; if the asker has a coach,

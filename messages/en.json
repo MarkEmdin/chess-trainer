@@ -177,7 +177,8 @@
     "bellLabel": "Notifications: {answers} new answers, {questions} new questions",
     "bellLabelStudent": "Notifications: {answers} new answers",
     "newQuestions": "New student questions",
-    "myAnswers": "Answers to my questions"
+    "myAnswers": "Answers to my questions",
+    "applications": "Coach applications"
   },
   "profile": {
     "title": "Profile",

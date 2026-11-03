@@ -24,7 +24,7 @@
 1. Coach B calls `respondToRequest` for a request of coach A's student → refused by action (visibility check) and by RLS (Task 3 test for the action).
 2. Assigning a nickname that is a coach/admin or doesn't exist → inline error, no row (Task 6 test).
 3. Approving an applicant who is currently someone's student → assignment removed (Task 6 test).
-4. Admin's own pending applications / own questions never count as "new" for themselves (Task 4 test).
+4. A coach's bell counts only questions RLS lets them see; pending applications count for the admin only (Task 4 test).
 5. Telegram new-question fan-out when asker has a coach → only admin + that coach (Task 5 test).
 
 ---
