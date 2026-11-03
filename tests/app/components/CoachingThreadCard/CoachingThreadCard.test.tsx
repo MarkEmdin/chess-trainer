@@ -139,4 +139,34 @@ describe('CoachingThreadCard', () => {
       expect(screen.getByTestId('coaching-modal')).toBeInTheDocument();
     });
   });
+
+  describe('answer author (spec 020)', () => {
+    it('names the coach who answered', () => {
+      renderWithIntl(
+        <CoachingThreadCard
+          thread={{
+            ...thread,
+            responses: [
+              {
+                ...thread.responses[0],
+                author: {
+                  first_name: 'Anna',
+                  last_name: 'Ivanova',
+                  title: 'CMS',
+                },
+              },
+            ],
+          }}
+        />,
+      );
+      expect(
+        screen.getByText('Answer from CMS Anna Ivanova'),
+      ).toBeInTheDocument();
+    });
+
+    it('falls back to the generic label without a coach profile', () => {
+      renderWithIntl(<CoachingThreadCard thread={thread} />);
+      expect(screen.getByText("Coach's response")).toBeInTheDocument();
+    });
+  });
 });

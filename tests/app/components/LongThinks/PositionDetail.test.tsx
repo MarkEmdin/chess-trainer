@@ -78,6 +78,21 @@ describe('<PositionDetail />', () => {
     expect(onAskCoach).toHaveBeenCalled();
   });
 
+  it('names the coach who answered', () => {
+    detail({
+      thread: {
+        body: 'Was Nf5 ok?',
+        responses: [
+          {
+            body: 'Play Qd2',
+            author: { first_name: 'Anna', last_name: 'Ivanova', title: 'IM' },
+          },
+        ],
+      },
+    });
+    expect(screen.getByText('Answer from IM Anna Ivanova')).toBeInTheDocument();
+  });
+
   it('shows a sign-in hint to guests', () => {
     detail({ isAuthenticated: false });
     expect(

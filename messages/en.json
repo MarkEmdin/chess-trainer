@@ -205,7 +205,7 @@
     },
     "answeredBy": "Answered by {name}",
     "answerFrom": "Answer from {name}",
-    "fallbackName": "the coach",
+    "answeredByCoach": "Answered by a coach",
     "myStudent": "My student",
     "coachOf": "Coach: {name}",
     "apply": {

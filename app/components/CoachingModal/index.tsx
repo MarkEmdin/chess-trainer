@@ -32,6 +32,7 @@ import { readPgnInfo } from '@/lib/chess/pgnInfo';
 import { replayAroundKey } from '@/lib/chess/replay';
 import { playVariation } from '@/lib/chess/variation';
 import { MAX_BODY_LENGTH } from '@/lib/coaching/body';
+import { useAnswerLabels } from '@/lib/coaches/useCoachName';
 import { contentToPlainText, type Segment } from '@/lib/coaching/content';
 import {
   boardFen,
@@ -55,6 +56,8 @@ import VariationBoard, { type ViewedLine } from './VariationBoard';
 import VariationLine from './VariationLine';
 
 type Props = {
+  // Overrides the label above the answer (coach mode: "Answered by …").
+  answerLabel?: string;
   mode: 'student' | 'coach';
   fen: string;
   orientation: 'white' | 'black';
@@ -93,6 +96,7 @@ export default function CoachingModal({
   ask,
   game,
   gameUrl,
+  answerLabel: answerLabelOverride,
   onClose,
   onSubmitted,
 }: Props) {
@@ -235,8 +239,10 @@ export default function CoachingModal({
 
   const questionLabel =
     mode === 'student' ? t('yourQuestion') : tAdmin('question');
+  const studentAnswerLabel = useAnswerLabels().forStudent(thread?.responses[0]);
   const answerLabel =
-    mode === 'student' ? t('coachResponse') : tAdmin('yourResponse');
+    answerLabelOverride ??
+    (mode === 'student' ? studentAnswerLabel : tAdmin('yourResponse'));
 
   return (
     <Dialog

@@ -1,6 +1,10 @@
 import { Link, redirect } from '@/i18n/navigation';
 import { getTranslations, getLocale } from 'next-intl/server';
 import { getAuthedUser } from '@/lib/auth/getUser';
+import { isStaff } from '@/lib/auth/roles';
+import { withAuthors } from '@/lib/coaches/authors';
+import { isCoachTitle } from '@/lib/coaches/titles';
+import type { CoachProfile } from '@/lib/coaches/displayName';
 import { createClient } from '@/lib/supabase/server';
 import { buttonVariants } from '@/app/components/ui/button';
 import PageLayout from '@/app/components/PageLayout';
@@ -14,9 +18,11 @@ export default async function AdminPage({
   searchParams,
 }: PageProps<'/[locale]/admin'>) {
   const user = await getAuthedUser();
-  if (!user || user.role !== 'admin') {
+  // Staff (spec 020): the admin sees every question, a coach the ones RLS
+  // lets them answer.
+  if (!user || !isStaff(user.role)) {
     const locale = await getLocale();
-    redirect({ href: '/', locale });
+    return redirect({ href: '/', locale });
   }
 
   const t = await getTranslations('coachingAdmin');
@@ -46,7 +52,7 @@ export default async function AdminPage({
         content,
         move_index,
         pgn,
-        coaching_responses (body, created_at, variation, content)
+        coaching_responses (body, created_at, variation, content, author_id)
       `,
     )
     .order('created_at', { ascending: false });
@@ -63,7 +69,57 @@ export default async function AdminPage({
     (profiles ?? []).map((p) => [p.id, p.nickname]),
   );
 
-  const cards: AdminCoachingRequest[] = (requests ?? []).map((r) => ({
+  // Assignments: RLS gives a coach their own rows and the admin all of them.
+  const [threads, { data: assignments }] = await Promise.all([
+    withAuthors(
+      supabase,
+      (requests ?? []).map((r) => ({
+        ...r,
+        responses: r.coaching_responses ?? [],
+      })),
+    ),
+    supabase.from('coach_students').select('student_id, coach_id'),
+  ]);
+  const coachOf = new Map(
+    ((assignments ?? []) as { student_id: string; coach_id: string }[]).map(
+      (a) => [a.student_id, a.coach_id],
+    ),
+  );
+
+  // The admin sees which coach a student has.
+  const assignedCoachIds =
+    user.role === 'admin' ? [...new Set(coachOf.values())] : [];
+  const { data: coachProfiles } = assignedCoachIds.length
+    ? await supabase
+        .from('coach_profiles')
+        .select('user_id, first_name, last_name, title')
+        .in('user_id', assignedCoachIds)
+    : { data: [] };
+  const profileOf = new Map<string, CoachProfile>(
+    (
+      (coachProfiles ?? []) as {
+        user_id: string;
+        first_name: string;
+        last_name: string;
+        title: string;
+      }[]
+    ).flatMap((p) =>
+      isCoachTitle(p.title)
+        ? [
+            [
+              p.user_id,
+              {
+                first_name: p.first_name,
+                last_name: p.last_name,
+                title: p.title,
+              },
+            ] as const,
+          ]
+        : [],
+    ),
+  );
+
+  const cards: AdminCoachingRequest[] = threads.map((r) => ({
     id: r.id,
     user_nickname: nicknameById[r.user_id] ?? '—',
     game_url: r.game_url,
@@ -75,8 +131,15 @@ export default async function AdminPage({
     content: r.content,
     move_index: r.move_index,
     pgn: r.pgn,
-    responses: r.coaching_responses ?? [],
+    responses: r.responses,
+    my_student: user.role === 'coach' && coachOf.get(r.user_id) === user.id,
+    assigned_coach:
+      user.role === 'admin'
+        ? (profileOf.get(coachOf.get(r.user_id) ?? '') ?? null)
+        : null,
   }));
+  // A coach's own students come first; otherwise newest first, as queried.
+  cards.sort((a, b) => Number(!!b.my_student) - Number(!!a.my_student));
 
   const byTab: Record<Tab, AdminCoachingRequest[]> = {
     new: cards.filter((c) => c.responses.length === 0),
@@ -121,6 +184,7 @@ export default async function AdminPage({
               key={card.id}
               request={card}
               autoOpen={card.id === requestId}
+              viewerId={user.id}
             />
           ))}
         </div>

@@ -205,7 +205,7 @@
     },
     "answeredBy": "Ответил(а) {name}",
     "answerFrom": "Ответ от {name}",
-    "fallbackName": "тренера",
+    "answeredByCoach": "Ответил тренер",
     "myStudent": "Мой ученик",
     "coachOf": "Тренер: {name}",
     "apply": {

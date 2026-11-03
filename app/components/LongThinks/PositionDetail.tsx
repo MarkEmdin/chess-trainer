@@ -9,12 +9,17 @@ import { formatSeconds } from '@/lib/chesscom/format';
 import type { LongThink } from '@/lib/games/longThinks';
 import type { Game, GameColor, GamePlayer } from '@/lib/games/types';
 import { cn } from '@/lib/utils';
+import { useAnswerLabels } from '@/lib/coaches/useCoachName';
+import type { CoachProfile } from '@/lib/coaches/displayName';
 import { formatThinkMove, lastMoveStyles } from './format';
 
 type Props = {
   think: LongThink;
   game: Game;
-  thread?: { body: string; responses: { body: string }[] };
+  thread?: {
+    body: string;
+    responses: { body: string; author?: CoachProfile | null }[];
+  };
   isAuthenticated: boolean;
   // Opens the coaching modal: a new question, or the existing thread.
   onAskCoach: () => void;
@@ -66,6 +71,7 @@ export default function PositionDetail({
 }: Props) {
   const t = useTranslations('thinkTime.detail');
   const tCoaching = useTranslations('coaching');
+  const answerLabels = useAnswerLabels();
   const tTile = useTranslations('games.tile');
   const format = useFormatter();
   const latestResponse = thread?.responses.at(-1);
@@ -130,7 +136,7 @@ export default function PositionDetail({
               <SectionLabel label={tCoaching('yourQuestion')}>
                 <p className="line-clamp-2 text-sm">{thread.body}</p>
               </SectionLabel>
-              <SectionLabel label={tCoaching('coachResponse')}>
+              <SectionLabel label={answerLabels.forStudent(latestResponse)}>
                 {latestResponse ? (
                   <p className="line-clamp-3 text-sm">{latestResponse.body}</p>
                 ) : (
