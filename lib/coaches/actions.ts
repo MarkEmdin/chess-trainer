@@ -64,15 +64,12 @@ function refresh() {
   revalidatePath('/[locale]', 'layout');
 }
 
-type AdminCheck =
-  | { admin: AuthedUser; error?: undefined }
-  | { admin?: undefined; error: string };
-
-async function requireAdmin(): Promise<AdminCheck> {
+// The admin, or the translated refusal.
+async function requireAdmin(): Promise<AuthedUser | string> {
   const user = await getAuthedUser();
-  if (user?.role === 'admin') return { admin: user };
+  if (user?.role === 'admin') return user;
   const t = await getTranslations('coaches.manage.errors');
-  return { error: t('notAdmin') };
+  return t('notAdmin');
 }
 
 export async function applyForCoach(
@@ -120,8 +117,8 @@ export async function approveApplication(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const check = await requireAdmin();
-  if (check.error) return { error: check.error };
+  const admin = await requireAdmin();
+  if (typeof admin === 'string') return { error: admin };
   const t = await getTranslations('coaches.manage.errors');
 
   const app = await pendingApplication(String(formData.get('application_id')));
@@ -165,8 +162,8 @@ export async function rejectApplication(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const check = await requireAdmin();
-  if (check.error) return { error: check.error };
+  const admin = await requireAdmin();
+  if (typeof admin === 'string') return { error: admin };
   const t = await getTranslations('coaches.manage.errors');
 
   const app = await pendingApplication(String(formData.get('application_id')));
@@ -193,8 +190,8 @@ export async function assignStudent(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const check = await requireAdmin();
-  if (check.error) return { error: check.error };
+  const admin = await requireAdmin();
+  if (typeof admin === 'string') return { error: admin };
   const t = await getTranslations('coaches.manage.errors');
 
   const coachId = String(formData.get('coach_id') ?? '');
@@ -235,8 +232,8 @@ export async function unassignStudent(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const check = await requireAdmin();
-  if (check.error) return { error: check.error };
+  const admin = await requireAdmin();
+  if (typeof admin === 'string') return { error: admin };
 
   const { error } = await createAdminClient()
     .from('coach_students')
@@ -251,8 +248,8 @@ export async function revokeCoach(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const check = await requireAdmin();
-  if (check.error) return { error: check.error };
+  const admin = await requireAdmin();
+  if (typeof admin === 'string') return { error: admin };
 
   const coachId = String(formData.get('coach_id') ?? '');
   const db = createAdminClient();
@@ -276,8 +273,8 @@ export async function saveMyCoachProfile(
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  const check = await requireAdmin();
-  if (check.error) return { error: check.error };
+  const admin = await requireAdmin();
+  if (typeof admin === 'string') return { error: admin };
 
   const parsed = parseCoachProfile(formData);
   if (!parsed.ok) return fieldErrors(parsed.errors);
@@ -285,7 +282,7 @@ export async function saveMyCoachProfile(
   const { error } = await createAdminClient()
     .from('coach_profiles')
     .upsert(
-      { user_id: check.admin.id, ...parsed.fields },
+      { user_id: admin.id, ...parsed.fields },
       { onConflict: 'user_id' },
     );
   if (error) return { error: error.message };
