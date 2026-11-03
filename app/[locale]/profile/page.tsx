@@ -1,6 +1,7 @@
 import { redirect } from '@/i18n/navigation';
 import { getTranslations, getLocale } from 'next-intl/server';
 import { getAuthedUser } from '@/lib/auth/getUser';
+import { isStaff } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 import PageLayout from '@/app/components/PageLayout';
 import ProfileForm from '@/app/components/ProfileForm';
@@ -43,7 +44,7 @@ export default async function ProfilePage() {
           <CardContent>
             <TelegramConnect
               connected={link !== null}
-              isAdmin={user.role === 'admin'}
+              isAdmin={isStaff(user.role)}
             />
           </CardContent>
         </Card>

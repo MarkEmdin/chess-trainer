@@ -22,7 +22,10 @@ jest.mock('@/lib/auth/actions', () => ({ signOut: () => signOut() }));
 
 const trigger = () => screen.getByRole('button', { name: 'Account menu' });
 
-async function open(props: { nickname: string; isAdmin: boolean }) {
+async function open(props: {
+  nickname: string;
+  role: 'user' | 'coach' | 'admin';
+}) {
   renderWithIntl(<AccountMenu {...props} />);
   await userEvent.click(trigger());
 }
@@ -34,20 +37,20 @@ describe('AccountMenu', () => {
     ['ann', 'A'],
     ['', '?'],
   ])('shows the initial of %j', (nickname, initial) => {
-    renderWithIntl(<AccountMenu nickname={nickname} isAdmin={false} />);
+    renderWithIntl(<AccountMenu nickname={nickname} role="user" />);
     expect(trigger()).toHaveTextContent(initial);
   });
 
   // Ghost-button classes turned the circle grey while open and on dark hover.
   it('keeps the primary circle colours in every state', () => {
-    renderWithIntl(<AccountMenu nickname="ann" isAdmin={false} />);
+    renderWithIntl(<AccountMenu nickname="ann" role="user" />);
     expect(trigger().className).not.toMatch(
       /aria-expanded:bg-muted|hover:bg-muted/,
     );
   });
 
   it('lists the nickname, profile, questions and logout', async () => {
-    await open({ nickname: 'ann', isAdmin: false });
+    await open({ nickname: 'ann', role: 'user' });
     expect(screen.getByText('ann')).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Profile' })).toHaveAttribute(
       'href',
@@ -60,20 +63,39 @@ describe('AccountMenu', () => {
       screen.getByRole('menuitem', { name: 'Logout' }),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole('menuitem', { name: 'Admin' }),
+      screen.queryByRole('menuitem', { name: 'Student questions' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('menuitem', { name: 'Become a coach' }),
+    ).toHaveAttribute('href', '/become-coach');
+  });
+
+  it('links a coach to student questions only', async () => {
+    await open({ nickname: 'ann', role: 'coach' });
+    expect(
+      screen.getByRole('menuitem', { name: 'Student questions' }),
+    ).toHaveAttribute('href', '/admin');
+    expect(
+      screen.queryByRole('menuitem', { name: 'Coaches' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('menuitem', { name: 'Become a coach' }),
     ).not.toBeInTheDocument();
   });
 
-  it('links admins to the admin page', async () => {
-    await open({ nickname: 'ann', isAdmin: true });
-    expect(screen.getByRole('menuitem', { name: 'Admin' })).toHaveAttribute(
+  it('links the admin to questions and coach management', async () => {
+    await open({ nickname: 'ann', role: 'admin' });
+    expect(
+      screen.getByRole('menuitem', { name: 'Student questions' }),
+    ).toHaveAttribute('href', '/admin');
+    expect(screen.getByRole('menuitem', { name: 'Coaches' })).toHaveAttribute(
       'href',
-      '/admin',
+      '/admin/coaches',
     );
   });
 
   it('logs out', async () => {
-    await open({ nickname: 'ann', isAdmin: false });
+    await open({ nickname: 'ann', role: 'user' });
     await userEvent.click(screen.getByRole('menuitem', { name: 'Logout' }));
     await waitFor(() => expect(signOut).toHaveBeenCalled());
   });
