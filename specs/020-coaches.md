@@ -1,6 +1,6 @@
 # Spec: Coaches — role, applications, assigned students
 
-Status: in-progress
+Status: done
 Branch: feature/coaches
 
 ## Problem
