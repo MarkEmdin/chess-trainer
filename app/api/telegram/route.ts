@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { isStaff } from '@/lib/auth/roles';
 import { telegramConfig } from '@/lib/telegram/config';
 import {
   consumeLinkToken,
@@ -64,15 +65,25 @@ export async function POST(req: NextRequest): Promise<Response> {
         await sendMessage(
           chatId,
           linked
-            ? connectedMessage(linked.locale, linked.nickname, linked.isAdmin)
+            ? connectedMessage(
+                linked.locale,
+                linked.nickname,
+                isStaff(linked.role),
+              )
             : info('expired'),
         );
       }
     } else if (command === '/stop') {
       await unlinkChat(chatId);
       await sendMessage(chatId, info('stopped'));
-    } else if (command === '/new' && link?.isAdmin) {
-      await sendMessage(chatId, await unansweredList(origin, locale, new Date()));
+    } else if (command === '/new' && link && isStaff(link.role)) {
+      await sendMessage(
+        chatId,
+        await unansweredList(origin, locale, new Date(), {
+          id: link.userId,
+          role: link.role,
+        }),
+      );
     } else {
       await sendMessage(chatId, info(link ? 'help' : 'helpUnlinked'));
     }

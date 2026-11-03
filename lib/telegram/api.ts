@@ -15,20 +15,27 @@ export async function sendMessage(
   const config = telegramConfig();
   if (!config) return 'error';
   try {
-    const res = await fetch(`https://api.telegram.org/bot${config.token}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: msg.text,
-        parse_mode: 'HTML',
-        ...(msg.buttons?.length && {
-          reply_markup: { inline_keyboard: msg.buttons.map((b) => [{ text: b.text, url: b.url }]) },
+    const res = await fetch(
+      `https://api.telegram.org/bot${config.token}/sendMessage`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: msg.text,
+          parse_mode: 'HTML',
+          ...(msg.buttons?.length && {
+            reply_markup: {
+              inline_keyboard: msg.buttons.map((b) => [
+                { text: b.text, url: b.url },
+              ]),
+            },
+          }),
+          link_preview_options: { is_disabled: true },
         }),
-        link_preview_options: { is_disabled: true },
-      }),
-      signal: AbortSignal.timeout(5000),
-    });
+        signal: AbortSignal.timeout(5000),
+      },
+    );
     if (res.ok) return 'ok';
     if (res.status === 403) return 'blocked';
     const body = await res.text().catch(() => '');

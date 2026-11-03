@@ -441,7 +441,7 @@
       "connectedAdmin": "I'll write about every new student question. /new shows the unanswered ones.",
       "expired": "This link has expired. Open your profile and press Connect Telegram again.",
       "startNoCode": "Hi! To get notifications, open your profile on the site and press Connect Telegram.",
-      "help": "I send notifications from Chess Fundamentals. Commands: /new (admins only), /stop.",
+      "help": "I send notifications from Chess Fundamentals. Commands: /new (coaches only), /stop.",
       "helpUnlinked": "Hi! To get notifications, open your profile on the site and press Connect Telegram.",
       "stopped": "Notifications are off. You can reconnect from your profile.",
       "newQuestion": "❓ New question from {nickname}\nMove: {move}\n\n{body}",
@@ -452,7 +452,12 @@
       "openAndAnswer": "Open and answer",
       "openAnswer": "Open answer",
       "openAdmin": "All questions",
-      "openProfile": "Open profile"
+      "openProfile": "Open profile",
+      "newApplication": "🧑‍🏫 New coach application from {nickname}: {name}",
+      "openApplications": "Review applications",
+      "applicationApproved": "🎉 Your coach application was approved. You can now answer students' questions.",
+      "applicationRejected": "Your coach application was not approved. You can update it and apply again.",
+      "openApplicationForm": "Open the application"
     },
     "prompt": {
       "text": "Want to know when the coach answers? We'll message you in Telegram.",

@@ -26,7 +26,9 @@ describe('telegram messages', () => {
     expect(m.text).toContain('&lt;script&gt;');
     expect(m.text).not.toContain('<script>');
     expect(m.text).toContain('&lt;b&gt;hi&lt;/b&gt; &amp; bye');
-    expect(m.buttons).toEqual([{ text: 'Open and answer', url: 'https://x.test/q' }]);
+    expect(m.buttons).toEqual([
+      { text: 'Open and answer', url: 'https://x.test/q' },
+    ]);
   });
 
   it('previewBody cuts a 5000-char body to <= 301 chars ending with an ellipsis, on a space', () => {
@@ -45,7 +47,10 @@ describe('telegram messages', () => {
     const items = Array.from({ length: 12 }, (_, i) => item(i));
     const m = questionListMessage('en', items, 'https://x.test/en/admin', now);
     expect(m.buttons).toHaveLength(11);
-    expect(m.buttons![10]).toEqual({ text: 'All questions', url: 'https://x.test/en/admin' });
+    expect(m.buttons![10]).toEqual({
+      text: 'All questions',
+      url: 'https://x.test/en/admin',
+    });
     expect(m.text).toContain('2');
     expect(m.text).toContain('12');
   });
@@ -69,13 +74,17 @@ describe('telegram messages', () => {
     expect(connectedMessage('en', 'Bob', true).text).toBe(
       "Done! Telegram is connected to the account <b>Bob</b>.\nI'll write about every new student question. /new shows the unanswered ones.",
     );
-    expect(connectedMessage('en', 'Bob', false).text).toContain('when the coach answers');
+    expect(connectedMessage('en', 'Bob', false).text).toContain(
+      'when the coach answers',
+    );
   });
 
   it('infoMessage carries the profile button where needed', () => {
     expect(infoMessage('en', 'expired', 'https://x.test/p').buttons).toEqual([
       { text: 'Open profile', url: 'https://x.test/p' },
     ]);
-    expect(infoMessage('en', 'help', 'https://x.test/p').buttons).toBeUndefined();
+    expect(
+      infoMessage('en', 'help', 'https://x.test/p').buttons,
+    ).toBeUndefined();
   });
 });

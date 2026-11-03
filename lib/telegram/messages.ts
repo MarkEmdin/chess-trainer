@@ -53,9 +53,42 @@ export function answeredMessage(
   };
 }
 
+export function newApplicationMessage(
+  locale: BotLocale,
+  p: { nickname: string; name: string; url: string },
+): BotMessage {
+  const tr = t(locale);
+  return {
+    text: tr('newApplication', {
+      nickname: `<b>${escapeHtml(p.nickname)}</b>`,
+      name: escapeHtml(p.name),
+    }),
+    buttons: [{ text: tr('openApplications'), url: p.url }],
+  };
+}
+
+export function applicationDecisionMessage(
+  locale: BotLocale,
+  p: { approved: boolean; url: string },
+): BotMessage {
+  const tr = t(locale);
+  return p.approved
+    ? {
+        text: tr('applicationApproved'),
+        buttons: [{ text: tr('openAdmin'), url: p.url }],
+      }
+    : {
+        text: tr('applicationRejected'),
+        buttons: [{ text: tr('openApplicationForm'), url: p.url }],
+      };
+}
+
 function ago(locale: BotLocale, createdAt: string, now: Date): string {
   const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
-  const minutes = Math.max(0, Math.floor((now.getTime() - new Date(createdAt).getTime()) / 60000));
+  const minutes = Math.max(
+    0,
+    Math.floor((now.getTime() - new Date(createdAt).getTime()) / 60000),
+  );
   if (minutes < 60) return rtf.format(-minutes, 'minute');
   if (minutes < 1440) return rtf.format(-Math.floor(minutes / 60), 'hour');
   return rtf.format(-Math.floor(minutes / 1440), 'day');
@@ -63,7 +96,12 @@ function ago(locale: BotLocale, createdAt: string, now: Date): string {
 
 export function questionListMessage(
   locale: BotLocale,
-  items: { nickname: string; moveSan: string; createdAt: string; url: string }[],
+  items: {
+    nickname: string;
+    moveSan: string;
+    createdAt: string;
+    url: string;
+  }[],
   adminUrl: string,
   now: Date,
 ): BotMessage {
@@ -84,7 +122,10 @@ export function questionListMessage(
   return {
     text,
     buttons: [
-      ...shown.map((it, i) => ({ text: `${i + 1}. ${it.nickname}, ${it.moveSan}`, url: it.url })),
+      ...shown.map((it, i) => ({
+        text: `${i + 1}. ${it.nickname}, ${it.moveSan}`,
+        url: it.url,
+      })),
       { text: tr('openAdmin'), url: adminUrl },
     ],
   };
@@ -93,12 +134,12 @@ export function questionListMessage(
 export function connectedMessage(
   locale: BotLocale,
   nickname: string,
-  isAdmin: boolean,
+  isStaff: boolean,
 ): BotMessage {
   const tr = t(locale);
   return {
     text: `${tr('connected', { nickname: `<b>${escapeHtml(nickname)}</b>` })}\n${tr(
-      isAdmin ? 'connectedAdmin' : 'connectedStudent',
+      isStaff ? 'connectedAdmin' : 'connectedStudent',
     )}`,
   };
 }
@@ -110,6 +151,7 @@ export function infoMessage(
 ): BotMessage {
   const tr = t(locale);
   const msg: BotMessage = { text: tr(key) };
-  if (key !== 'help') msg.buttons = [{ text: tr('openProfile'), url: profileUrl }];
+  if (key !== 'help')
+    msg.buttons = [{ text: tr('openProfile'), url: profileUrl }];
   return msg;
 }

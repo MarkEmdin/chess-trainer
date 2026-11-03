@@ -44,9 +44,8 @@ export function countNotifications(
         response_seen_at: r.response_seen_at,
       }),
   ).length;
-  const newQuestions =
-    isStaff(user.role)
-      ? rows.filter((r) => r.coaching_responses.length === 0).length
-      : null;
+  const newQuestions = isStaff(user.role)
+    ? rows.filter((r) => r.coaching_responses.length === 0).length
+    : null;
   return { unseenAnswers, newQuestions };
 }

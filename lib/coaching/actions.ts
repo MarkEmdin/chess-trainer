@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/server';
 import { SITE_URL } from '@/lib/site';
 import { shouldOfferTelegram } from '@/lib/telegram/prompt';
 import {
-  notifyAdminsOfQuestion,
+  notifyStaffOfQuestion,
   notifyStudentOfAnswer,
 } from '@/lib/telegram/notify';
 import { getAuthedUser } from '@/lib/auth/getUser';
@@ -151,7 +151,7 @@ export async function createCoachingRequest(
   }
 
   const origin = (await headers()).get('origin') ?? SITE_URL;
-  after(() => notifyAdminsOfQuestion(data.id, origin));
+  after(() => notifyStaffOfQuestion(data.id, origin));
   return {
     success: true,
     requestId: data.id,
