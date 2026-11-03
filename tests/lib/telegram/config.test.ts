@@ -27,10 +27,6 @@ describe('telegramConfig', () => {
     process.env.TELEGRAM_BOT_TOKEN = 't';
     process.env.TELEGRAM_BOT_USERNAME = 'bot';
     process.env.TELEGRAM_WEBHOOK_SECRET = 's';
-    expect(telegramConfig()).toEqual({
-      token: 't',
-      username: 'bot',
-      secret: 's',
-    });
+    expect(telegramConfig()).toEqual({ token: 't', username: 'bot', secret: 's' });
   });
 });

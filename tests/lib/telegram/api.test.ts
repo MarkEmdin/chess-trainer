@@ -1,10 +1,6 @@
 import { escapeHtml, sendMessage } from '@/lib/telegram/api';
 
-const KEYS = [
-  'TELEGRAM_BOT_TOKEN',
-  'TELEGRAM_BOT_USERNAME',
-  'TELEGRAM_WEBHOOK_SECRET',
-] as const;
+const KEYS = ['TELEGRAM_BOT_TOKEN', 'TELEGRAM_BOT_USERNAME', 'TELEGRAM_WEBHOOK_SECRET'] as const;
 
 describe('telegram api', () => {
   const original = { ...process.env };
@@ -36,18 +32,14 @@ describe('telegram api', () => {
       chat_id: 42,
       text: 'hi',
       parse_mode: 'HTML',
-      reply_markup: {
-        inline_keyboard: [[{ text: 'Open', url: 'https://x.test/a' }]],
-      },
+      reply_markup: { inline_keyboard: [[{ text: 'Open', url: 'https://x.test/a' }]] },
       link_preview_options: { is_disabled: true },
     });
   });
 
   it('omits reply_markup when there are no buttons', async () => {
     await sendMessage(1, { text: 'hi' });
-    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).not.toHaveProperty(
-      'reply_markup',
-    );
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).not.toHaveProperty('reply_markup');
   });
 
   it("returns 'blocked' on 403", async () => {
@@ -74,17 +66,9 @@ describe('telegram api', () => {
   it('logs status and body on a 400 without the token', async () => {
     const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
     try {
-      fetchMock.mockResolvedValue({
-        ok: false,
-        status: 400,
-        text: async () => 'bad button url',
-      });
+      fetchMock.mockResolvedValue({ ok: false, status: 400, text: async () => 'bad button url' });
       expect(await sendMessage(1, { text: 'x' })).toBe('error');
-      expect(spy).toHaveBeenCalledWith(
-        'telegram sendMessage failed',
-        400,
-        'bad button url',
-      );
+      expect(spy).toHaveBeenCalledWith('telegram sendMessage failed', 400, 'bad button url');
       expect(JSON.stringify(spy.mock.calls)).not.toContain('tok');
     } finally {
       spy.mockRestore();

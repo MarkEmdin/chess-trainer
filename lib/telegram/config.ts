@@ -1,8 +1,4 @@
-export type TelegramConfig = {
-  token: string;
-  username: string;
-  secret: string;
-};
+export type TelegramConfig = { token: string; username: string; secret: string };
 
 // The feature is off unless all three variables are set.
 export function telegramConfig(): TelegramConfig | null {
