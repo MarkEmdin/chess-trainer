@@ -13,6 +13,7 @@ import {
 } from '@/lib/coaches/actions';
 import type { CoachProfile } from '@/lib/coaches/displayName';
 import { useCoachName } from '@/lib/coaches/useCoachName';
+import Spinner from '@/app/components/Spinner';
 
 export type ManagedCoach = {
   id: string;
@@ -100,6 +101,7 @@ export default function CoachCard({ coach }: { coach: ManagedCoach }) {
               className="max-w-xs"
             />
             <Button type="submit" size="sm" disabled={assigning}>
+              {assigning && <Spinner />}
               {t('assign')}
             </Button>
           </div>
@@ -121,6 +123,7 @@ export default function CoachCard({ coach }: { coach: ManagedCoach }) {
                 variant="destructive"
                 disabled={revoking}
               >
+                {revoking && <Spinner />}
                 {t('revokeConfirm')}
               </Button>
             </form>

@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { isRole, type Role } from './roles';
 
@@ -11,7 +12,9 @@ export type AuthedUser = {
 
 // Returns the authenticated user (with profile fields joined) or null.
 // Use from Server Components / layouts to render auth-aware UI.
-export async function getAuthedUser(): Promise<AuthedUser | null> {
+// Cached per request (spec 021): Header, NotificationBell and the page all
+// ask, and each uncached call is an Auth round trip plus a profile query.
+export const getAuthedUser = cache(async (): Promise<AuthedUser | null> => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -32,4 +35,4 @@ export async function getAuthedUser(): Promise<AuthedUser | null> {
     role: isRole(profile?.role) ? profile.role : 'user',
     preferredLocale: profile?.preferred_locale ?? null,
   };
-}
+});

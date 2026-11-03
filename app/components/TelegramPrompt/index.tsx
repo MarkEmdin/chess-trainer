@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui/button';
 import { setTelegramPromptDismissed } from '@/lib/telegram/actions';
 import { useTelegramConnect } from '@/lib/telegram/useTelegramConnect';
+import Spinner from '@/app/components/Spinner';
 
 // Offered right after a question is sent (spec 015). Stays up after "Don't
 // remind me" so the student can still connect before closing the modal.
@@ -27,6 +28,7 @@ export default function TelegramPrompt() {
     <div className="flex flex-col items-start gap-3 rounded-md border border-border bg-muted/50 p-3 text-sm">
       <p>{t('prompt.text')}</p>
       <Button type="button" size="sm" disabled={pending} onClick={connect}>
+        {pending && <Spinner />}
         {t('prompt.connect')}
       </Button>
       {error && (

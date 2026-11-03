@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { Link, redirect } from '@/i18n/navigation';
+import LinkPending from '@/app/components/LinkPending';
 import { getAuthedUser } from '@/lib/auth/getUser';
 import { createClient } from '@/lib/supabase/server';
 import { isCoachTitle } from '@/lib/coaches/titles';
@@ -147,6 +148,7 @@ export default async function CoachesPage({
               {counts[key] === null
                 ? t(`tabs.${key}`)
                 : t(`tabs.${key}`, { count: counts[key] })}
+              <LinkPending />
             </Link>
           ))}
         </div>

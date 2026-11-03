@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/app/components/ui/button';
 import { resendConfirmation, type AuthFormState } from '@/lib/auth/actions';
+import Spinner from '@/app/components/Spinner';
 
 type Props = {
   maskedEmail: string;
@@ -28,6 +29,7 @@ export default function CheckEmail({ maskedEmail }: Props) {
 
       <form action={formAction} className="flex flex-col gap-4">
         <Button type="submit" variant="outline" disabled={pending}>
+          {pending && <Spinner />}
           {pending ? t('resendPending') : t('resend')}
         </Button>
 

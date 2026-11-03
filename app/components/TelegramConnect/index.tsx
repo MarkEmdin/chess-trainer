@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui/button';
 import { disconnectTelegram } from '@/lib/telegram/actions';
 import { useTelegramConnect } from '@/lib/telegram/useTelegramConnect';
+import Spinner from '@/app/components/Spinner';
 
 type Props = { connected: boolean; isAdmin: boolean };
 
@@ -27,12 +28,14 @@ export default function TelegramConnect({ connected, isAdmin }: Props) {
             disabled={pending}
             onClick={() => startTransition(() => disconnectTelegram())}
           >
+            {pending && <Spinner />}
             {t('disconnect')}
           </Button>
         </div>
       ) : (
         <div className="flex flex-col items-start gap-2">
           <Button type="button" disabled={pending} onClick={connect}>
+            {pending && <Spinner />}
             {t('connect')}
           </Button>
           {started && (

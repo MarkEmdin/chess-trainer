@@ -6,6 +6,7 @@ import { Link } from '@/i18n/navigation';
 import { Button } from '@/app/components/ui/button';
 import FormField from '@/app/components/FormField';
 import { updatePassword, type AuthFormState } from '@/lib/auth/actions';
+import Spinner from '@/app/components/Spinner';
 
 export default function ResetPasswordForm() {
   const t = useTranslations('auth');
@@ -58,6 +59,7 @@ export default function ResetPasswordForm() {
           )}
 
           <Button type="submit" disabled={pending}>
+            {pending && <Spinner />}
             {pending ? t('resetPassword.pending') : t('resetPassword.submit')}
           </Button>
         </form>

@@ -6,6 +6,7 @@ import { Link } from '@/i18n/navigation';
 import { Button } from '@/app/components/ui/button';
 import FormField from '@/app/components/FormField';
 import { requestPasswordReset, type AuthFormState } from '@/lib/auth/actions';
+import Spinner from '@/app/components/Spinner';
 
 export default function ForgotPasswordForm() {
   const t = useTranslations('auth');
@@ -47,6 +48,7 @@ export default function ForgotPasswordForm() {
           )}
 
           <Button type="submit" disabled={pending}>
+            {pending && <Spinner />}
             {pending ? t('forgotPassword.pending') : t('forgotPassword.submit')}
           </Button>
         </form>

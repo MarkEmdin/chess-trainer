@@ -15,6 +15,7 @@ import {
   MAX_HANDLE_LENGTH,
   type ApplicationFields,
 } from '@/lib/coaches/application';
+import Spinner from '@/app/components/Spinner';
 
 type Initial = Partial<Record<keyof ApplicationFields, string>>;
 
@@ -101,6 +102,7 @@ export default function CoachApplicationForm({
       )}
 
       <Button type="submit" disabled={pending} className="self-start">
+        {pending && <Spinner />}
         {pending ? t('submitting') : t('submit')}
       </Button>
     </form>

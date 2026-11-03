@@ -8,6 +8,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { Link, usePathname } from '@/i18n/navigation';
+import LinkPending from '@/app/components/LinkPending';
 import { cn } from '@/lib/utils';
 
 const links: ReadonlyArray<{
@@ -40,13 +41,14 @@ export default function SiteNav() {
               href={href}
               aria-current={isActive(href) ? 'page' : undefined}
               className={cn(
-                'block py-1 text-sm transition-colors',
+                'flex items-center gap-1 py-1 text-sm transition-colors',
                 isActive(href)
                   ? 'font-semibold text-foreground shadow-[inset_0_-2px_0_var(--primary)]'
                   : 'text-muted-foreground hover:text-foreground',
               )}
             >
               {t(key)}
+              <LinkPending />
             </Link>
           </li>
         ))}
@@ -63,7 +65,7 @@ export default function SiteNav() {
                 href={href}
                 aria-current={isActive(href) ? 'page' : undefined}
                 className={cn(
-                  'flex flex-col items-center gap-0.5 py-2 text-[11px]',
+                  'relative flex flex-col items-center gap-0.5 py-2 text-[11px]',
                   isActive(href)
                     ? 'font-semibold text-primary'
                     : 'text-muted-foreground',
@@ -71,6 +73,7 @@ export default function SiteNav() {
               >
                 <Icon aria-hidden className="size-5" />
                 {t(key)}
+                <LinkPending className="absolute top-1.5 right-3" />
               </Link>
             </li>
           ))}
