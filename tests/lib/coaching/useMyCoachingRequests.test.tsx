@@ -15,14 +15,38 @@ const rows = [
     move_index: 3,
     pgn: null,
     response_seen_at: null,
-    coaching_responses: [],
+    coaching_responses: [
+      {
+        body: 'a',
+        created_at: '2026-10-24T12:00:00Z',
+        variation: null,
+        content: null,
+        author_id: 'c1',
+      },
+    ],
   },
 ];
 
 jest.mock('@/lib/supabase/client', () => ({
   createClient: () => ({
     auth: { getUser: async () => ({ data: { user } }) },
-    from: () => {
+    from: (table: string) => {
+      if (table === 'coach_profiles') {
+        return {
+          select: () => ({
+            in: async () => ({
+              data: [
+                {
+                  user_id: 'c1',
+                  first_name: 'Ivan',
+                  last_name: 'Petrov',
+                  title: 'IM',
+                },
+              ],
+            }),
+          }),
+        };
+      }
       const builder = {
         select: () => builder,
         eq: (column: string, value: string) => {
@@ -55,6 +79,18 @@ describe('useMyCoachingRequests', () => {
     await waitFor(() => expect(result.current.data).toBeDefined());
     expect(eq).toHaveBeenCalledWith('user_id', 'u1');
     expect(result.current.data?.FEN.response_seen_at).toBeNull();
+  });
+
+  it('attaches the coach profile of each answer', async () => {
+    const { result } = renderHook(() => useMyCoachingRequests(true), {
+      wrapper,
+    });
+    await waitFor(() => expect(result.current.data).toBeDefined());
+    expect(result.current.data?.FEN.responses[0].author).toEqual({
+      first_name: 'Ivan',
+      last_name: 'Petrov',
+      title: 'IM',
+    });
   });
 
   it('returns nothing without a session', async () => {

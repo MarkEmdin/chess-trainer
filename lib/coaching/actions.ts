@@ -12,6 +12,7 @@ import {
   notifyStudentOfAnswer,
 } from '@/lib/telegram/notify';
 import { getAuthedUser } from '@/lib/auth/getUser';
+import { isStaff } from '@/lib/auth/roles';
 import { replayAroundKey } from '@/lib/chess/replay';
 import { parseVariationField, playVariation } from '@/lib/chess/variation';
 import { MAX_BODY_LENGTH, normalizeBody } from './body';
@@ -158,8 +159,10 @@ export async function createCoachingRequest(
   };
 }
 
-// Admin-side: write a response to a coaching request. Belt-and-suspenders
-// authorization — RLS on coaching_responses already blocks non-admins,
+// Staff-side (admin or coach, spec 020): write a response to a coaching
+// request, signed with the author's id. Belt-and-suspenders authorization —
+// RLS on coaching_responses already blocks non-staff and requests the coach
+// can't see (the request read below then returns nothing),
 // but explicit role check returns a clean error message instead of a
 // silent "0 rows" failure. One response per request is enforced here
 // at the action layer (schema permits multiple — keeping the door open
@@ -177,7 +180,7 @@ export async function respondToRequest(
   }
 
   const user = await getAuthedUser();
-  if (!user || user.role !== 'admin') {
+  if (!user || !isStaff(user.role)) {
     return { error: t('notAdmin') };
   }
 
@@ -211,7 +214,7 @@ export async function respondToRequest(
 
   const { error } = await supabase
     .from('coaching_responses')
-    .insert({ request_id, body, variation, content });
+    .insert({ request_id, body, variation, content, author_id: user.id });
 
   if (error) {
     return { error: error.message };

@@ -249,7 +249,18 @@ describe('respondToRequest', () => {
       body: 'Play Nf6',
       variation: ['Nf6', 'Nc3'],
       content: null,
+      author_id: 'c1',
     });
+  });
+
+  it('lets a coach reply and signs the answer with their id', async () => {
+    getAuthedUser.mockResolvedValue({ id: 'coach7', role: 'coach' });
+    const result = await respondToRequest(undefined, replyForm());
+    expect(result).toEqual({ success: true });
+    expect(insert).toHaveBeenCalledWith(
+      'coaching_responses',
+      expect.objectContaining({ author_id: 'coach7' }),
+    );
   });
 
   it('refreshes the layout so the header bell recounts', async () => {
@@ -405,6 +416,7 @@ describe('inline-move content', () => {
       body: 'Хотел 3… d6',
       variation: null,
       content: JSON.parse(D6_CONTENT),
+      author_id: 'c1',
     });
   });
 });

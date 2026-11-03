@@ -1,3 +1,4 @@
+import type { CoachProfile } from '@/lib/coaches/displayName';
 import type { MessageContent } from './content';
 
 // One message in a coaching thread: the student's question or the coach's
@@ -9,6 +10,10 @@ export type CoachingMessage = {
   created_at: string;
   variation: string[] | null;
   content?: MessageContent | null;
+  // Answers only (spec 020): who wrote it, and their public coach profile
+  // (null when they have none). Absent on questions and when not loaded.
+  author_id?: string | null;
+  author?: CoachProfile | null;
 };
 
 export type CoachingThreadData = CoachingMessage & {
