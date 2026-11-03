@@ -38,6 +38,7 @@ jest.mock('@/lib/coaching/getNotificationCounts', () => ({
 
 const student = { id: 'u1', role: 'user' };
 const admin = { id: 'a1', role: 'admin' };
+const coach = { id: 'c1', role: 'coach' };
 
 async function renderBell() {
   const ui = await NotificationBell();
@@ -102,6 +103,34 @@ describe('<NotificationBell />', () => {
     });
     expect(answers).toHaveAttribute('href', '/coaching?tab=answered');
     expect(answers).toHaveTextContent('1');
+  });
+
+  it('gives a coach the same menu, without applications', async () => {
+    getAuthedUser.mockResolvedValue(coach);
+    getNotificationCounts.mockResolvedValue({
+      unseenAnswers: 0,
+      newQuestions: 2,
+      pendingApplications: null,
+    });
+    await renderBell();
+    await userEvent.click(screen.getByRole('button'));
+    expect(screen.getAllByRole('menuitem')).toHaveLength(2);
+  });
+
+  it('shows pending coach applications to the admin', async () => {
+    getAuthedUser.mockResolvedValue(admin);
+    getNotificationCounts.mockResolvedValue({
+      unseenAnswers: 0,
+      newQuestions: 1,
+      pendingApplications: 2,
+    });
+    await renderBell();
+    const trigger = screen.getByRole('button');
+    expect(within(trigger).getByText('3')).toHaveClass('bg-primary');
+    await userEvent.click(trigger);
+    const item = screen.getByRole('menuitem', { name: /Coach applications/ });
+    expect(item).toHaveAttribute('href', '/admin/coaches');
+    expect(item).toHaveTextContent('2');
   });
 
   it('keeps both rows for an admin with no new questions', async () => {

@@ -73,6 +73,10 @@ describe('countNotifications', () => {
     });
   });
 
+  it('adds unanswered questions for a coach', () => {
+    expect(countNotifications(rows, { id: 'c1', role: 'coach' }).newQuestions).toBe(1);
+  });
+
   it("counts the admin's own unanswered question as new too", () => {
     expect(
       countNotifications([row('a1', false), row('u2', false)], {

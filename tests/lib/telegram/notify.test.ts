@@ -1,5 +1,7 @@
 import {
-  notifyAdminsOfQuestion,
+  notifyAdminsOfApplication,
+  notifyApplicantOfDecision,
+  notifyStaffOfQuestion,
   notifyStudentOfAnswer,
   unansweredList,
 } from '@/lib/telegram/notify';
@@ -29,7 +31,8 @@ function from(table: string) {
     },
     order: (k: string, o: { ascending: boolean }) => {
       rows.sort(
-        (a, b) => (String(a[k]) < String(b[k]) ? -1 : 1) * (o.ascending ? 1 : -1),
+        (a, b) =>
+          (String(a[k]) < String(b[k]) ? -1 : 1) * (o.ascending ? 1 : -1),
       );
       return builder;
     },
@@ -95,9 +98,9 @@ beforeEach(() => {
 
 afterEach(() => jest.restoreAllMocks());
 
-describe('notifyAdminsOfQuestion', () => {
+describe('notifyStaffOfQuestion', () => {
   it('sends to every linked admin except the asker, in each admin locale, with the admin?request button', async () => {
-    await notifyAdminsOfQuestion('q1', ORIGIN);
+    await notifyStaffOfQuestion('q1', ORIGIN);
     expect(sendMessage).toHaveBeenCalledTimes(1);
     const [chatId, msg] = sendMessage.mock.calls[0];
     expect(chatId).toBe(2);
@@ -106,32 +109,102 @@ describe('notifyAdminsOfQuestion', () => {
   });
 
   it('skips admins without a link and users whose role is not admin', async () => {
-    await notifyAdminsOfQuestion('q1', ORIGIN);
+    await notifyStaffOfQuestion('q1', ORIGIN);
     expect(sendMessage.mock.calls.map((c) => c[0])).toEqual([2]);
   });
 
   it("unlinks the chat when the send is 'blocked'", async () => {
     sendMessage.mockResolvedValue('blocked');
-    await notifyAdminsOfQuestion('q1', ORIGIN);
+    await notifyStaffOfQuestion('q1', ORIGIN);
     expect(unlinkChat).toHaveBeenCalledWith(2);
   });
 
   it('resolves and logs when sendMessage rejects', async () => {
     sendMessage.mockRejectedValue(new Error('boom'));
-    await expect(notifyAdminsOfQuestion('q1', ORIGIN)).resolves.toBeUndefined();
+    await expect(notifyStaffOfQuestion('q1', ORIGIN)).resolves.toBeUndefined();
     expect(console.error).toHaveBeenCalled();
   });
 
   it('resolves and logs when the DB errors', async () => {
     dbError = new Error('db down');
-    await expect(notifyAdminsOfQuestion('q1', ORIGIN)).resolves.toBeUndefined();
+    await expect(notifyStaffOfQuestion('q1', ORIGIN)).resolves.toBeUndefined();
     expect(console.error).toHaveBeenCalled();
   });
 
   it('is a no-op when telegram is not configured', async () => {
     telegramConfig.mockReturnValue(null);
-    await notifyAdminsOfQuestion('q1', ORIGIN);
+    await notifyStaffOfQuestion('q1', ORIGIN);
     expect(sendMessage).not.toHaveBeenCalled();
+  });
+});
+
+describe('notifyStaffOfQuestion with coaches', () => {
+  beforeEach(() => {
+    tables.coaching_requests[0].user_id = 'kid';
+    tables.user_profiles.push(
+      { id: 'kid', nickname: 'Kid', role: 'user', preferred_locale: 'en' },
+      { id: 'coachA', nickname: 'CA', role: 'coach', preferred_locale: 'en' },
+      { id: 'coachB', nickname: 'CB', role: 'coach', preferred_locale: 'en' },
+    );
+    tables.telegram_links.push(
+      { user_id: 'coachA', chat_id: 10 },
+      { user_id: 'coachB', chat_id: 11 },
+    );
+    tables.coach_students = [];
+  });
+
+  it('tells the admins and every coach about a student without a coach', async () => {
+    await notifyStaffOfQuestion('q1', ORIGIN);
+    expect(sendMessage.mock.calls.map((c) => c[0]).sort()).toEqual([
+      1, 10, 11, 2,
+    ]);
+  });
+
+  it("tells only the admins and the student's own coach", async () => {
+    tables.coach_students = [{ student_id: 'kid', coach_id: 'coachA' }];
+    await notifyStaffOfQuestion('q1', ORIGIN);
+    expect(sendMessage.mock.calls.map((c) => c[0]).sort()).toEqual([1, 10, 2]);
+  });
+
+  it('never tells a coach about their own question', async () => {
+    tables.coaching_requests[0].user_id = 'coachA';
+    await notifyStaffOfQuestion('q1', ORIGIN);
+    expect(sendMessage.mock.calls.map((c) => c[0])).not.toContain(10);
+  });
+});
+
+describe('application notifications', () => {
+  beforeEach(() => {
+    tables.coach_applications = [
+      {
+        id: 'app1',
+        user_id: 'demoted',
+        first_name: 'Ivan',
+        last_name: 'Petrov',
+        title: 'IM',
+      },
+    ];
+  });
+
+  it('tells every linked admin about a new application', async () => {
+    await notifyAdminsOfApplication('app1', ORIGIN);
+    expect(sendMessage.mock.calls.map((c) => c[0]).sort()).toEqual([1, 2]);
+    const msg = sendMessage.mock.calls.find((c) => c[0] === 2)![1];
+    expect(msg.text).toContain('Ivan Petrov');
+    expect(msg.buttons[0].url).toBe(`${ORIGIN}/ru/admin/coaches`);
+  });
+
+  it('tells an approved applicant where to answer questions', async () => {
+    await notifyApplicantOfDecision('demoted', true, ORIGIN);
+    const [chatId, msg] = sendMessage.mock.calls[0];
+    expect(chatId).toBe(3);
+    expect(msg.buttons[0].url).toBe(`${ORIGIN}/en/admin`);
+  });
+
+  it('tells a rejected applicant, linking back to the form', async () => {
+    await notifyApplicantOfDecision('demoted', false, ORIGIN);
+    const [, msg] = sendMessage.mock.calls[0];
+    expect(msg.buttons[0].url).toBe(`${ORIGIN}/en/become-coach`);
   });
 });
 
@@ -192,6 +265,7 @@ describe('unansweredList', () => {
       ORIGIN,
       'en',
       new Date('2026-10-04T00:00:00Z'),
+      { id: 'a-ru', role: 'admin' },
     );
     expect(msg.text.indexOf('Asker')).toBeGreaterThan(-1);
     expect(msg.text.indexOf('Asker')).toBeLessThan(
@@ -201,6 +275,41 @@ describe('unansweredList', () => {
     expect(msg.buttons?.map((b) => b.url)).toEqual([
       `${ORIGIN}/en/admin?request=old`,
       `${ORIGIN}/en/admin?request=new`,
+      `${ORIGIN}/en/admin`,
+    ]);
+  });
+});
+
+describe('unansweredList for a coach', () => {
+  it("leaves out another coach's students", async () => {
+    tables.coaching_requests = [
+      {
+        id: 'mine',
+        user_id: 'kid1',
+        move_san: '1. e4',
+        created_at: '2026-10-01T00:00:00Z',
+        coaching_responses: [],
+      },
+      {
+        id: 'theirs',
+        user_id: 'kid2',
+        move_san: '1. d4',
+        created_at: '2026-10-02T00:00:00Z',
+        coaching_responses: [],
+      },
+    ];
+    tables.coach_students = [
+      { student_id: 'kid1', coach_id: 'coachA' },
+      { student_id: 'kid2', coach_id: 'coachB' },
+    ];
+    const msg = await unansweredList(
+      ORIGIN,
+      'en',
+      new Date('2026-10-04T00:00:00Z'),
+      { id: 'coachA', role: 'coach' },
+    );
+    expect(msg.buttons?.map((b) => b.url)).toEqual([
+      `${ORIGIN}/en/admin?request=mine`,
       `${ORIGIN}/en/admin`,
     ]);
   });

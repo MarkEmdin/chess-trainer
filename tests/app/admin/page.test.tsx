@@ -49,16 +49,27 @@ jest.mock('@/app/components/CoachingAdminCard', () => ({
   default: ({
     request,
     autoOpen,
+    viewerId,
   }: {
     autoOpen?: boolean;
+    viewerId?: string;
     request: {
       id: string;
       content?: unknown;
-      responses: { content?: unknown }[];
+      my_student?: boolean;
+      assigned_coach?: { first_name: string } | null;
+      responses: {
+        content?: unknown;
+        author?: { first_name: string } | null;
+      }[];
     };
   }) => (
     <div
       data-testid="card"
+      data-viewer={viewerId}
+      data-my-student={String(!!request.my_student)}
+      data-assigned-coach={request.assigned_coach?.first_name ?? ''}
+      data-author={request.responses[0]?.author?.first_name ?? ''}
       data-autoopen={String(!!autoOpen)}
       data-content={JSON.stringify(request.content ?? null)}
       data-response-content={JSON.stringify(
@@ -87,6 +98,7 @@ const rows = [
         body: 'ok',
         created_at: '2026-10-21T12:00:00Z',
         variation: null,
+        author_id: 'c9',
         content: {
           v: 1,
           segments: [{ t: 'text', text: 'ok' }],
@@ -104,7 +116,10 @@ const rows = [
   },
 ];
 
-// Chainable stand-in: requests come back from .order(), profiles from .in().
+let assignments: { student_id: string; coach_id: string }[] = [];
+
+// Chainable stand-in: requests come back from .order(), profiles from .in(),
+// assignments from awaiting the select.
 jest.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
     from: (table: string) => {
@@ -113,8 +128,27 @@ jest.mock('@/lib/supabase/server', () => ({
         order: async () => ({ data: rows }),
         in: async () => ({
           data:
-            table === 'user_profiles' ? [{ id: 'u1', nickname: 'alice' }] : [],
+            table === 'user_profiles'
+              ? [{ id: 'u1', nickname: 'alice' }]
+              : table === 'coach_profiles'
+                ? [
+                    {
+                      user_id: 'c9',
+                      first_name: 'Anna',
+                      last_name: 'I',
+                      title: 'IM',
+                    },
+                    {
+                      user_id: 'c1',
+                      first_name: 'Boris',
+                      last_name: 'K',
+                      title: 'FM',
+                    },
+                  ]
+                : [],
         }),
+        then: (resolve: (v: unknown) => void) =>
+          resolve({ data: table === 'coach_students' ? assignments : [] }),
       };
       return builder;
     },
@@ -134,6 +168,7 @@ const render$ = async (tab?: string, request?: string) =>
 
 beforeEach(() => {
   redirect.mockClear();
+  assignments = [];
   getAuthedUser.mockResolvedValue({ id: 'c1', role: 'admin' });
 });
 
@@ -215,5 +250,44 @@ describe('admin page', () => {
       'new-1',
       'new-2',
     ]);
+  });
+
+  describe('coaches (spec 020)', () => {
+    it('opens for a coach', async () => {
+      getAuthedUser.mockResolvedValue({ id: 'c5', role: 'coach' });
+      await render$();
+      expect(redirect).not.toHaveBeenCalled();
+      expect(screen.getAllByTestId('card')[0]).toHaveAttribute(
+        'data-viewer',
+        'c5',
+      );
+    });
+
+    it("puts a coach's own students first, marked", async () => {
+      getAuthedUser.mockResolvedValue({ id: 'c5', role: 'coach' });
+      assignments = [{ student_id: 'u2', coach_id: 'c5' }];
+      await render$();
+      expect(
+        screen
+          .getAllByTestId('card')
+          .map((c) => [c.textContent, c.dataset.myStudent]),
+      ).toEqual([
+        ['new-2', 'true'],
+        ['new-1', 'false'],
+      ]);
+    });
+
+    it('tells the admin which coach a student has', async () => {
+      assignments = [{ student_id: 'u2', coach_id: 'c1' }];
+      await render$();
+      const cards = screen.getAllByTestId('card');
+      expect(cards.map((c) => c.dataset.assignedCoach)).toEqual(['', 'Boris']);
+      expect(cards.map((c) => c.dataset.myStudent)).toEqual(['false', 'false']);
+    });
+
+    it('attaches the author of each answer', async () => {
+      await render$('answered');
+      expect(screen.getByTestId('card')).toHaveAttribute('data-author', 'Anna');
+    });
   });
 });

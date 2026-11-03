@@ -155,4 +155,76 @@ describe('CoachingAdminCard', () => {
     expect(screen.queryByTestId('coaching-modal')).not.toBeInTheDocument();
     expect(scrollIntoView).not.toHaveBeenCalled();
   });
+
+  describe('coaches (spec 020)', () => {
+    const answer = {
+      body: 'Play Nf6',
+      created_at: '2026-10-21',
+      variation: null,
+      author_id: 'c2',
+      author: {
+        first_name: 'Anna',
+        last_name: 'Ivanova',
+        title: 'WFM' as const,
+      },
+    };
+
+    it('marks the viewing coach’s own student', () => {
+      renderWithIntl(
+        <CoachingAdminCard
+          request={request({ my_student: true })}
+          viewerId="c1"
+        />,
+      );
+      expect(screen.getByText('My student')).toBeInTheDocument();
+    });
+
+    it('shows the admin which coach a student belongs to', () => {
+      renderWithIntl(
+        <CoachingAdminCard
+          request={request({
+            assigned_coach: {
+              first_name: 'Anna',
+              last_name: 'Ivanova',
+              title: 'WFM',
+            },
+          })}
+          viewerId="admin1"
+        />,
+      );
+      expect(screen.getByText('Coach: WFM Anna Ivanova')).toBeInTheDocument();
+    });
+
+    it('names another coach who answered', () => {
+      renderWithIntl(
+        <CoachingAdminCard
+          request={request({ responses: [answer] })}
+          viewerId="c1"
+        />,
+      );
+      expect(
+        screen.getByText('Answered by WFM Anna Ivanova'),
+      ).toBeInTheDocument();
+    });
+
+    it('says "Your response" for the viewer’s own answer', () => {
+      renderWithIntl(
+        <CoachingAdminCard
+          request={request({ responses: [answer] })}
+          viewerId="c2"
+        />,
+      );
+      expect(screen.getByText('Your response')).toBeInTheDocument();
+    });
+
+    it('falls back when the author has no coach profile', () => {
+      renderWithIntl(
+        <CoachingAdminCard
+          request={request({ responses: [{ ...answer, author: null }] })}
+          viewerId="c1"
+        />,
+      );
+      expect(screen.getByText('Answered by a coach')).toBeInTheDocument();
+    });
+  });
 });

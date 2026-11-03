@@ -11,6 +11,8 @@ import { MessagePreview } from '@/app/components/CoachingThreadCard';
 import SectionLabel from '@/app/components/SectionLabel';
 import { sideToMove } from '@/lib/chess/fen';
 import type { CoachingThreadData } from '@/lib/coaching/types';
+import type { CoachProfile } from '@/lib/coaches/displayName';
+import { useAnswerLabels, useCoachName } from '@/lib/coaches/useCoachName';
 
 const CoachingModal = dynamic(() => import('@/app/components/CoachingModal'), {
   ssr: false,
@@ -22,15 +24,31 @@ export type AdminCoachingRequest = CoachingThreadData & {
   user_nickname: string;
   game_url: string;
   move_san: string;
+  // Spec 020: the asker is the viewing coach's own student.
+  my_student?: boolean;
+  // Spec 020, admin only: the asker's coach, when they have one.
+  assigned_coach?: CoachProfile | null;
 };
 
 type Props = {
   request: AdminCoachingRequest;
   autoOpen?: boolean;
+  // The signed-in staff member, to tell their own answers apart.
+  viewerId?: string;
 };
 
-export default function CoachingAdminCard({ request, autoOpen }: Props) {
+export default function CoachingAdminCard({
+  request,
+  autoOpen,
+  viewerId,
+}: Props) {
   const t = useTranslations('coachingAdmin');
+  const tCoaches = useTranslations('coaches');
+  const coachName = useCoachName();
+  const answerLabel = useAnswerLabels().forStaff(
+    request.responses[0],
+    viewerId,
+  );
   const tCoaching = useTranslations('coaching');
   const format = useFormatter();
   const [open, setOpen] = useState(autoOpen ?? false);
@@ -76,6 +94,18 @@ export default function CoachingAdminCard({ request, autoOpen }: Props) {
               <span className="text-sm text-muted-foreground">
                 {t('askedBy', { nickname: request.user_nickname })}
               </span>
+              {request.my_student && (
+                <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">
+                  {tCoaches('myStudent')}
+                </span>
+              )}
+              {request.assigned_coach && (
+                <span className="text-sm text-muted-foreground">
+                  {tCoaches('coachOf', {
+                    name: coachName(request.assigned_coach),
+                  })}
+                </span>
+              )}
               <span className="text-sm text-muted-foreground">
                 {t('askedAt', { date: when(request.created_at) })}
               </span>
@@ -86,7 +116,7 @@ export default function CoachingAdminCard({ request, autoOpen }: Props) {
             </SectionLabel>
 
             {answered && (
-              <SectionLabel label={t('yourResponse')}>
+              <SectionLabel label={answerLabel}>
                 {request.responses.map((r, i) => (
                   <div key={i} className="flex flex-col gap-1">
                     <span className="text-xs text-muted-foreground">
@@ -131,6 +161,7 @@ export default function CoachingAdminCard({ request, autoOpen }: Props) {
               : undefined
           }
           gameUrl={request.game_url}
+          answerLabel={answerLabel}
           onClose={() => setOpen(false)}
         />
       )}

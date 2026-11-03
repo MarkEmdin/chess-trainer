@@ -8,8 +8,9 @@ import { cn } from '@/lib/utils';
 import AdminBellMenu from './AdminBellMenu';
 import BadgePill from './BadgePill';
 
-// Header bell (spec 012): red = the user's unopened answers; admins also
-// get green = student questions with no response, and a menu to pick.
+// Header bell (spec 012): red = the user's unopened answers; staff also get
+// green = student questions with no response (plus coach applications for
+// the admin, spec 020), and a menu to pick.
 export default async function NotificationBell() {
   const user = await getAuthedUser();
   if (!user) return null;
@@ -24,6 +25,7 @@ export default async function NotificationBell() {
       <AdminBellMenu
         unseenAnswers={counts.unseenAnswers}
         newQuestions={counts.newQuestions}
+        pendingApplications={counts.pendingApplications ?? 0}
         label={t('bellLabel', {
           answers: counts.unseenAnswers,
           questions: counts.newQuestions,

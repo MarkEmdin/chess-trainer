@@ -93,7 +93,7 @@ describe('consumeLinkToken', () => {
     tokenRows = [{ user_id: 'u1' }];
     profileRow = { nickname: 'Mark', role: 'admin', preferred_locale: 'ru' };
     const res = await consumeLinkToken('tok', 42);
-    expect(res).toEqual({ nickname: 'Mark', isAdmin: true, locale: 'ru' });
+    expect(res).toEqual({ nickname: 'Mark', role: 'admin', locale: 'ru' });
     expect(on('telegram_link_tokens', 'delete')).toHaveLength(1);
     expect(on('telegram_links', 'delete')).toHaveLength(1);
     expect(on('telegram_links', 'eq')[0].args).toEqual(['chat_id', 42]);
@@ -108,7 +108,7 @@ describe('consumeLinkToken', () => {
     profileRow = { nickname: 'Mark', role: 'user', preferred_locale: null };
     expect(await consumeLinkToken('tok', 42)).toEqual({
       nickname: 'Mark',
-      isAdmin: false,
+      role: 'user',
       locale: 'en',
     });
     calls = [];
@@ -129,7 +129,7 @@ describe('findLinkByChat', () => {
     profileRow = { nickname: 'M', role: 'user', preferred_locale: 'ru' };
     expect(await findLinkByChat(1)).toEqual({
       userId: 'u1',
-      isAdmin: false,
+      role: 'user',
       locale: 'ru',
     });
   });

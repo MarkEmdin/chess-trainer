@@ -13,13 +13,14 @@ import {
   DropdownMenuTrigger,
 } from '@/app/components/ui/dropdown-menu';
 import { signOut } from '@/lib/auth/actions';
+import { isStaff, type Role } from '@/lib/auth/roles';
 import { cn } from '@/lib/utils';
 
-type Props = { nickname: string; isAdmin: boolean };
+type Props = { nickname: string; role: Role };
 
 // The signed-in user's entry point to their account (spec 015): a round
 // initial in the header, at every screen size.
-export default function AccountMenu({ nickname, isAdmin }: Props) {
+export default function AccountMenu({ nickname, role }: Props) {
   const t = useTranslations('auth');
   const [, startTransition] = useTransition();
 
@@ -46,9 +47,19 @@ export default function AccountMenu({ nickname, isAdmin }: Props) {
         <DropdownMenuItem asChild>
           <Link href="/coaching">{t('myCoaching')}</Link>
         </DropdownMenuItem>
-        {isAdmin && (
+        {isStaff(role) && (
           <DropdownMenuItem asChild>
             <Link href="/admin">{t('admin')}</Link>
+          </DropdownMenuItem>
+        )}
+        {role === 'admin' && (
+          <DropdownMenuItem asChild>
+            <Link href="/admin/coaches">{t('coaches')}</Link>
+          </DropdownMenuItem>
+        )}
+        {role === 'user' && (
+          <DropdownMenuItem asChild>
+            <Link href="/become-coach">{t('becomeCoach')}</Link>
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />

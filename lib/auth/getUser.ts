@@ -1,10 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
+import { isRole, type Role } from './roles';
 
 export type AuthedUser = {
   id: string;
   email: string;
   nickname: string;
-  role: 'user' | 'admin';
+  role: Role;
   preferredLocale: string | null;
 };
 
@@ -28,7 +29,7 @@ export async function getAuthedUser(): Promise<AuthedUser | null> {
     id: user.id,
     email: user.email ?? '',
     nickname: profile?.nickname ?? '',
-    role: profile?.role ?? 'user',
+    role: isRole(profile?.role) ? profile.role : 'user',
     preferredLocale: profile?.preferred_locale ?? null,
   };
 }

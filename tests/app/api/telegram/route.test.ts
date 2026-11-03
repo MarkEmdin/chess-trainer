@@ -72,7 +72,7 @@ describe('POST /api/telegram', () => {
   it('links on /start with a valid code', async () => {
     (consumeLinkToken as jest.Mock).mockResolvedValue({
       nickname: 'Ann',
-      isAdmin: false,
+      role: 'user',
       locale: 'en',
     });
     const res = await post(msg('/start abc'));
@@ -120,10 +120,14 @@ describe('POST /api/telegram', () => {
     );
   });
 
-  it.each(['/new', '/new@somebot'])('%s from a linked admin lists', async (t) => {
+  it.each([
+    ['/new', 'admin'],
+    ['/new@somebot', 'admin'],
+    ['/new', 'coach'],
+  ])('%s from a linked %s lists what they may answer', async (t, role) => {
     (findLinkByChat as jest.Mock).mockResolvedValue({
       userId: 'u',
-      isAdmin: true,
+      role,
       locale: 'en',
     });
     const list = { text: 'list' };
@@ -133,14 +137,15 @@ describe('POST /api/telegram', () => {
       'https://example.com',
       'en',
       expect.any(Date),
+      { id: 'u', role },
     );
     expect(sendMessage).toHaveBeenCalledWith(7, list);
   });
 
-  it('/new from a linked non-admin gets help', async () => {
+  it('/new from a linked student gets help', async () => {
     (findLinkByChat as jest.Mock).mockResolvedValue({
       userId: 'u',
-      isAdmin: false,
+      role: 'user',
       locale: 'en',
     });
     await post(msg('/new'));

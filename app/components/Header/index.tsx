@@ -35,10 +35,7 @@ export default async function Header() {
           <NotificationBell />
           <LanguageToggle />
           {user ? (
-            <AccountMenu
-              nickname={user.nickname}
-              isAdmin={user.role === 'admin'}
-            />
+            <AccountMenu nickname={user.nickname} role={user.role} />
           ) : (
             <>
               <Link href="/login" className={linkClass}>

@@ -13,6 +13,7 @@ import { formatVariation, playVariation } from '@/lib/chess/variation';
 import type { CoachingMessage, CoachingThreadData } from '@/lib/coaching/types';
 import { isUnseen } from '@/lib/coaching/notifications';
 import { markResponseSeen } from '@/lib/coaching/actions';
+import { useAnswerLabels } from '@/lib/coaches/useCoachName';
 
 // The modal pulls in chess.js and the interactive board; load it only when
 // the card is opened.
@@ -32,6 +33,7 @@ type Props = {
 export default function CoachingThreadCard({ thread }: Props) {
   const t = useTranslations('coaching');
   const format = useFormatter();
+  const answerLabels = useAnswerLabels();
   const [open, setOpen] = useState(false);
   // Flipped locally on open, so the label goes at once and a second open
   // doesn't ask the server again.
@@ -73,7 +75,7 @@ export default function CoachingThreadCard({ thread }: Props) {
               <MessagePreview fen={thread.fen} message={thread} />
             </SectionLabel>
 
-            <SectionLabel label={t('coachResponse')}>
+            <SectionLabel label={answerLabels.forStudent(thread.responses[0])}>
               {thread.responses.length === 0 ? (
                 <p className="text-sm text-muted-foreground italic">
                   {t('awaitingReply')}

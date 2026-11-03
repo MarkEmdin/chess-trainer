@@ -1,5 +1,6 @@
 import { randomBytes } from 'crypto';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { isRole, type Role } from '@/lib/auth/roles';
 import { toBotLocale, type BotLocale } from './messages';
 
 const TOKEN_TTL_MS = 15 * 60 * 1000;
@@ -29,7 +30,7 @@ export async function createLinkToken(userId: string): Promise<string> {
 export async function consumeLinkToken(
   token: string,
   chatId: number,
-): Promise<{ nickname: string; isAdmin: boolean; locale: BotLocale } | null> {
+): Promise<{ nickname: string; role: Role; locale: BotLocale } | null> {
   const admin = createAdminClient();
   // Delete-and-return is atomic: only one caller can claim a token.
   const { data: claimed } = await admin
@@ -51,14 +52,14 @@ export async function consumeLinkToken(
   const profile = await getProfile(userId);
   return {
     nickname: profile?.nickname ?? '',
-    isAdmin: profile?.role === 'admin',
+    role: isRole(profile?.role) ? profile.role : 'user',
     locale: toBotLocale(profile?.preferred_locale),
   };
 }
 
 export async function findLinkByChat(
   chatId: number,
-): Promise<{ userId: string; isAdmin: boolean; locale: BotLocale } | null> {
+): Promise<{ userId: string; role: Role; locale: BotLocale } | null> {
   const { data: link } = await createAdminClient()
     .from('telegram_links')
     .select('user_id')
@@ -68,7 +69,7 @@ export async function findLinkByChat(
   const profile = await getProfile(link.user_id);
   return {
     userId: link.user_id,
-    isAdmin: profile?.role === 'admin',
+    role: isRole(profile?.role) ? profile.role : 'user',
     locale: toBotLocale(profile?.preferred_locale),
   };
 }

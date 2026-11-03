@@ -2,6 +2,7 @@
 
 import useSWR from 'swr';
 import { createClient } from '@/lib/supabase/client';
+import { withAuthors } from '@/lib/coaches/authors';
 import type { CoachingThreadData } from '@/lib/coaching/types';
 
 export type MyCoachingRequest = CoachingThreadData;
@@ -36,7 +37,8 @@ const fetcher = async (): Promise<CoachingRequestsByFen> => {
           body,
           created_at,
           variation,
-          content
+          content,
+          author_id
         )
       `,
     )
@@ -46,8 +48,16 @@ const fetcher = async (): Promise<CoachingRequestsByFen> => {
 
   if (error || !data) return {};
 
+  const threads = await withAuthors(
+    supabase,
+    data.map((r) => ({
+      ...r,
+      responses: r.coaching_responses ?? [],
+    })),
+  );
+
   return Object.fromEntries(
-    data.map((r) => [
+    threads.map((r) => [
       r.fen,
       {
         id: r.id,
@@ -59,7 +69,7 @@ const fetcher = async (): Promise<CoachingRequestsByFen> => {
         move_index: r.move_index,
         pgn: r.pgn,
         response_seen_at: r.response_seen_at,
-        responses: r.coaching_responses ?? [],
+        responses: r.responses,
       },
     ]),
   );

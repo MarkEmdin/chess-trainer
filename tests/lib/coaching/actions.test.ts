@@ -67,10 +67,10 @@ jest.mock('next/headers', () => ({
   headers: async () => ({ get: () => 'https://site.test' }),
 }));
 
-const notifyAdminsOfQuestion = jest.fn();
+const notifyStaffOfQuestion = jest.fn();
 const notifyStudentOfAnswer = jest.fn();
 jest.mock('@/lib/telegram/notify', () => ({
-  notifyAdminsOfQuestion: (...a: unknown[]) => notifyAdminsOfQuestion(...a),
+  notifyStaffOfQuestion: (...a: unknown[]) => notifyStaffOfQuestion(...a),
   notifyStudentOfAnswer: (...a: unknown[]) => notifyStudentOfAnswer(...a),
 }));
 
@@ -122,7 +122,7 @@ function insertedBody(): string {
 
 beforeEach(() => {
   insert.mockClear();
-  notifyAdminsOfQuestion.mockReset();
+  notifyStaffOfQuestion.mockReset();
   notifyStudentOfAnswer.mockReset();
   requestRow = { fen: BLACK_TO_MOVE };
   existingResponse = null;
@@ -249,7 +249,18 @@ describe('respondToRequest', () => {
       body: 'Play Nf6',
       variation: ['Nf6', 'Nc3'],
       content: null,
+      author_id: 'c1',
     });
+  });
+
+  it('lets a coach reply and signs the answer with their id', async () => {
+    getAuthedUser.mockResolvedValue({ id: 'coach7', role: 'coach' });
+    const result = await respondToRequest(undefined, replyForm());
+    expect(result).toEqual({ success: true });
+    expect(insert).toHaveBeenCalledWith(
+      'coaching_responses',
+      expect.objectContaining({ author_id: 'coach7' }),
+    );
   });
 
   it('refreshes the layout so the header bell recounts', async () => {
@@ -405,6 +416,7 @@ describe('inline-move content', () => {
       body: 'Хотел 3… d6',
       variation: null,
       content: JSON.parse(D6_CONTENT),
+      author_id: 'c1',
     });
   });
 });
@@ -412,7 +424,7 @@ describe('inline-move content', () => {
 describe('telegram notifications', () => {
   it('notifies admins after a question is stored', async () => {
     await createCoachingRequest(undefined, askForm());
-    expect(notifyAdminsOfQuestion).toHaveBeenCalledWith(
+    expect(notifyStaffOfQuestion).toHaveBeenCalledWith(
       'new-id',
       'https://site.test',
     );
@@ -429,12 +441,12 @@ describe('telegram notifications', () => {
   it('does not notify on a validation error', async () => {
     await createCoachingRequest(undefined, askForm({ variation: 'nope' }));
     await respondToRequest(undefined, replyForm({ variation: '["e4"]' }));
-    expect(notifyAdminsOfQuestion).not.toHaveBeenCalled();
+    expect(notifyStaffOfQuestion).not.toHaveBeenCalled();
     expect(notifyStudentOfAnswer).not.toHaveBeenCalled();
   });
 
   it('still succeeds when a notification rejects', async () => {
-    notifyAdminsOfQuestion.mockRejectedValue(new Error('boom'));
+    notifyStaffOfQuestion.mockRejectedValue(new Error('boom'));
     notifyStudentOfAnswer.mockRejectedValue(new Error('boom'));
     expect(await createCoachingRequest(undefined, askForm())).toEqual({
       success: true,
