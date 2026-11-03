@@ -46,9 +46,30 @@ jest.mock('@/app/components/PageLayout', () => ({
 
 jest.mock('@/app/components/CoachingThreadCard', () => ({
   __esModule: true,
-  default: ({ thread }: { thread: { id: string } }) => (
-    <div data-testid="card">{thread.id}</div>
+  default: ({
+    thread,
+  }: {
+    thread: { id: string; responses: { author?: { first_name: string } }[] };
+  }) => (
+    <div
+      data-testid="card"
+      data-author={thread.responses[0]?.author?.first_name ?? ''}
+    >
+      {thread.id}
+    </div>
   ),
+}));
+
+// Spec 021: answers carry their coach, like the admin page (spec 020).
+jest.mock('@/lib/coaches/authors', () => ({
+  withAuthors: async (_client: unknown, threads: { responses: object[] }[]) =>
+    threads.map((t) => ({
+      ...t,
+      responses: t.responses.map((r) => ({
+        ...r,
+        author: { first_name: 'Anna' },
+      })),
+    })),
 }));
 
 const reply = {
@@ -150,5 +171,11 @@ describe('coaching page', () => {
     getAuthedUser.mockResolvedValue({ id: 'a1', role: 'admin' });
     await render$();
     expect(eq).toHaveBeenCalledWith('user_id', 'a1');
+  });
+
+  it('names the coach who answered (spec 021)', async () => {
+    await render$('answered');
+    expect(screen.getByTestId('card')).toHaveAttribute('data-author', 'Anna');
+    expect(select.mock.calls[0][0]).toMatch(/author_id/);
   });
 });

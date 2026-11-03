@@ -7,6 +7,7 @@ import CoachNameFields, {
   type FieldErrors,
 } from '@/app/components/CoachNameFields';
 import { saveMyCoachProfile, type FormState } from '@/lib/coaches/actions';
+import Spinner from '@/app/components/Spinner';
 
 // The admin's own signature under answers.
 export default function MyCoachProfileForm({
@@ -36,6 +37,7 @@ export default function MyCoachProfileForm({
         </p>
       )}
       <Button type="submit" disabled={pending} className="self-start">
+        {pending && <Spinner />}
         {t('save')}
       </Button>
     </form>

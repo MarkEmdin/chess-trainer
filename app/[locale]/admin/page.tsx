@@ -7,6 +7,7 @@ import { isCoachTitle } from '@/lib/coaches/titles';
 import type { CoachProfile } from '@/lib/coaches/displayName';
 import { createClient } from '@/lib/supabase/server';
 import { buttonVariants } from '@/app/components/ui/button';
+import LinkPending from '@/app/components/LinkPending';
 import PageLayout from '@/app/components/PageLayout';
 import CoachingAdminCard, {
   type AdminCoachingRequest,
@@ -170,6 +171,7 @@ export default async function AdminPage({
             })}
           >
             {t(`tabs.${key}`, { count: byTab[key].length })}
+            <LinkPending />
           </Link>
         ))}
       </div>

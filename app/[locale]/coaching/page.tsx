@@ -3,6 +3,8 @@ import { getTranslations, getLocale } from 'next-intl/server';
 import { getAuthedUser } from '@/lib/auth/getUser';
 import { createClient } from '@/lib/supabase/server';
 import { buttonVariants } from '@/app/components/ui/button';
+import LinkPending from '@/app/components/LinkPending';
+import { withAuthors } from '@/lib/coaches/authors';
 import PageLayout from '@/app/components/PageLayout';
 import CoachingThreadCard, {
   type CoachingThread,
@@ -44,7 +46,8 @@ export default async function CoachingPage({
           body,
           created_at,
           variation,
-          content
+          content,
+          author_id
         )
       `,
     )
@@ -52,8 +55,9 @@ export default async function CoachingPage({
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
-  const threads: CoachingThread[] =
-    data?.map((r) => ({
+  const threads: CoachingThread[] = await withAuthors(
+    supabase,
+    (data ?? []).map((r) => ({
       id: r.id,
       game_url: r.game_url,
       fen: r.fen,
@@ -66,7 +70,8 @@ export default async function CoachingPage({
       pgn: r.pgn,
       response_seen_at: r.response_seen_at,
       responses: r.coaching_responses ?? [],
-    })) ?? [];
+    })),
+  );
 
   const byTab: Record<Tab, CoachingThread[]> = {
     waiting: threads.filter((th) => th.responses.length === 0),
@@ -95,6 +100,7 @@ export default async function CoachingPage({
                 })}
               >
                 {t(`tabs.${key}`, { count: byTab[key].length })}
+                <LinkPending />
               </Link>
             ))}
           </div>

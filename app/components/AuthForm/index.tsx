@@ -6,6 +6,7 @@ import { Link } from '@/i18n/navigation';
 import { Button } from '@/app/components/ui/button';
 import FormField from '@/app/components/FormField';
 import { signIn, signUp, type AuthFormState } from '@/lib/auth/actions';
+import Spinner from '@/app/components/Spinner';
 
 type Props = {
   mode: 'login' | 'register';
@@ -118,6 +119,7 @@ export default function AuthForm({ mode, notice }: Props) {
         )}
 
         <Button type="submit" disabled={pending}>
+          {pending && <Spinner />}
           {pending ? t(`${mode}.pending`) : t(`${mode}.submit`)}
         </Button>
       </form>

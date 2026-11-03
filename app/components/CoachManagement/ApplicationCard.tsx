@@ -11,6 +11,7 @@ import {
 } from '@/lib/coaches/actions';
 import type { CoachTitle } from '@/lib/coaches/titles';
 import { useCoachName } from '@/lib/coaches/useCoachName';
+import Spinner from '@/app/components/Spinner';
 
 export type PendingApplication = {
   id: string;
@@ -93,6 +94,7 @@ export default function ApplicationCard({
           <form action={approve}>
             <input type="hidden" name="application_id" value={application.id} />
             <Button type="submit" size="sm" disabled={approving || rejecting}>
+              {approving && <Spinner />}
               {t('approve')}
             </Button>
           </form>
@@ -104,6 +106,7 @@ export default function ApplicationCard({
               variant="outline"
               disabled={approving || rejecting}
             >
+              {rejecting && <Spinner />}
               {t('reject')}
             </Button>
           </form>

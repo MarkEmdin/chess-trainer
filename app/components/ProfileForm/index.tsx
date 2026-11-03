@@ -8,6 +8,7 @@ import {
   updateExternalUsernames,
   type ProfileFormState,
 } from '@/lib/auth/profileActions';
+import Spinner from '@/app/components/Spinner';
 
 type Props = {
   initial: {
@@ -60,6 +61,7 @@ export default function ProfileForm({ initial }: Props) {
       )}
 
       <Button type="submit" disabled={pending} className="self-start">
+        {pending && <Spinner />}
         {pending ? t('saving') : t('save')}
       </Button>
     </form>

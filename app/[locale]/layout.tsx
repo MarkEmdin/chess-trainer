@@ -92,7 +92,9 @@ export default async function LocaleLayout({
             disableTransitionOnChange
           >
             <Header />
-            {children}
+            {/* Grows to fill the screen so short pages keep the footer at
+                the bottom (spec 021). */}
+            <div className="flex flex-1 flex-col">{children}</div>
             <Footer />
           </ThemeProvider>
         </NextIntlClientProvider>

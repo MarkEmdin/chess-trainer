@@ -54,6 +54,7 @@ import MessageContentView from './MessageContentView';
 import MoveEditor, { useRecorderStore, type MoveEditorApi } from './MoveEditor';
 import VariationBoard, { type ViewedLine } from './VariationBoard';
 import VariationLine from './VariationLine';
+import Spinner from '@/app/components/Spinner';
 
 type Props = {
   // Overrides the label above the answer (coach mode: "Answered by …").
@@ -448,6 +449,7 @@ export default function CoachingModal({
                       type="submit"
                       disabled={askPending || tooLong || !plainText}
                     >
+                      {askPending && <Spinner />}
                       {askPending ? t('submitting') : t('submit')}
                     </Button>
                   ) : (
@@ -455,6 +457,7 @@ export default function CoachingModal({
                       type="submit"
                       disabled={replyPending || tooLong || !plainText}
                     >
+                      {replyPending && <Spinner />}
                       {replyPending ? tAdmin('sending') : tAdmin('send')}
                     </Button>
                   )}
