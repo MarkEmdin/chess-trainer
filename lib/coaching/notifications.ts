@@ -1,4 +1,5 @@
 // What the header bell counts (spec 012).
+import type { Role } from '@/lib/auth/roles';
 
 export type NotificationRow = {
   user_id: string;
@@ -30,7 +31,7 @@ export function formatBadgeCount(n: number): string | null {
 // Admins read every request (RLS), so own answers are picked by `user_id`.
 export function countNotifications(
   rows: readonly NotificationRow[],
-  user: { id: string; role: 'user' | 'admin' },
+  user: { id: string; role: Role },
 ): NotificationCounts {
   const unseenAnswers = rows.filter(
     (r) =>
