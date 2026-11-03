@@ -263,6 +263,7 @@
       "assignLabel": "Assign a student by nickname",
       "assign": "Assign",
       "revoke": "Revoke coach role",
+      "revokeConfirm": "Yes, revoke the role",
       "profileHint": "Your name and title as students see them under your answers.",
       "save": "Save",
       "saved": "Saved.",
