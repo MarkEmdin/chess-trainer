@@ -155,20 +155,22 @@ toggle. This is the user's decision.
 - Nav link for everyone; guests are sent to login.
 - The like mark shows in the modal too, and may lag on `/think-time` until the
   next fetch.
+- The leaderboard shows nicknames, which are also the sign-in name, to all
+  signed-in users; opt-out, on by default.
 
 ## Acceptance criteria
 
-- [ ] An answer is liked automatically; existing answers are liked after the
+- [x] An answer is liked automatically; existing answers are liked after the
       migration.
-- [ ] Staff can remove and restore a like; students and non-visible staff can't
+- [x] Staff can remove and restore a like; students and non-visible staff can't
       (action and RPC).
-- [ ] The leaderboard counts likes on answers from the last 7 days only, and a
+- [x] The leaderboard counts likes on answers from the last 7 days only, and a
       removed like drops out at once.
 - [x] Equal likes share a place, including the cup; numbering skips after a tie.
-- [ ] Coaches, the admin and students who hid themselves aren't listed or
+- [x] Coaches, the admin and students who hid themselves aren't listed or
       counted in places.
 - [x] Own row is highlighted, and pinned below the list when outside the top 20.
-- [ ] Guests are redirected to login.
+- [x] Guests are redirected to login.
 - [ ] Staff don't see their own questions in `/admin`, the bell count or the
       Telegram list, and can't answer them; `/coaching` still shows them.
 - [x] `messages/en.json` and `messages/ru.json` stay structurally identical.
