@@ -48,9 +48,27 @@ describe('ResponseLikeToggle', () => {
     renderWithIntl(<ResponseLikeToggle responseId="a1" liked />);
     fireEvent.click(screen.getByRole('button'));
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Only coaches can reply.',
+      "Couldn't update the like. Try again.",
     );
     expect(screen.queryByText('not allowed')).toBeNull();
     expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('shows the error instead of throwing when the call rejects', async () => {
+    setResponseLiked.mockRejectedValue(new Error('network'));
+    renderWithIntl(<ResponseLikeToggle responseId="a1" liked />);
+    fireEvent.click(screen.getByRole('button'));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      "Couldn't update the like. Try again.",
+    );
+    expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('follows a fresher liked prop from the server', () => {
+    const { rerender } = renderWithIntl(
+      <ResponseLikeToggle key="a1-true" responseId="a1" liked />,
+    );
+    rerender(<ResponseLikeToggle key="a1-false" responseId="a1" liked={false} />);
+    expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'false');
   });
 });

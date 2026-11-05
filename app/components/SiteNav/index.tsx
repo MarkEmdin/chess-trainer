@@ -35,7 +35,7 @@ export default function SiteNav() {
     <>
       <ul
         data-testid="site-nav-desktop"
-        className="hidden sm:flex items-center gap-6"
+        className="hidden sm:flex items-center gap-4 lg:gap-6"
       >
         {links.map(({ href, key }) => (
           <li key={href}>

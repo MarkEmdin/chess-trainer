@@ -11,7 +11,6 @@ type Props = { responseId: string; liked: boolean };
 // Staff's like on an answer: on by default, they can take it away.
 export default function ResponseLikeToggle({ responseId, liked }: Props) {
   const t = useTranslations('coachingAdmin');
-  const tErrors = useTranslations('coaching.errors');
   const [value, setValue] = useState(liked);
   const [failed, setFailed] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -20,9 +19,13 @@ export default function ResponseLikeToggle({ responseId, liked }: Props) {
     const next = !value;
     setFailed(false);
     startTransition(async () => {
-      const res = await setResponseLiked(responseId, next);
-      if (res.error) setFailed(true);
-      else setValue(next);
+      try {
+        const res = await setResponseLiked(responseId, next);
+        if (res.error) setFailed(true);
+        else setValue(next);
+      } catch {
+        setFailed(true);
+      }
     });
   }
 
@@ -34,7 +37,7 @@ export default function ResponseLikeToggle({ responseId, liked }: Props) {
         aria-label={value ? t('unlike') : t('like')}
         disabled={pending}
         onClick={toggle}
-        className="inline-flex rounded p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-50"
+        className="inline-flex rounded p-1.5 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
       >
         <HeartIcon
           className={cn('size-4', value && 'fill-primary text-primary')}
@@ -42,7 +45,7 @@ export default function ResponseLikeToggle({ responseId, liked }: Props) {
       </button>
       {failed && (
         <span role="alert" className="text-xs text-destructive">
-          {tErrors('notAdmin')}
+          {t('likeFailed')}
         </span>
       )}
     </>

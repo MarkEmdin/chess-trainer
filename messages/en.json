@@ -165,7 +165,8 @@
     "askedAt": "asked {date}",
     "answeredAt": "Answered {date}",
     "like": "Mark as a good question",
-    "unlike": "Remove like"
+    "unlike": "Remove like",
+    "likeFailed": "Couldn't update the like. Try again."
   },
   "coachingPage": {
     "title": "My coaching",

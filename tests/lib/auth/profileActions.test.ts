@@ -33,7 +33,8 @@ describe('updateExternalUsernames show_in_leaderboard', () => {
   });
 
   it('stores false when the checkbox is absent', async () => {
-    await updateExternalUsernames(undefined, formData({}));
+    await updateExternalUsernames(undefined, formData({ leaderboard_field: '1' }),
+    );
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ show_in_leaderboard: false }),
     );
@@ -42,11 +43,17 @@ describe('updateExternalUsernames show_in_leaderboard', () => {
   it('stores true when the checkbox is on', async () => {
     const result = await updateExternalUsernames(
       undefined,
-      formData({ show_in_leaderboard: 'on' }),
+      formData({ leaderboard_field: '1', show_in_leaderboard: 'on' }),
     );
     expect(result).toEqual({ success: true });
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ show_in_leaderboard: true }),
     );
+  });
+
+  it('leaves the setting alone when the form had no checkbox (staff)', async () => {
+    await updateExternalUsernames(undefined, formData({}));
+    const patch = (update.mock.calls[0] as unknown[])[0];
+    expect(patch).not.toHaveProperty('show_in_leaderboard');
   });
 });
