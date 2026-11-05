@@ -1,0 +1,38 @@
+<h2>Простой список с кубками</h2>
+<p class="subtitle">Кубки у первых трёх мест, числа для примера.</p>
+
+<style>
+  .lb { background:#0f1115; color:#e8eaed; padding:18px; border-radius:10px; font-size:14px; max-width:520px; margin:0 auto; }
+  .lb h4 { margin:0 0 2px; font-size:18px; color:#e8eaed; }
+  .lb .sub { color:#9aa0a8; font-size:12px; margin-bottom:14px; }
+  .lb .row { display:flex; align-items:center; gap:10px; padding:9px 12px; background:#171a20; border:1px solid #262a31; border-radius:8px; margin-bottom:6px; }
+  .lb .rank { width:26px; color:#9aa0a8; font-weight:600; display:flex; }
+  .lb .name { flex:1; }
+  .lb .likes { color:#6fcf97; font-weight:600; white-space:nowrap; }
+  .lb .me { border-color:#6fcf97; background:#17241d; }
+  .lb .gap { text-align:center; color:#9aa0a8; margin:2px 0 6px; }
+  .lb svg { width:20px; height:20px; fill:currentColor; }
+</style>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="cup" viewBox="0 0 24 24">
+    <path d="M7 3h10v2h4v3a4 4 0 0 1-4 4h-.5A5 5 0 0 1 13 15v3h3v3H8v-3h3v-3a5 5 0 0 1-3.500-3H7a4 4 0 0 1-4-4V5h4V3zm0 4H5v1a2 2 0 0 0 2 2V7zm10 0v3a2 2 0 0 0 2-2V7h-2z"/>
+  </symbol>
+</svg>
+
+<div class="mockup">
+  <div class="mockup-header">Лидерборд</div>
+  <div class="mockup-body">
+    <div class="lb">
+      <h4>Лидерборд недели</h4>
+      <div class="sub">Лайки тренеров за 7 дней</div>
+      <div class="row"><span class="rank" style="color:#e5b93c"><svg><use href="#cup"/></svg></span><span class="name">Анна</span><span class="likes">♥ 7</span></div>
+      <div class="row"><span class="rank" style="color:#c3c9d1"><svg><use href="#cup"/></svg></span><span class="name">Гроссмейстер2012</span><span class="likes">♥ 5</span></div>
+      <div class="row"><span class="rank" style="color:#c98a54"><svg><use href="#cup"/></svg></span><span class="name">Илья</span><span class="likes">♥ 4</span></div>
+      <div class="row"><span class="rank">4</span><span class="name">Саша</span><span class="likes">♥ 3</span></div>
+      <div class="row"><span class="rank">5</span><span class="name">Нина</span><span class="likes">♥ 2</span></div>
+      <div class="gap">···</div>
+      <div class="row me"><span class="rank">12</span><span class="name">Ты</span><span class="likes">♥ 1</span></div>
+    </div>
+  </div>
+</div>
