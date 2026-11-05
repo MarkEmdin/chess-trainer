@@ -3,6 +3,7 @@
     "positions": "Positions",
     "games": "Games",
     "learn": "Learn",
+    "leaderboard": "Leaderboard",
     "main": "Main navigation"
   },
   "auth": {
@@ -292,6 +293,7 @@
     "subtitle": "Set your Chess.com and Lichess usernames here so they sync across the app.",
     "chesscom": "Chess.com username",
     "lichess": "Lichess username",
+    "showInLeaderboard": "Show me on the leaderboard",
     "save": "Save",
     "saving": "Saving…",
     "saved": "Saved",

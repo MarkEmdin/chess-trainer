@@ -16,7 +16,7 @@ export default async function ProfilePage() {
   const supabase = await createClient();
   const { data: profile } = await supabase
     .from('user_profiles')
-    .select('chesscom_username, lichess_username')
+    .select('chesscom_username, lichess_username, show_in_leaderboard')
     .eq('id', user!.id)
     .single();
 
@@ -37,6 +37,7 @@ export default async function ProfilePage() {
         initial={{
           chesscom: profile?.chesscom_username ?? '',
           lichess: profile?.lichess_username ?? '',
+          showInLeaderboard: profile?.show_in_leaderboard ?? true,
         }}
       />
       {showTelegram && (

@@ -1,6 +1,6 @@
 # Spec: Weekly question leaderboard
 
-Status: approved
+Status: done
 Branch: feature/leaderboard
 
 ## Problem
@@ -164,13 +164,13 @@ toggle. This is the user's decision.
       (action and RPC).
 - [ ] The leaderboard counts likes on answers from the last 7 days only, and a
       removed like drops out at once.
-- [ ] Equal likes share a place, including the cup; numbering skips after a tie.
+- [x] Equal likes share a place, including the cup; numbering skips after a tie.
 - [ ] Coaches, the admin and students who hid themselves aren't listed or
       counted in places.
-- [ ] Own row is highlighted, and pinned below the list when outside the top 20.
+- [x] Own row is highlighted, and pinned below the list when outside the top 20.
 - [ ] Guests are redirected to login.
 - [ ] Staff don't see their own questions in `/admin`, the bell count or the
       Telegram list, and can't answer them; `/coaching` still shows them.
-- [ ] `messages/en.json` and `messages/ru.json` stay structurally identical.
-- [ ] `npm run lint`, `npm test`, `npm run build` pass.
-- [ ] Tests under `tests/` for new lib logic, actions and components.
+- [x] `messages/en.json` and `messages/ru.json` stay structurally identical.
+- [x] `npm run lint`, `npm test`, `npm run build` pass.
+- [x] Tests under `tests/` for new lib logic, actions and components.

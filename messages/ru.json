@@ -3,6 +3,7 @@
     "positions": "Позиции",
     "games": "Партии",
     "learn": "Обучение",
+    "leaderboard": "Лидерборд",
     "main": "Основная навигация"
   },
   "auth": {
@@ -292,6 +293,7 @@
     "subtitle": "Никнеймы Chess.com и Lichess — будут использоваться по всему сайту.",
     "chesscom": "Никнейм на Chess.com",
     "lichess": "Никнейм на Lichess",
+    "showInLeaderboard": "Показывать меня в лидерборде",
     "save": "Сохранить",
     "saving": "Сохранение…",
     "saved": "Сохранено",
