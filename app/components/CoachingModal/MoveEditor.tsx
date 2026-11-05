@@ -237,6 +237,9 @@ export default function MoveEditor({
     [],
   );
   const focus = useCallback(() => {
+    // On a touch screen focusing opens the keyboard, which only the user
+    // should do: they tap the text when they want to type.
+    if (window.matchMedia('(pointer: coarse)').matches) return;
     // The board library hands focus back to the dragged piece a moment
     // after the drop; wait that out before taking it back. The dialog may
     // close in between, so never touch a destroyed editor.

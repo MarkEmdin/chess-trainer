@@ -79,7 +79,7 @@ No data changes.
 
 - `CoachingModal/index.tsx`: the board column becomes `sticky top-0` under `lg`,
   above the scrolling content, with its size capped by `dvh` so it follows the
-  keyboard. Target: `min(100%, calc(100dvh - 260px))`, tuned on the device.
+  keyboard. Target: `min(100%, calc(100dvh - 240px))`, tuned on the device.
 - `app/[locale]/layout.tsx`: `viewport.interactiveWidget = 'resizes-content'`
   so Android Chrome shrinks `dvh` with the keyboard. It applies to the whole
   site, so check that no other page breaks.
@@ -89,12 +89,10 @@ No data changes.
   `view.composing`, and turn the core one off with
   `enableCoreExtensions: { keymap: false }`. Tried in a scratch build:
   composition, plain Backspace and Enter all behaved.
-- `MoveEditor`: keep the caret from before a touch on the board and insert
-  there. Skip the post-move `focus()` on touch.
+- `CoachingModal`: while recording on touch, block `removeAllRanges` so the
+  drag library can't reset the caret. `MoveEditor`: skip `focus()` on touch.
 - `ChessboardWithNotation`: detect a tap on touch and call `onSquareClick`,
-  since the library won't for a piece.
-
-The mechanisms for the caret and for tap detection are left to the plan.
+  since the library misses them, for empty squares too.
 
 ## i18n
 
@@ -118,17 +116,17 @@ No new keys.
 
 ## Acceptance criteria
 
-- [ ] Shrinking a composing word leaves the shortened word, with and without a
+- [x] Shrinking a composing word leaves the shortened word, with and without a
       chip before it.
-- [ ] Plain Backspace, Enter and paragraph join still work.
-- [ ] After text, a touch-dragged move lands at the caret; text typed after it
+- [x] Plain Backspace, Enter and paragraph join still work.
+- [x] After text, a touch-dragged move lands at the caret; text typed after it
       and a second move stay in order.
-- [ ] Tap-tap records a quiet move and a capture on touch.
-- [ ] A move doesn't focus the editor on touch; on desktop it still does.
-- [ ] Under `lg`, the order is board, question, answers, editor, game moves.
-- [ ] The board stays visible while typing at 393×460 in emulation.
-- [ ] On `lg` and up the layout is unchanged.
+- [x] Tap-tap records a quiet move and a capture on touch.
+- [x] A move doesn't focus the editor on touch; on desktop it still does.
+- [x] Under `lg`, the order is board, question, answers, editor, game moves.
+- [x] The board stays visible while typing at 393×460 in emulation.
+- [x] On `lg` and up the layout is unchanged.
 - [ ] Manual check on the Xiaomi from a Vercel preview: delete, caret, tap-tap,
       board visible with the keyboard open.
-- [ ] `npm run lint`, `npm test`, `npm run build` pass.
-- [ ] Tests under `tests/` for the keymap, caret and tap logic.
+- [x] `npm run lint`, `npm test`, `npm run build` pass.
+- [x] Tests under `tests/` for the keymap, caret and tap logic.

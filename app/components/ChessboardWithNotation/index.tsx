@@ -11,6 +11,7 @@ import { MARK_COLOR } from '@/lib/chess/drawing';
 
 const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] as const;
 const RANKS_WHITE_VIEW = ['8', '7', '6', '5', '4', '3', '2', '1'] as const;
+const TAP_MAX_MOVE_PX = 10;
 
 type Props = {
   position: string;
@@ -47,6 +48,39 @@ export default function ChessboardWithNotation({
     handlers.current = { onPieceDrop, onSquareClick, onRightDrag };
   });
   const rightStart = useRef<string | null>(null);
+  const squareTouch = useRef<{ x: number; y: number; square: string } | null>(
+    null,
+  );
+
+  // The library's own tap detection is unreliable on touch: touching a piece
+  // starts a drag, which cancels it. Taps are detected here instead. When it
+  // does fire as well, the second call finds nothing left to do.
+  const detectsTaps = allowDragging && onSquareClick;
+
+  function onSquareTouchStart(e: React.TouchEvent) {
+    const target = e.target as Element;
+    const square = target.closest('[data-square]')?.getAttribute('data-square');
+    const touch = e.touches[0];
+    squareTouch.current =
+      square && e.touches.length === 1
+        ? { x: touch.clientX, y: touch.clientY, square }
+        : null;
+  }
+
+  function onSquareTouchEnd(e: React.TouchEvent) {
+    const start = squareTouch.current;
+    squareTouch.current = null;
+    const touch = e.changedTouches[0];
+    if (!start) return;
+    const moved = Math.hypot(touch.clientX - start.x, touch.clientY - start.y);
+    if (moved < TAP_MAX_MOVE_PX) {
+      // A capture removes the tapped piece. Without this the browser's
+      // follow-up mouse events land on the board and take focus from the
+      // text, closing the keyboard.
+      e.preventDefault();
+      handlers.current.onSquareClick?.({ piece: null, square: start.square });
+    }
+  }
 
   // Flip the label order when the board is viewed from black.
   const files = boardOrientation === 'white' ? FILES : [...FILES].reverse();
@@ -73,7 +107,10 @@ export default function ChessboardWithNotation({
           ))}
         </div>
       )}
-      <div>
+      <div
+        onTouchStartCapture={detectsTaps ? onSquareTouchStart : undefined}
+        onTouchEndCapture={detectsTaps ? onSquareTouchEnd : undefined}
+      >
         <Chessboard
           options={{
             position,

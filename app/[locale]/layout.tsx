@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
@@ -21,6 +21,10 @@ const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
 });
+
+// Lets `dvh` follow the phone keyboard, so the coaching modal's board can
+// shrink and stay visible while typing. iOS Safari ignores this.
+export const viewport: Viewport = { interactiveWidget: 'resizes-content' };
 
 export async function generateMetadata({
   params,

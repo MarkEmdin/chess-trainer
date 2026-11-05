@@ -31,6 +31,8 @@ import {
 import { sideToMove } from '@/lib/chess/fen';
 import { readPgnInfo } from '@/lib/chess/pgnInfo';
 import { replayAroundKey } from '@/lib/chess/replay';
+import { holdSelection } from '@/lib/coaching/holdSelection';
+import { useIsWide } from '@/lib/useIsWide';
 import { playVariation } from '@/lib/chess/variation';
 import { MAX_BODY_LENGTH } from '@/lib/coaching/body';
 import { useAnswerLabels } from '@/lib/coaches/useCoachName';
@@ -53,7 +55,7 @@ import { cn } from '@/lib/utils';
 import type { CoachingMessage, CoachingThreadData } from '@/lib/coaching/types';
 import MessageContentView from './MessageContentView';
 import MoveEditor, { useRecorderStore, type MoveEditorApi } from './MoveEditor';
-import VariationBoard, { type ViewedLine } from './VariationBoard';
+import VariationBoard, { GameMoves, type ViewedLine } from './VariationBoard';
 import VariationLine from './VariationLine';
 import Spinner from '@/app/components/Spinner';
 
@@ -131,6 +133,7 @@ export default function CoachingModal({
   const editorApi = useRef<MoveEditorApi>(null);
   const [segments, setSegments] = useState<Segment[]>([]);
   const boardColumn = useRef<HTMLDivElement>(null);
+  const wide = useIsWide();
   const form = useRef<HTMLFormElement>(null);
   const replay = useMemo(() => {
     if (!game) return null;
@@ -229,6 +232,11 @@ export default function CoachingModal({
 
   useEffect(() => {
     if (!recording) return;
+    if (window.matchMedia('(pointer: coarse)').matches) return holdSelection();
+  }, [recording]);
+
+  useEffect(() => {
+    if (!recording) return;
     const onDown = (e: PointerEvent) => {
       const target = e.target as Node;
       if (boardColumn.current?.contains(target)) return;
@@ -291,39 +299,44 @@ export default function CoachingModal({
               allows, but leave room for the recording/viewing controls. */}
           <div
             ref={boardColumn}
-            className="w-full mx-auto lg:mx-0 lg:shrink-0 max-w-[max(280px,min(560px,calc(100dvh-330px)))] lg:w-[max(280px,min(560px,calc(100dvh-330px)))]"
+            className="sticky top-0 z-10 bg-popover pb-2 lg:static lg:z-auto lg:bg-transparent lg:pb-0 lg:shrink-0 lg:w-[max(280px,min(560px,calc(100dvh-330px)))]"
           >
-            <VariationBoard
-              fen={fen}
-              orientation={orientation}
-              canWrite={canWrite}
-              writing={
-                recording && canWrite
-                  ? {
-                      fen: boardFen(store.state),
-                      lastMove: boardLastMove(store.state),
-                      drawing: currentDrawing(store.state),
-                      onMove: (from, to) =>
-                        editorApi.current?.move(from, to) ?? false,
-                      onMark: (from, to) => {
-                        store.update((s) => toggleMark(s, from, to));
-                        editorApi.current?.focus();
-                      },
-                      onClearDrawings: () => {
-                        store.update(clearDrawings);
-                        editorApi.current?.focus();
-                      },
-                    }
-                  : null
-              }
-              viewing={viewing}
-              onStopViewing={() => view(null)}
-              game={replay}
-              askerColor={askerColor}
-              askerNote={t(mode === 'coach' ? 'players.asker' : 'players.you')}
-              boardIndex={boardIndex}
-              onBoardIndexChange={setBoardIndex}
-            />
+            <div className="w-full mx-auto max-w-[min(100%,calc(100dvh-240px))] lg:max-w-none">
+              <VariationBoard
+                fen={fen}
+                orientation={orientation}
+                canWrite={canWrite}
+                writing={
+                  recording && canWrite
+                    ? {
+                        fen: boardFen(store.state),
+                        lastMove: boardLastMove(store.state),
+                        drawing: currentDrawing(store.state),
+                        onMove: (from, to) =>
+                          editorApi.current?.move(from, to) ?? false,
+                        onMark: (from, to) => {
+                          store.update((s) => toggleMark(s, from, to));
+                          editorApi.current?.focus();
+                        },
+                        onClearDrawings: () => {
+                          store.update(clearDrawings);
+                          editorApi.current?.focus();
+                        },
+                      }
+                    : null
+                }
+                viewing={viewing}
+                onStopViewing={() => view(null)}
+                game={replay}
+                askerColor={askerColor}
+                askerNote={t(
+                  mode === 'coach' ? 'players.asker' : 'players.you',
+                )}
+                boardIndex={boardIndex}
+                onBoardIndexChange={setBoardIndex}
+                showGameMoves={wide}
+              />
+            </div>
           </div>
 
           <div className="flex flex-col gap-4 flex-1 min-w-0">
@@ -466,6 +479,19 @@ export default function CoachingModal({
                   )}
                 </div>
               </form>
+            )}
+
+            {!wide && replay && (
+              <div className="flex flex-col gap-2">
+                <GameMoves
+                  game={replay}
+                  boardIndex={boardIndex}
+                  onChange={(index) => {
+                    setViewing(null);
+                    setBoardIndex(index);
+                  }}
+                />
+              </div>
             )}
           </div>
         </div>

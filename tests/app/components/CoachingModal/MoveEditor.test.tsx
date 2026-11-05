@@ -65,6 +65,32 @@ async function renderEditor() {
 }
 
 describe('<MoveEditor />', () => {
+  describe('focus after a move', () => {
+    const original = window.matchMedia;
+    afterEach(() => {
+      window.matchMedia = original;
+    });
+
+    async function playMove(coarse: boolean) {
+      window.matchMedia = ((query: string) => ({
+        ...original(query),
+        matches: coarse && query === '(pointer: coarse)',
+      })) as typeof window.matchMedia;
+      await renderEditor();
+      fireEvent.click(screen.getByRole('button', { name: 'fake move' }));
+      await act(() => new Promise((done) => setTimeout(done, 200)));
+      return screen.getByRole('textbox', { name: 'Your question' });
+    }
+
+    it('returns to the text with a mouse', async () => {
+      expect(await playMove(false)).toHaveFocus();
+    });
+
+    it('leaves the keyboard closed on a touch screen', async () => {
+      expect(await playMove(true)).not.toHaveFocus();
+    });
+  });
+
   it('shows the placeholder in an empty editor', async () => {
     await renderEditor();
     expect(

@@ -610,12 +610,50 @@ describe('CoachingModal game browsing', () => {
     expect(submittedForm(createCoachingRequest).get('pgn')).toBe(GAME_PGN);
   });
 
-  it('hides game navigation while recording', () => {
-    renderAsking();
-    fireEvent.focus(screen.getByRole('textbox'));
-    expect(
-      screen.queryByRole('button', { name: 'Previous move' }),
-    ).not.toBeInTheDocument();
+  describe('by screen width', () => {
+    const original = window.matchMedia;
+    afterEach(() => {
+      window.matchMedia = original;
+    });
+
+    function setWide(wide: boolean) {
+      window.matchMedia = ((query: string) => ({
+        ...original(query),
+        matches: wide && query.includes('min-width'),
+      })) as typeof window.matchMedia;
+    }
+
+    it('hides game navigation while recording on a wide screen', () => {
+      setWide(true);
+      renderAsking();
+      fireEvent.focus(screen.getByRole('textbox'));
+      expect(
+        screen.queryByRole('button', { name: 'Previous move' }),
+      ).not.toBeInTheDocument();
+    });
+
+    it('keeps game navigation in the board column on a wide screen', () => {
+      setWide(true);
+      renderAsking();
+      const previous = screen.getByRole('button', { name: 'Previous move' });
+      const send = screen.getByRole('button', { name: 'Send to coach' });
+      expect(
+        previous.compareDocumentPosition(send) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+    });
+
+    it('puts the game below the form on a narrow screen, even while recording', () => {
+      setWide(false);
+      renderAsking();
+      fireEvent.focus(screen.getByRole('textbox'));
+      const previous = screen.getByRole('button', { name: 'Previous move' });
+      const send = screen.getByRole('button', { name: 'Send to coach' });
+      expect(
+        send.compareDocumentPosition(previous) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+    });
   });
 
   it('links to the game when a url is given', () => {
