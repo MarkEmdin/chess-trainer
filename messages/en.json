@@ -122,6 +122,7 @@
       "alreadyAsked": "You've already asked about this position.",
       "notAdmin": "Only coaches can reply.",
       "alreadyResponded": "You've already responded to this question.",
+      "ownQuestion": "You can't answer your own question.",
       "invalidVariation": "This variation can't be saved. Try recording it again."
     },
     "editor": {

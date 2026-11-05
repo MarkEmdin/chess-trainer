@@ -123,9 +123,16 @@ let assignments: { student_id: string; coach_id: string }[] = [];
 jest.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
     from: (table: string) => {
+      let excluded: unknown = null;
       const builder = {
         select: () => builder,
-        order: async () => ({ data: rows }),
+        neq: (_col: string, value: unknown) => {
+          excluded = value;
+          return builder;
+        },
+        order: async () => ({
+          data: rows.filter((r) => r.user_id !== excluded),
+        }),
         in: async () => ({
           data:
             table === 'user_profiles'
@@ -194,6 +201,14 @@ describe('admin page', () => {
     expect(
       screen.getByRole('tab', { name: 'coachingAdmin.tabs.answered(1)' }),
     ).toHaveAttribute('href', '/admin?tab=answered');
+  });
+
+  it("leaves the viewer's own questions out of the queue", async () => {
+    getAuthedUser.mockResolvedValue({ id: 'u2', role: 'admin' });
+    await render$();
+    expect(screen.getAllByTestId('card').map((c) => c.textContent)).toEqual([
+      'new-1',
+    ]);
   });
 
   it('shows answered questions on the answered tab', async () => {

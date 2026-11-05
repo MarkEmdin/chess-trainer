@@ -69,20 +69,34 @@ describe('countNotifications', () => {
   it('adds unanswered questions for an admin', () => {
     expect(countNotifications(rows, { id: 'u1', role: 'admin' })).toEqual({
       unseenAnswers: 1,
-      newQuestions: 1,
+      newQuestions: 0,
     });
   });
 
   it('adds unanswered questions for a coach', () => {
-    expect(countNotifications(rows, { id: 'c1', role: 'coach' }).newQuestions).toBe(1);
+    expect(
+      countNotifications(rows, { id: 'c1', role: 'coach' }).newQuestions,
+    ).toBe(1);
   });
 
-  it("counts the admin's own unanswered question as new too", () => {
+  it("doesn't count the viewer's own unanswered question as new", () => {
     expect(
       countNotifications([row('a1', false), row('u2', false)], {
         id: 'a1',
         role: 'admin',
       }).newQuestions,
-    ).toBe(2);
+    ).toBe(1);
+  });
+
+  it("still counts a coach's own unseen answers", () => {
+    expect(
+      countNotifications(
+        [row('c1', true), row('c1', false), row('u2', false)],
+        {
+          id: 'c1',
+          role: 'coach',
+        },
+      ),
+    ).toEqual({ unseenAnswers: 1, newQuestions: 1 });
   });
 });

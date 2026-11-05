@@ -11,7 +11,7 @@ const BLACK_TO_MOVE =
 
 const insert = jest.fn();
 const rpc = jest.fn();
-let requestRow: { fen: string } | null = null;
+let requestRow: { fen: string; user_id: string } | null = null;
 let existingResponse: { id: string } | null = null;
 
 // Minimal chainable stand-in for the Supabase query builder: only the calls
@@ -124,7 +124,7 @@ beforeEach(() => {
   insert.mockClear();
   notifyStaffOfQuestion.mockReset();
   notifyStudentOfAnswer.mockReset();
-  requestRow = { fen: BLACK_TO_MOVE };
+  requestRow = { fen: BLACK_TO_MOVE, user_id: 'student1' };
   existingResponse = null;
   getAuthedUser.mockResolvedValue({ id: 'c1', role: 'admin' });
   shouldOfferTelegram.mockReset().mockResolvedValue(true);
@@ -293,6 +293,13 @@ describe('respondToRequest', () => {
     getAuthedUser.mockResolvedValue(user);
     const result = await respondToRequest(undefined, replyForm());
     expect(result).toEqual({ error: 'coaching.errors.notAdmin' });
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  it('refuses to answer your own question', async () => {
+    requestRow = { fen: BLACK_TO_MOVE, user_id: 'c1' };
+    const result = await respondToRequest(undefined, replyForm());
+    expect(result).toEqual({ error: 'coaching.errors.ownQuestion' });
     expect(insert).not.toHaveBeenCalled();
   });
 

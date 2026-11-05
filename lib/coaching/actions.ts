@@ -189,12 +189,16 @@ export async function respondToRequest(
   // The answer's variation starts from the question's position.
   const { data: request } = await supabase
     .from('coaching_requests')
-    .select('fen')
+    .select('fen, user_id')
     .eq('id', request_id)
     .single();
 
   if (!request) {
     return { error: t('missingFields') };
+  }
+
+  if (request.user_id === user.id) {
+    return { error: t('ownQuestion') };
   }
 
   // Validated against the stored position, never a fen from the form.

@@ -265,7 +265,7 @@ describe('unansweredList', () => {
       ORIGIN,
       'en',
       new Date('2026-10-04T00:00:00Z'),
-      { id: 'a-ru', role: 'admin' },
+      { id: 'viewer', role: 'admin' },
     );
     expect(msg.text.indexOf('Asker')).toBeGreaterThan(-1);
     expect(msg.text.indexOf('Asker')).toBeLessThan(
@@ -275,6 +275,37 @@ describe('unansweredList', () => {
     expect(msg.buttons?.map((b) => b.url)).toEqual([
       `${ORIGIN}/en/admin?request=old`,
       `${ORIGIN}/en/admin?request=new`,
+      `${ORIGIN}/en/admin`,
+    ]);
+  });
+});
+
+describe('unansweredList own questions', () => {
+  it("leaves out the viewer's own open question", async () => {
+    tables.coaching_requests = [
+      {
+        id: 'mine',
+        user_id: 'a-ru',
+        move_san: '1. e4',
+        created_at: '2026-10-01T00:00:00Z',
+        coaching_responses: [],
+      },
+      {
+        id: 'other',
+        user_id: 'asker',
+        move_san: '1. d4',
+        created_at: '2026-10-02T00:00:00Z',
+        coaching_responses: [],
+      },
+    ];
+    const msg = await unansweredList(
+      ORIGIN,
+      'en',
+      new Date('2026-10-04T00:00:00Z'),
+      { id: 'a-ru', role: 'admin' },
+    );
+    expect(msg.buttons?.map((b) => b.url)).toEqual([
+      `${ORIGIN}/en/admin?request=other`,
       `${ORIGIN}/en/admin`,
     ]);
   });

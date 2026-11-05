@@ -56,6 +56,7 @@ export default async function AdminPage({
         coaching_responses (body, created_at, variation, content, author_id)
       `,
     )
+    .neq('user_id', user.id)
     .order('created_at', { ascending: false });
 
   const userIds = [...new Set((requests ?? []).map((r) => r.user_id))];
