@@ -53,8 +53,9 @@ own questions in the staff queue.
 
 ### Who is ranked
 
-- Only students (`role = 'user'`). Coaches and the admin never appear.
-- A student can hide themselves with a checkbox in `/profile`. Hidden students
+- Students and coaches. Coaches ask questions too, and stronger coaches answer
+  them. The admin never appears.
+- Anyone ranked can hide themselves with a checkbox in `/profile`. Hidden people
   aren't listed and don't take up a place, and they see no pinned row.
 
 ### The week
@@ -167,7 +168,7 @@ toggle. This is the user's decision.
 - [x] The leaderboard counts likes on answers from the last 7 days only, and a
       removed like drops out at once.
 - [x] Equal likes share a place, including the cup; numbering skips after a tie.
-- [x] Coaches, the admin and students who hid themselves aren't listed or
+- [x] The admin and people who hid themselves aren't listed or
       counted in places.
 - [x] Own row is highlighted, and pinned below the list when outside the top 20.
 - [x] Guests are redirected to login.

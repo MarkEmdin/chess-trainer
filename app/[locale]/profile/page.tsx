@@ -34,7 +34,7 @@ export default async function ProfilePage() {
   return (
     <PageLayout title={t('title')} subtitle={t('subtitle')} maxWidth="2xl">
       <ProfileForm
-        showLeaderboardOption={user.role === 'user'}
+        showLeaderboardOption={user.role !== 'admin'}
         initial={{
           chesscom: profile?.chesscom_username ?? '',
           lichess: profile?.lichess_username ?? '',

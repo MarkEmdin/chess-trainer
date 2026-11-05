@@ -51,7 +51,7 @@ describe('updateExternalUsernames show_in_leaderboard', () => {
     );
   });
 
-  it('leaves the setting alone when the form had no checkbox (staff)', async () => {
+  it('leaves the setting alone when the form had no checkbox (admin)', async () => {
     await updateExternalUsernames(undefined, formData({}));
     const patch = (update.mock.calls[0] as unknown[])[0];
     expect(patch).not.toHaveProperty('show_in_leaderboard');

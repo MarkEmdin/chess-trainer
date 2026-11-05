@@ -27,7 +27,7 @@ export async function updateExternalUsernames(
   const chesscom = String(formData.get('chesscom_username') ?? '').trim();
   const lichess = String(formData.get('lichess_username') ?? '').trim();
   // Unchecked checkboxes are absent from FormData, so absence means hidden,
-  // but only when the form rendered the checkbox (staff don't get one).
+  // but only when the form rendered the checkbox (the admin doesn't get one).
   const hasLeaderboardField = formData.has('leaderboard_field');
   const showInLeaderboard = formData.get('show_in_leaderboard') === 'on';
 

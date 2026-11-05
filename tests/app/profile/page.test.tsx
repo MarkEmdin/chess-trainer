@@ -52,7 +52,7 @@ describe('profile page', () => {
 
   it.each([
     ['user', true],
-    ['coach', false],
+    ['coach', true],
     ['admin', false],
   ])('role %s: leaderboard checkbox shown=%s', async (role, shown) => {
     telegramConfig.mockReturnValue(null);
