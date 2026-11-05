@@ -603,7 +603,7 @@
     "subtitle": "Лайки тренеров за 7 дней",
     "empty": "На этой неделе лайков пока нет. Задайте тренеру хороший вопрос!",
     "you": "Ты",
-    "likes": "{count, plural, one {# лайк} few {# лайка} other {# лайков}}",
+    "positions": "{count, plural, one {# позиция} few {# позиции} other {# позиций}}",
     "place": "{place} место"
   },
   "footer": {

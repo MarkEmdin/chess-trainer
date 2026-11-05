@@ -1,7 +1,7 @@
 import { TrophyIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
-import { cupFor, splitRows } from '@/lib/leaderboard/rows';
+import { cupFor } from '@/lib/leaderboard/rows';
 import type { Cup, LeaderboardRow } from '@/lib/leaderboard/types';
 
 const CUP_COLOR: Record<Cup, string> = {
@@ -12,7 +12,8 @@ const CUP_COLOR: Record<Cup, string> = {
 
 function Row({ row }: { row: LeaderboardRow }) {
   const t = useTranslations('leaderboard');
-  const cup = cupFor(row.place);
+  // With no likes this week everyone ties for first, and nobody earned a cup.
+  const cup = row.likes > 0 ? cupFor(row.place) : null;
   return (
     <li
       aria-current={row.is_me ? 'true' : undefined}
@@ -35,7 +36,7 @@ function Row({ row }: { row: LeaderboardRow }) {
         {row.is_me ? t('you') : row.nickname}
       </span>
       <span className="whitespace-nowrap font-semibold text-primary">
-        {t('likes', { count: row.likes })}
+        {t('positions', { count: row.likes })}
       </span>
     </li>
   );
@@ -43,25 +44,16 @@ function Row({ row }: { row: LeaderboardRow }) {
 
 export default function Leaderboard({ rows }: { rows: LeaderboardRow[] }) {
   const t = useTranslations('leaderboard');
-  const { top, pinned } = splitRows(rows);
 
-  if (top.length === 0) {
+  if (rows.length === 0) {
     return <p className="text-muted-foreground">{t('empty')}</p>;
   }
 
   return (
     <ol className="flex max-w-xl flex-col gap-1.5">
-      {top.map((row) => (
+      {rows.map((row) => (
         <Row key={`${row.place}-${row.nickname}`} row={row} />
       ))}
-      {pinned && (
-        <>
-          <li aria-hidden className="text-center text-muted-foreground">
-            ···
-          </li>
-          <Row row={pinned} />
-        </>
-      )}
     </ol>
   );
 }

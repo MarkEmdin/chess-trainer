@@ -32,9 +32,7 @@ jest.mock('@/app/components/PageLayout', () => ({
 }));
 jest.mock('@/app/components/ProfileForm', () => ({
   __esModule: true,
-  default: ({ showLeaderboardOption }: { showLeaderboardOption: boolean }) => (
-    <div>profile-form leaderboard {String(showLeaderboardOption)}</div>
-  ),
+  default: () => <div>profile-form</div>,
 }));
 jest.mock('@/app/components/TelegramConnect', () => ({
   __esModule: true,
@@ -49,19 +47,6 @@ jest.mock('@/lib/telegram/config', () => ({
 
 describe('profile page', () => {
   beforeEach(() => getAuthedUser.mockResolvedValue({ id: 'u1', role: 'user' }));
-
-  it.each([
-    ['user', true],
-    ['coach', true],
-    ['admin', false],
-  ])('role %s: leaderboard checkbox shown=%s', async (role, shown) => {
-    telegramConfig.mockReturnValue(null);
-    getAuthedUser.mockResolvedValue({ id: 'u1', role });
-    render(await ProfilePage());
-    expect(
-      screen.getByText(`profile-form leaderboard ${shown}`),
-    ).toBeInTheDocument();
-  });
 
   it('hides the Telegram section when telegramConfig() is null', async () => {
     telegramConfig.mockReturnValue(null);

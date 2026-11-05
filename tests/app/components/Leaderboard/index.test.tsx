@@ -22,17 +22,29 @@ describe('Leaderboard', () => {
     expect(screen.getByText('4')).toBeInTheDocument();
   });
 
-  it('marks own row and pins an outside row after a separator', () => {
-    renderWithIntl(
-      <Leaderboard rows={[r(1, 'A', 7), r(21, 'Me', 1, true)]} />,
-    );
+  it('marks own row', () => {
+    renderWithIntl(<Leaderboard rows={[r(1, 'A', 7), r(2, 'Me', 1, true)]} />);
     const me = screen.getByText('You').closest('li');
     expect(me).toHaveAttribute('aria-current', 'true');
-    const sep = screen.getByText('···');
-    expect(
-      sep.compareDocumentPosition(me as Node) &
-        Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
+  });
+
+  it('lists every row, past place 20 too', () => {
+    renderWithIntl(<Leaderboard rows={[r(1, 'A', 7), r(25, 'Z', 1)]} />);
+    expect(screen.getByText('Z')).toBeInTheDocument();
+  });
+
+  it('gives no cup without a position', () => {
+    renderWithIntl(<Leaderboard rows={[r(1, 'A', 0), r(1, 'B', 0)]} />);
+    expect(screen.queryByLabelText('Place 1')).not.toBeInTheDocument();
+    expect(screen.getAllByText('0 positions')).toHaveLength(2);
+  });
+
+  it('counts in positions', () => {
+    renderWithIntl(
+      <Leaderboard rows={[r(1, 'a', 3), r(2, 'b', 1)]} />,
+    );
+    expect(screen.getByText('3 positions')).toBeInTheDocument();
+    expect(screen.getByText('1 position')).toBeInTheDocument();
   });
 
   it('shows the empty state', () => {
