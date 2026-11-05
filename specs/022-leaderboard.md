@@ -41,20 +41,22 @@ own questions in the staff queue.
 
 - Signed-in users open `/leaderboard`; guests are redirected to `/login`.
 - A link appears in `SiteNav`, on desktop and in the mobile tab bar.
-- The list shows up to the top 20 places: place, nickname, likes.
-- Places 1–3 show a gold, silver and bronze cup instead of the number.
+- The list shows everyone who is ranked: place, nickname, positions (the count
+  of liked questions). There are few users, so there is no top-20 limit for now.
+- Places 1–3 show a gold, silver and bronze cup instead of the number, unless
+  the count is 0.
 - Equal likes share a place: 7, 5, 5, 3 gives places 1, 2, 2, 4. Both tied
-  students get the cup of that place, and a tie at place 20 shows everyone tied.
+  students get the cup of that place.
   Tied rows are ordered by nickname so the list is stable.
-- Your own row is highlighted. If it falls outside the list, it is pinned below
-  the list after a `···` row.
-- With 0 likes this week you aren't listed and no row is pinned.
-- If nobody has a like this week, the page shows an empty state.
+- Your own row is highlighted.
+- With 0 likes this week you are still listed, at the bottom.
+- The empty state shows only if nobody is ranked at all.
 
 ### Who is ranked
 
-- Only students (`role = 'user'`). Coaches and the admin never appear.
-- A student can hide themselves with a checkbox in `/profile`. Hidden students
+- Everyone: students, coaches and the admin, with or without likes. Staff ask
+  questions too, and other staff answer them.
+- Anyone ranked can hide themselves with a checkbox in `/profile`. Hidden people
   aren't listed and don't take up a place, and they see no pinned row.
 
 ### The week
@@ -130,7 +132,7 @@ Both locales, same keys:
 
 - `nav.leaderboard`
 - `leaderboard.title`, `leaderboard.subtitle`, `leaderboard.empty`,
-  `leaderboard.you`, `leaderboard.likes`
+  `leaderboard.you`, `leaderboard.positions`
 - `coachingAdmin.like`, `coachingAdmin.unlike`
 - `coachingPage.liked`
 - `profile.showInLeaderboard`
@@ -148,7 +150,6 @@ toggle. This is the user's decision.
 - The like is stored on the answer, not the question.
 - Staff here includes the admin, for both the like toggle and hiding own
   questions, though the request named coaches.
-- Own row is pinned when it falls outside the top 20, not the top 5.
 - Tied places skip numbers (1, 2, 2, 4), not (1, 2, 2, 3).
 - The student sees a like mark on their thread. It appears on nearly every
   answer, since it is on by default.
@@ -167,9 +168,9 @@ toggle. This is the user's decision.
 - [x] The leaderboard counts likes on answers from the last 7 days only, and a
       removed like drops out at once.
 - [x] Equal likes share a place, including the cup; numbering skips after a tie.
-- [x] Coaches, the admin and students who hid themselves aren't listed or
+- [x] People who hid themselves aren't listed or
       counted in places.
-- [x] Own row is highlighted, and pinned below the list when outside the top 20.
+- [x] Own row is highlighted.
 - [x] Guests are redirected to login.
 - [ ] Staff don't see their own questions in `/admin`, the bell count or the
       Telegram list, and can't answer them; `/coaching` still shows them.

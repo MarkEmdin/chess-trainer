@@ -603,7 +603,7 @@
     "subtitle": "Coach likes over the last 7 days",
     "empty": "No likes yet this week. Ask a coach a good question!",
     "you": "You",
-    "likes": "{count, plural, one {# like} other {# likes}}",
+    "positions": "{count, plural, one {# position} other {# positions}}",
     "place": "Place {place}"
   },
   "footer": {
