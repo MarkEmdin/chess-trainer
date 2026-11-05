@@ -6,6 +6,10 @@ import type { MessageContent } from './content';
 // (older messages); `content` is an inline-editor message (spec 011), whose
 // `body` is its plain-text rendering.
 export type CoachingMessage = {
+  // Answers only: row id and whether staff liked it (default true). Absent
+  // on questions and when not loaded.
+  id?: string;
+  liked?: boolean;
   body: string;
   created_at: string;
   variation: string[] | null;
