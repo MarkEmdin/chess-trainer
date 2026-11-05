@@ -31,7 +31,7 @@ export function formatBadgeCount(n: number): string | null {
 }
 
 // Staff read every request they may answer (RLS), so own answers are picked
-// by `user_id`.
+// by `user_id`; staff's own questions aren't theirs to answer.
 export function countNotifications(
   rows: readonly NotificationRow[],
   user: { id: string; role: Role },
@@ -45,7 +45,9 @@ export function countNotifications(
       }),
   ).length;
   const newQuestions = isStaff(user.role)
-    ? rows.filter((r) => r.coaching_responses.length === 0).length
+    ? rows.filter(
+        (r) => r.coaching_responses.length === 0 && r.user_id !== user.id,
+      ).length
     : null;
   return { unseenAnswers, newQuestions };
 }

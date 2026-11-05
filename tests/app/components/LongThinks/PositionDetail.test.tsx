@@ -78,6 +78,20 @@ describe('<PositionDetail />', () => {
     expect(onAskCoach).toHaveBeenCalled();
   });
 
+  it.each([
+    [true, true],
+    [false, false],
+    [undefined, false],
+  ])('liked=%s shows the like mark: %s', (liked, shown) => {
+    detail({
+      thread: {
+        body: 'Was Nf5 ok?',
+        responses: [{ body: 'Play Qd2', liked }],
+      },
+    });
+    expect(screen.queryByText('The coach liked this question') !== null).toBe(shown);
+  });
+
   it('names the coach who answered', () => {
     detail({
       thread: {

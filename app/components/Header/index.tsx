@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 const linkClass =
   'text-sm text-muted-foreground hover:text-foreground transition-colors';
 
-// Three section links sit inline (a bottom tab bar on mobile, see SiteNav).
+// Four section links sit inline (a bottom tab bar on mobile, see SiteNav).
 // Account-only links (coaching, admin) live in AccountMenu since spec 015,
 // so the row no longer grows with who is logged in.
 export default async function Header() {
@@ -21,7 +21,7 @@ export default async function Header() {
 
   return (
     <header className="bg-card text-card-foreground border-b border-border">
-      <nav className="max-w-6xl mx-auto flex items-center gap-6 px-4 py-3 sm:px-6">
+      <nav className="max-w-6xl mx-auto flex items-center gap-3 md:gap-6 px-4 py-3 sm:px-6">
         <Link
           href="/"
           className="text-base font-bold whitespace-nowrap hover:text-muted-foreground transition-colors"

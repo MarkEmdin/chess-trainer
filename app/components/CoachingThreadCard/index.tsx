@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
 import ChessboardContainer from '@/app/components/ChessboardContainer';
 import SectionLabel from '@/app/components/SectionLabel';
+import LikedMark from '@/app/components/LikedMark';
 import { sideToMove } from '@/lib/chess/fen';
 import { formatVariation, playVariation } from '@/lib/chess/variation';
 import type { CoachingMessage, CoachingThreadData } from '@/lib/coaching/types';
@@ -82,7 +83,10 @@ export default function CoachingThreadCard({ thread }: Props) {
                 </p>
               ) : (
                 thread.responses.map((r, i) => (
-                  <MessagePreview key={i} fen={thread.fen} message={r} />
+                  <div key={i} className="flex flex-col gap-1">
+                    <MessagePreview fen={thread.fen} message={r} />
+                    <LikedMark message={r} />
+                  </div>
                 ))
               )}
             </SectionLabel>

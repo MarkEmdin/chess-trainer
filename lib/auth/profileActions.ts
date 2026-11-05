@@ -26,6 +26,10 @@ export async function updateExternalUsernames(
   // Empty string -> null so the user can clear a previously-set value.
   const chesscom = String(formData.get('chesscom_username') ?? '').trim();
   const lichess = String(formData.get('lichess_username') ?? '').trim();
+  // Unchecked checkboxes are absent from FormData, so absence means hidden,
+  // but only when the form rendered the checkbox (staff don't get one).
+  const hasLeaderboardField = formData.has('leaderboard_field');
+  const showInLeaderboard = formData.get('show_in_leaderboard') === 'on';
 
   if (chesscom && !CHESSCOM_RE.test(chesscom)) {
     return { error: t('chesscomFormat') };
@@ -49,6 +53,7 @@ export async function updateExternalUsernames(
     .update({
       chesscom_username: chesscom || null,
       lichess_username: lichess || null,
+      ...(hasLeaderboardField && { show_in_leaderboard: showInLeaderboard }),
     })
     .eq('id', user.id);
 

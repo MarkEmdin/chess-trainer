@@ -3,6 +3,7 @@
     "positions": "Positions",
     "games": "Games",
     "learn": "Learn",
+    "leaderboard": "Leaderboard",
     "main": "Main navigation"
   },
   "auth": {
@@ -122,6 +123,7 @@
       "alreadyAsked": "You've already asked about this position.",
       "notAdmin": "Only coaches can reply.",
       "alreadyResponded": "You've already responded to this question.",
+      "ownQuestion": "You can't answer your own question.",
       "invalidVariation": "This variation can't be saved. Try recording it again."
     },
     "editor": {
@@ -161,7 +163,10 @@
     "emptyNew": "No new questions.",
     "emptyAnswered": "No answered questions yet.",
     "askedAt": "asked {date}",
-    "answeredAt": "Answered {date}"
+    "answeredAt": "Answered {date}",
+    "like": "Mark as a good question",
+    "unlike": "Remove like",
+    "likeFailed": "Couldn't update the like. Try again."
   },
   "coachingPage": {
     "title": "My coaching",
@@ -172,7 +177,8 @@
       "answered": "Answered ({count})"
     },
     "emptyWaiting": "No questions awaiting a reply.",
-    "emptyAnswered": "No answers yet — the coach will reply soon."
+    "emptyAnswered": "No answers yet — the coach will reply soon.",
+    "liked": "The coach liked this question"
   },
   "coaches": {
     "titles": {
@@ -288,6 +294,7 @@
     "subtitle": "Set your Chess.com and Lichess usernames here so they sync across the app.",
     "chesscom": "Chess.com username",
     "lichess": "Lichess username",
+    "showInLeaderboard": "Show me on the leaderboard",
     "save": "Save",
     "saving": "Saving…",
     "saved": "Saved",
@@ -589,6 +596,15 @@
       "text": "The project is open source — the code is on",
       "link": "GitHub"
     }
+  },
+  "leaderboard": {
+    "metaTitle": "Leaderboard",
+    "title": "Leaderboard of the week",
+    "subtitle": "Coach likes over the last 7 days",
+    "empty": "No likes yet this week. Ask a coach a good question!",
+    "you": "You",
+    "likes": "{count, plural, one {# like} other {# likes}}",
+    "place": "Place {place}"
   },
   "footer": {
     "about": "About"

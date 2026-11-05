@@ -174,6 +174,7 @@ export async function unansweredList(
   const open = (data ?? []).filter(
     (r) =>
       r.coaching_responses.length === 0 &&
+      r.user_id !== viewer.id &&
       canSeeRequest(viewer, r.user_id, coachOf),
   );
   const { data: profiles } = open.length

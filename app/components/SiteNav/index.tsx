@@ -6,6 +6,7 @@ import {
   GraduationCapIcon,
   LayoutGridIcon,
   type LucideIcon,
+  TrophyIcon,
 } from 'lucide-react';
 import { Link, usePathname } from '@/i18n/navigation';
 import LinkPending from '@/app/components/LinkPending';
@@ -13,15 +14,16 @@ import { cn } from '@/lib/utils';
 
 const links: ReadonlyArray<{
   href: string;
-  key: 'positions' | 'games' | 'learn';
+  key: 'positions' | 'games' | 'learn' | 'leaderboard';
   Icon: LucideIcon;
 }> = [
   { href: '/think-time', key: 'positions', Icon: CrosshairIcon },
   { href: '/games', key: 'games', Icon: LayoutGridIcon },
   { href: '/lessons', key: 'learn', Icon: GraduationCapIcon },
+  { href: '/leaderboard', key: 'leaderboard', Icon: TrophyIcon },
 ];
 
-// Three sections fit inline on desktop; under `sm` the same links move to a
+// Four sections fit inline on desktop; under `sm` the same links move to a
 // fixed bottom tab bar (the body reserves room for it in the layout).
 export default function SiteNav() {
   const t = useTranslations('nav');
@@ -33,7 +35,7 @@ export default function SiteNav() {
     <>
       <ul
         data-testid="site-nav-desktop"
-        className="hidden sm:flex items-center gap-6"
+        className="hidden sm:flex items-center gap-4 lg:gap-6"
       >
         {links.map(({ href, key }) => (
           <li key={href}>

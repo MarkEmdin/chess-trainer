@@ -4,6 +4,7 @@ import {
   createCoachingRequest,
   markResponseSeen,
   respondToRequest,
+  setResponseLiked,
 } from '@/lib/coaching/actions';
 
 const BLACK_TO_MOVE =
@@ -11,7 +12,7 @@ const BLACK_TO_MOVE =
 
 const insert = jest.fn();
 const rpc = jest.fn();
-let requestRow: { fen: string } | null = null;
+let requestRow: { fen: string; user_id: string } | null = null;
 let existingResponse: { id: string } | null = null;
 
 // Minimal chainable stand-in for the Supabase query builder: only the calls
@@ -124,7 +125,7 @@ beforeEach(() => {
   insert.mockClear();
   notifyStaffOfQuestion.mockReset();
   notifyStudentOfAnswer.mockReset();
-  requestRow = { fen: BLACK_TO_MOVE };
+  requestRow = { fen: BLACK_TO_MOVE, user_id: 'student1' };
   existingResponse = null;
   getAuthedUser.mockResolvedValue({ id: 'c1', role: 'admin' });
   shouldOfferTelegram.mockReset().mockResolvedValue(true);
@@ -293,6 +294,13 @@ describe('respondToRequest', () => {
     getAuthedUser.mockResolvedValue(user);
     const result = await respondToRequest(undefined, replyForm());
     expect(result).toEqual({ error: 'coaching.errors.notAdmin' });
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  it('refuses to answer your own question', async () => {
+    requestRow = { fen: BLACK_TO_MOVE, user_id: 'c1' };
+    const result = await respondToRequest(undefined, replyForm());
+    expect(result).toEqual({ error: 'coaching.errors.ownQuestion' });
     expect(insert).not.toHaveBeenCalled();
   });
 
@@ -482,5 +490,43 @@ describe('markResponseSeen', () => {
   it('resolves quietly when the RPC call throws', async () => {
     rpc.mockRejectedValue(new Error('offline'));
     await expect(markResponseSeen('r1')).resolves.toBeUndefined();
+  });
+});
+
+describe('setResponseLiked', () => {
+  beforeEach(() => {
+    rpc.mockReset();
+    jest.mocked(revalidatePath).mockClear();
+  });
+
+  it('refuses non-staff without calling the RPC', async () => {
+    getAuthedUser.mockResolvedValue({ id: 'u1', role: 'user' });
+    const result = await setResponseLiked('resp1', false);
+    expect(result).toEqual({ error: 'coaching.errors.notAdmin' });
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it('sets the like through the RPC and refreshes the pages', async () => {
+    getAuthedUser.mockResolvedValue({ id: 'c1', role: 'coach' });
+    rpc.mockResolvedValue({ error: null });
+    const result = await setResponseLiked('resp1', false);
+    expect(result).toEqual({});
+    expect(rpc).toHaveBeenCalledWith('set_response_liked', {
+      response_id: 'resp1',
+      value: false,
+    });
+    expect(revalidatePath).toHaveBeenCalledWith('/[locale]/admin', 'page');
+    expect(revalidatePath).toHaveBeenCalledWith('/[locale]/coaching', 'page');
+    expect(revalidatePath).toHaveBeenCalledWith(
+      '/[locale]/leaderboard',
+      'page',
+    );
+  });
+
+  it('returns an RPC error as { error }', async () => {
+    getAuthedUser.mockResolvedValue({ id: 'c1', role: 'admin' });
+    rpc.mockResolvedValue({ error: { message: 'boom' } });
+    expect(await setResponseLiked('resp1', true)).toEqual({ error: 'boom' });
+    expect(revalidatePath).not.toHaveBeenCalled();
   });
 });

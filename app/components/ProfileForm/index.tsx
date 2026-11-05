@@ -14,10 +14,12 @@ type Props = {
   initial: {
     chesscom: string;
     lichess: string;
+    showInLeaderboard: boolean;
   };
+  showLeaderboardOption: boolean;
 };
 
-export default function ProfileForm({ initial }: Props) {
+export default function ProfileForm({ initial, showLeaderboardOption }: Props) {
   const t = useTranslations('profile');
   const [state, formAction, pending] = useActionState<
     ProfileFormState,
@@ -47,6 +49,18 @@ export default function ProfileForm({ initial }: Props) {
         autoCapitalize="none"
         spellCheck={false}
       />
+
+      {showLeaderboardOption && (
+        <label className="flex items-center gap-2 text-sm">
+          <input type="hidden" name="leaderboard_field" value="1" />
+          <input
+            type="checkbox"
+            name="show_in_leaderboard"
+            defaultChecked={initial.showInLeaderboard}
+          />
+          {t('showInLeaderboard')}
+        </label>
+      )}
 
       {state && 'error' in state && (
         <p className="text-sm text-destructive" role="alert">

@@ -27,17 +27,19 @@ describe('<SiteNav />', () => {
     pathname = '/';
   });
 
-  it('links to positions, games and learn', () => {
+  it('links to positions, games, learn and leaderboard', () => {
     renderWithIntl(<SiteNav />);
     expect(desktopLinks().map((a) => a.getAttribute('href'))).toEqual([
       '/think-time',
       '/games',
       '/lessons',
+      '/leaderboard',
     ]);
     expect(desktopLinks().map((a) => a.textContent)).toEqual([
       'Positions',
       'Games',
       'Learn',
+      'Leaderboard',
     ]);
   });
 
@@ -56,6 +58,6 @@ describe('<SiteNav />', () => {
   it('renders a bottom tab bar for mobile', () => {
     renderWithIntl(<SiteNav />);
     const bar = screen.getByRole('navigation', { name: 'Main navigation' });
-    expect(within(bar).getAllByRole('link')).toHaveLength(3);
+    expect(within(bar).getAllByRole('link')).toHaveLength(4);
   });
 });

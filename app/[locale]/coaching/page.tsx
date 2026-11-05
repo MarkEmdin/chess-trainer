@@ -47,7 +47,8 @@ export default async function CoachingPage({
           created_at,
           variation,
           content,
-          author_id
+          author_id,
+          liked
         )
       `,
     )

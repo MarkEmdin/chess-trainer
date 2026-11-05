@@ -833,3 +833,40 @@ describe('CoachingModal drafts', () => {
     getItem.mockRestore();
   });
 });
+
+describe('CoachingModal like mark', () => {
+  const MARK = 'The coach liked this question';
+  const answered = (liked: boolean) =>
+    thread({
+      responses: [
+        {
+          id: 'a1',
+          liked,
+          body: 'Play Nf6',
+          created_at: '2026-10-21',
+          variation: null,
+        },
+      ],
+    });
+
+  it('shows to the student', () => {
+    renderWithIntl(
+      <CoachingModal {...baseProps} mode="student" thread={answered(true)} />,
+    );
+    expect(screen.getByText(MARK)).toBeInTheDocument();
+  });
+
+  it('is absent for the student when not liked', () => {
+    renderWithIntl(
+      <CoachingModal {...baseProps} mode="student" thread={answered(false)} />,
+    );
+    expect(screen.queryByText(MARK)).toBeNull();
+  });
+
+  it('is absent in staff mode', () => {
+    renderWithIntl(
+      <CoachingModal {...baseProps} mode="coach" thread={answered(true)} />,
+    );
+    expect(screen.queryByText(MARK)).toBeNull();
+  });
+});

@@ -189,12 +189,16 @@ export async function respondToRequest(
   // The answer's variation starts from the question's position.
   const { data: request } = await supabase
     .from('coaching_requests')
-    .select('fen')
+    .select('fen, user_id')
     .eq('id', request_id)
     .single();
 
   if (!request) {
     return { error: t('missingFields') };
+  }
+
+  if (request.user_id === user.id) {
+    return { error: t('ownQuestion') };
   }
 
   // Validated against the stored position, never a fen from the form.
@@ -245,4 +249,29 @@ export async function markResponseSeen(requestId: string): Promise<void> {
   } catch {
     // Offline or similar: nothing to recover.
   }
+}
+
+// Staff: like or unlike an answer. The RPC re-checks staff, visibility and
+// that the question isn't the caller's own.
+export async function setResponseLiked(
+  responseId: string,
+  liked: boolean,
+): Promise<{ error?: string }> {
+  const user = await getAuthedUser();
+  if (!user || !isStaff(user.role)) {
+    const t = await getTranslations('coaching.errors');
+    return { error: t('notAdmin') };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('set_response_liked', {
+    response_id: responseId,
+    value: liked,
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath('/[locale]/admin', 'page');
+  revalidatePath('/[locale]/coaching', 'page');
+  revalidatePath('/[locale]/leaderboard', 'page');
+  return {};
 }

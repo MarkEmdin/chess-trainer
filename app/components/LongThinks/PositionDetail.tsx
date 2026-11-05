@@ -4,6 +4,7 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { ArrowLeftIcon, MessageSquareIcon } from 'lucide-react';
 import ChessboardWithNotation from '@/app/components/ChessboardWithNotation';
 import { Button } from '@/app/components/ui/button';
+import LikedMark from '@/app/components/LikedMark';
 import SectionLabel from '@/app/components/SectionLabel';
 import { formatSeconds } from '@/lib/chesscom/format';
 import type { LongThink } from '@/lib/games/longThinks';
@@ -18,7 +19,11 @@ type Props = {
   game: Game;
   thread?: {
     body: string;
-    responses: { body: string; author?: CoachProfile | null }[];
+    responses: {
+      body: string;
+      author?: CoachProfile | null;
+      liked?: boolean;
+    }[];
   };
   isAuthenticated: boolean;
   // Opens the coaching modal: a new question, or the existing thread.
@@ -138,7 +143,12 @@ export default function PositionDetail({
               </SectionLabel>
               <SectionLabel label={answerLabels.forStudent(latestResponse)}>
                 {latestResponse ? (
-                  <p className="line-clamp-3 text-sm">{latestResponse.body}</p>
+                  <>
+                    <p className="line-clamp-3 text-sm">
+                      {latestResponse.body}
+                    </p>
+                    <LikedMark message={latestResponse} />
+                  </>
                 ) : (
                   <p className="text-sm italic text-muted-foreground">
                     {tCoaching('awaitingReply')}
