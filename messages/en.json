@@ -162,7 +162,9 @@
     "emptyNew": "No new questions.",
     "emptyAnswered": "No answered questions yet.",
     "askedAt": "asked {date}",
-    "answeredAt": "Answered {date}"
+    "answeredAt": "Answered {date}",
+    "like": "Mark as a good question",
+    "unlike": "Remove like"
   },
   "coachingPage": {
     "title": "My coaching",
@@ -173,7 +175,8 @@
       "answered": "Answered ({count})"
     },
     "emptyWaiting": "No questions awaiting a reply.",
-    "emptyAnswered": "No answers yet — the coach will reply soon."
+    "emptyAnswered": "No answers yet — the coach will reply soon.",
+    "liked": "The coach liked this question"
   },
   "coaches": {
     "titles": {

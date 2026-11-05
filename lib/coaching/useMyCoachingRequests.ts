@@ -38,7 +38,8 @@ const fetcher = async (): Promise<CoachingRequestsByFen> => {
           created_at,
           variation,
           content,
-          author_id
+          author_id,
+          liked
         )
       `,
     )

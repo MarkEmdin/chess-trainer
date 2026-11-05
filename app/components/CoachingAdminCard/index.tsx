@@ -9,6 +9,7 @@ import { Button } from '@/app/components/ui/button';
 import ChessboardContainer from '@/app/components/ChessboardContainer';
 import { MessagePreview } from '@/app/components/CoachingThreadCard';
 import SectionLabel from '@/app/components/SectionLabel';
+import ResponseLikeToggle from '@/app/components/ResponseLikeToggle';
 import { sideToMove } from '@/lib/chess/fen';
 import type { CoachingThreadData } from '@/lib/coaching/types';
 import type { CoachProfile } from '@/lib/coaches/displayName';
@@ -119,9 +120,17 @@ export default function CoachingAdminCard({
               <SectionLabel label={answerLabel}>
                 {request.responses.map((r, i) => (
                   <div key={i} className="flex flex-col gap-1">
-                    <span className="text-xs text-muted-foreground">
-                      {t('answeredAt', { date: when(r.created_at) })}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        {t('answeredAt', { date: when(r.created_at) })}
+                      </span>
+                      {r.id && (
+                        <ResponseLikeToggle
+                          responseId={r.id}
+                          liked={r.liked !== false}
+                        />
+                      )}
+                    </div>
                     <MessagePreview fen={request.fen} message={r} />
                   </div>
                 ))}

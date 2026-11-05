@@ -52,6 +52,24 @@ const thread: CoachingThread = {
 };
 
 describe('CoachingThreadCard', () => {
+  describe('like mark', () => {
+    const withLiked = (liked?: boolean): CoachingThread => ({
+      ...thread,
+      responses: [{ ...thread.responses[0], id: 'a1', liked }],
+    });
+    const MARK = 'The coach liked this question';
+
+    it('shows when the answer is liked', () => {
+      renderWithIntl(<CoachingThreadCard thread={withLiked(true)} />);
+      expect(screen.getByText(MARK)).toBeInTheDocument();
+    });
+
+    it.each([false, undefined])('is absent when liked is %s', (liked) => {
+      renderWithIntl(<CoachingThreadCard thread={withLiked(liked)} />);
+      expect(screen.queryByText(MARK)).toBeNull();
+    });
+  });
+
   it('opens the thread in the student modal', () => {
     renderWithIntl(<CoachingThreadCard thread={thread} />);
     fireEvent.click(screen.getByRole('button', { name: 'Open' }));

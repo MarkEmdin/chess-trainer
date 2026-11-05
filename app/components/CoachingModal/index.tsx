@@ -13,6 +13,7 @@ import { useTranslations } from 'next-intl';
 import { ExternalLinkIcon } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import SectionLabel from '@/app/components/SectionLabel';
+import LikedMark from '@/app/components/LikedMark';
 import {
   Dialog,
   DialogContent,
@@ -345,14 +346,16 @@ export default function CoachingModal({
                   </p>
                 ) : (
                   thread.responses.map((response, i) => (
-                    <MessageBody
-                      key={i}
-                      message={response}
-                      fen={fen}
-                      id={`response-${i}`}
-                      viewingKey={viewing?.key ?? null}
-                      onView={view}
-                    />
+                    <div key={i} className="flex flex-col gap-1">
+                      <MessageBody
+                        message={response}
+                        fen={fen}
+                        id={`response-${i}`}
+                        viewingKey={viewing?.key ?? null}
+                        onView={view}
+                      />
+                      {mode === 'student' && <LikedMark message={response} />}
+                    </div>
                   ))
                 )}
               </SectionLabel>
