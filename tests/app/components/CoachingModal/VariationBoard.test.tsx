@@ -104,6 +104,21 @@ describe('VariationBoard', () => {
     expect(w.onMove).toHaveBeenCalledWith('g1', 'f3');
   });
 
+  it('keeps a tapped piece selected through the drop a tap ends with', () => {
+    const w = writing();
+    setup({ writing: w });
+    act(() => board.onSquareClick!({ square: 'g1' }));
+    act(() => {
+      board.onPieceDrop!({
+        sourceSquare: 'g1',
+        targetSquare: 'g1',
+      } as Parameters<NonNullable<BoardProps['onPieceDrop']>>[0]);
+    });
+    act(() => board.onSquareClick!({ square: 'f3' }));
+    expect(w.onMove).toHaveBeenCalledTimes(1);
+    expect(w.onMove).toHaveBeenCalledWith('g1', 'f3');
+  });
+
   it('shows and edits drawings while writing', () => {
     const w = writing({ drawing: { arrows: [['e2', 'e4']], circles: ['d4'] } });
     setup({ writing: w });

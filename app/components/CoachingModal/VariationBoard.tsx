@@ -66,6 +66,8 @@ type Props = {
   // The student's side, marked on the player rows with `askerNote`.
   askerColor: Orientation;
   askerNote: string;
+  // False when the parent renders `GameMoves` itself, below the form.
+  showGameMoves?: boolean;
 };
 
 export type GameReplay = {
@@ -134,22 +136,36 @@ export default function VariationBoard(props: Props) {
         />
       </Frame>
       {playerRow(props.orientation)}
-      {game && (
-        <GameNav
+      {game && props.showGameMoves !== false && (
+        <GameMoves
           game={game}
           boardIndex={boardIndex}
           onChange={props.onBoardIndexChange}
         />
       )}
-      {game && (
-        <GameMoveList
-          moves={game.moves}
-          keyIndex={game.keyIndex}
-          boardIndex={boardIndex}
-          onSelect={props.onBoardIndexChange}
-        />
-      )}
     </div>
+  );
+}
+
+export function GameMoves({
+  game,
+  boardIndex,
+  onChange,
+}: {
+  game: GameReplay;
+  boardIndex: number;
+  onChange: (index: number) => void;
+}) {
+  return (
+    <>
+      <GameNav game={game} boardIndex={boardIndex} onChange={onChange} />
+      <GameMoveList
+        moves={game.moves}
+        keyIndex={game.keyIndex}
+        boardIndex={boardIndex}
+        onSelect={onChange}
+      />
+    </>
   );
 }
 
@@ -279,8 +295,7 @@ function Frame({
       data-testid="variation-board-frame"
       className={cn(
         'rounded-md p-1 transition-shadow',
-        recording &&
-          'ring-2 ring-primary shadow-[0_0_16px] shadow-primary/50',
+        recording && 'ring-2 ring-primary shadow-[0_0_16px] shadow-primary/50',
       )}
     >
       {children}
@@ -330,7 +345,7 @@ function Writer({
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-sm font-medium text-primary">
+      <span className="text-xs whitespace-nowrap font-medium text-primary lg:text-sm lg:whitespace-normal">
         {t('recording')}
       </span>
       <Frame recording>
@@ -344,6 +359,9 @@ function Writer({
           arrows={drawing.arrows}
           allowDragging
           onPieceDrop={({ sourceSquare, targetSquare }) => {
+            // On touch a tap ends as a drop on the same square; keep what the
+            // tap selected.
+            if (sourceSquare === targetSquare) return false;
             setSelected(null);
             return targetSquare ? onMove(sourceSquare, targetSquare) : false;
           }}
@@ -355,7 +373,7 @@ function Writer({
         type="button"
         variant="ghost"
         size="sm"
-        className="self-start"
+        className="self-start pointer-coarse:hidden"
         disabled={drawing.arrows.length === 0 && drawing.circles.length === 0}
         onClick={onClearDrawings}
       >
