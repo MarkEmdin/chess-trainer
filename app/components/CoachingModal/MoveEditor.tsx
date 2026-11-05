@@ -38,6 +38,7 @@ import {
   type RecorderState,
 } from '@/lib/coaching/moveRecorder';
 import { chipIds, docToSegments } from './editorDoc';
+import { ComposingKeymap } from './composingKeymap';
 import { MoveChip } from './moveChip';
 
 // The recorder state, readable synchronously: one board move updates it and
@@ -126,6 +127,7 @@ export default function MoveEditor({
   const editor = useEditor({
     immediatelyRender: false,
     content: initialDoc,
+    enableCoreExtensions: { keymap: false },
     extensions: [
       Document,
       Paragraph,
@@ -133,6 +135,7 @@ export default function MoveEditor({
       Placeholder.configure({ placeholder }),
       UndoRedo,
       MoveChip,
+      ComposingKeymap,
     ],
     editorProps: {
       attributes: {
