@@ -3,6 +3,10 @@ import { renderWithIntl, screen, within } from '@/tests/test-utils';
 import GamesShell from '@/app/components/GamesShell';
 import { useChessComGames } from '@/lib/chesscom/useChessComGames';
 import { useLichessGames } from '@/lib/lichess/useLichessGames';
+import {
+  updateChesscomUsername,
+  updateLichessUsername,
+} from '@/lib/auth/profileActions';
 import type { Game } from '@/lib/games/types';
 import type { UseGamesResult } from '@/lib/games/useGamesPages';
 
@@ -306,6 +310,66 @@ describe('<GamesShell />', () => {
       shell();
       expect(screen.getByText('status-3')).toBeInTheDocument();
     });
+  });
+});
+
+describe('<GamesShell /> nickname entered before signing up', () => {
+  const signedIn = (
+    chesscom: string | null = null,
+    lichess: string | null = null,
+  ) =>
+    renderWithIntl(
+      <GamesShell
+        isAuthenticated
+        initialChesscomUsername={chesscom}
+        initialLichessUsername={lichess}
+        emptyMessage="no-games-here"
+        renderStatus={({ games }) => `status-${games.length}`}
+      >
+        {() => <div data-testid="children">CONTENT</div>}
+      </GamesShell>,
+    );
+
+  beforeEach(() => {
+    localStorage.clear();
+    jest.mocked(updateChesscomUsername).mockClear();
+    jest.mocked(updateLichessUsername).mockClear();
+    mockUseChessComGames.mockReturnValue(idleResult());
+    mockUseLichessGames.mockReturnValue(idleResult());
+  });
+
+  it('moves it into an empty profile', () => {
+    localStorage.setItem('chesscom-username', 'alice');
+    signedIn();
+    expect(updateChesscomUsername).toHaveBeenCalledWith('alice');
+    expect(mockUseChessComGames).toHaveBeenLastCalledWith('alice');
+    expect(localStorage.getItem('chesscom-username')).toBeNull();
+  });
+
+  it('moves a lichess nickname too', () => {
+    localStorage.setItem('lichess-username', 'bob');
+    signedIn();
+    expect(updateLichessUsername).toHaveBeenCalledWith('bob');
+  });
+
+  it('never replaces a nickname in the profile', () => {
+    localStorage.setItem('chesscom-username', 'alice');
+    signedIn(null, 'saved');
+    expect(updateChesscomUsername).not.toHaveBeenCalled();
+    expect(localStorage.getItem('chesscom-username')).toBe('alice');
+  });
+
+  it('does not bring it back after change user', async () => {
+    localStorage.setItem('chesscom-username', 'alice');
+    mockUseChessComGames.mockReturnValue({
+      ...idleResult(),
+      games: [makeGame('a')],
+    });
+    const user = userEvent.setup();
+    signedIn();
+    await user.click(screen.getByRole('button', { name: /change user/i }));
+    expect(updateChesscomUsername).toHaveBeenLastCalledWith(null);
+    expect(mockUseChessComGames).toHaveBeenLastCalledWith(null);
   });
 });
 

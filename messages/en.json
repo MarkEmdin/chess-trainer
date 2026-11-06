@@ -4,6 +4,7 @@
     "games": "Games",
     "learn": "Learn",
     "leaderboard": "Leaderboard",
+    "help": "Help",
     "main": "Main navigation"
   },
   "auth": {
@@ -28,7 +29,7 @@
     },
     "register": {
       "title": "Create account",
-      "subtitle": "Start tracking your chess progress.",
+      "subtitle": "Create an account to ask a coach questions.",
       "submit": "Register",
       "pending": "Creating…",
       "switchPrompt": "Already have an account?",
@@ -55,7 +56,7 @@
       "subtitle": "Enter your nickname or email and we'll send you a reset link.",
       "submit": "Send reset link",
       "pending": "Sending…",
-      "success": "If that account exists, a reset email was sent.",
+      "success": "If that account exists, a reset email was sent. Check your spam folder too.",
       "backToLogin": "Back to login",
       "identifier": "Nickname or email"
     },
@@ -72,6 +73,7 @@
       "resent": "If the account needs confirming, a new email was sent.",
       "title": "Check your email",
       "body": "We sent a confirmation link to {email}. Open it to finish creating your account.",
+      "spamHint": "Can’t find it? Check your spam folder: the email sometimes lands there.",
       "resend": "Resend email",
       "resendPending": "Sending…",
       "backToLogin": "Back to login"
@@ -79,7 +81,7 @@
     "emailConfirmed": {
       "title": "Email confirmed",
       "body": "You're logged in. Welcome!",
-      "cta": "Start learning"
+      "cta": "Go to my positions"
     },
     "accountMenu": "Account menu",
     "profile": "Profile"
@@ -142,7 +144,8 @@
         "tooManyLines": "Too many variations (max {max})",
         "lineTooLong": "Variation too long (max {max} moves)",
         "tooManyChips": "Too many move chips (max {max})"
-      }
+      },
+      "howToFill": "How to fill this in?"
     },
     "status": {
       "asked": "Question asked",
@@ -310,10 +313,10 @@
     }
   },
   "home": {
-    "tagline": "Learn to think through chess positions on your own.",
-    "idea": "This project helps beginner players analyze positions themselves — without engine help. Find the moments in your own games where you thought the longest, work out what was going on, and put your ideas into words. Then discuss them with a coach — and soon with other players too.",
-    "ctaPrimary": "Find my key positions",
-    "ctaSecondary": "Learning materials",
+    "headline": "A real coach reviews your games",
+    "subhead": "Enter your Chess.com or Lichess nickname and we’ll find the moves you thought about longest. Write down your thoughts and get an answer from a real coach, with comments and lines.",
+    "ctaPrimary": "Try it on my games",
+    "demoLabel": "Sample question and answer",
     "howItWorks": {
       "title": "How it works",
       "find": {
@@ -513,9 +516,9 @@
       "overMove": "over",
       "openQuestion": "Open question",
       "openGame": "Open the whole game",
-      "signInToAsk": "Sign in to ask a coach about this position.",
       "back": "Back",
-      "counter": "{n} / {total}"
+      "counter": "{n} / {total}",
+      "accountNeeded": "You need an account to ask a coach."
     }
   },
   "videoModal": {
@@ -672,10 +675,11 @@
     "place": "Place {place}"
   },
   "footer": {
-    "about": "About"
+    "about": "About",
+    "tutorial": "How it works"
   },
   "metadata": {
-    "description": "Learn to analyze chess positions yourself — find the key moments in your games and discuss them with a coach."
+    "description": "A real coach reviews your games: find the moves you thought about longest and get an answer with comments and lines."
   },
   "feedback": {
     "open": "Report a problem",
@@ -700,5 +704,63 @@
       "tooLong": "No more than {max} characters.",
       "failed": "Could not send. Your text is still here, please try again later."
     }
+  },
+  "tutorial": {
+    "metaTitle": "How it works — Chess Fundamentals",
+    "title": "How it works",
+    "lead": "Five minutes on how to ask a coach a question and how to write moves right on the board.",
+    "prompt": {
+      "text": "New here? See how the site works and how to ask a coach a question.",
+      "open": "Open tutorial",
+      "close": "Close"
+    },
+    "ask": {
+      "title": "How to ask a question",
+      "demoIntro": "This is what a finished text looks like. Try it:",
+      "steps": {
+        "find": {
+          "title": "Find a position",
+          "text": "Open “Positions”, enter your Chess.com or Lichess nickname and pick a move you thought about for a long time. Any game under “Games” works too. Press “Ask coach”. You need an account for this."
+        },
+        "write": {
+          "title": "Write what you were thinking",
+          "text": "Tap the text field. “Recording” appears above the board: from now on the board writes moves into your text. Describe the moves you considered and what made you doubt."
+        },
+        "moves": {
+          "title": "Show lines on the board",
+          "text": "Drag a piece, or tap it and then tap a square. The move lands in the text where the caret is. Further moves continue the same line."
+        },
+        "continue": {
+          "title": "Keep writing",
+          "text": "Type some more and play again: the new moves land at the caret and continue from the position on the board."
+        },
+        "newLine": {
+          "title": "Start another line",
+          "text": "“Back to key position” returns the board to the start, and the next moves become a new line. “Undo move” removes the last move. Tap a move in the text to carry on from it."
+        },
+        "send": {
+          "title": "Send it",
+          "text": "Press “Send to coach”. If you close the window first, your draft is kept."
+        }
+      }
+    },
+    "phone": {
+      "title": "On a phone",
+      "tips": {
+        "keyboard": "Playing a move doesn’t open the keyboard. Tap the text when you want to type.",
+        "hide": "“Hide board” at the top of the window makes room. Your text and moves stay, and “Show board” brings it back.",
+        "send": "The send button stays at the bottom of the window while you write."
+      }
+    },
+    "answer": {
+      "title": "How to read an answer",
+      "text": "Answers appear in “My questions”, in your account menu. Tap a line in the text: the board shows its first move, and the arrows step through it. Try it:",
+      "notifications": "To hear about answers right away, connect Telegram in your profile."
+    },
+    "coach": {
+      "title": "If you are a coach",
+      "text": "Open “Student questions” in your account menu and press “Reply”. It is the same window: you write an answer the same way as a question, with moves on the board."
+    },
+    "cta": "Find my key positions"
   }
 }

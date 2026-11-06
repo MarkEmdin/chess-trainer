@@ -39,7 +39,7 @@ describe('email-confirmed page', () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole('link', { name: 'auth.emailConfirmed.cta' }),
-    ).toHaveAttribute('href', '/lessons');
+    ).toHaveAttribute('href', '/think-time');
   });
 
   it('sends a logged-out visitor to login', async () => {

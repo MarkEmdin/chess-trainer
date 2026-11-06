@@ -19,6 +19,13 @@ jest.mock('@/i18n/navigation', () => ({
   ),
 }));
 
+jest.mock('@/app/components/LineDemo', () => ({
+  __esModule: true,
+  default: ({ header }: { header: React.ReactNode }) => (
+    <div data-testid="line-demo">{header}</div>
+  ),
+}));
+
 jest.mock('next-intl/server', () => ({
   getTranslations: async (namespace: string) => (key: string) =>
     `${namespace}.${key}`,
@@ -54,30 +61,32 @@ describe('home page', () => {
     expect(redirect).not.toHaveBeenCalled();
   });
 
-  it('shows the brand and the project idea', async () => {
+  it('leads with the promise of a real coach', async () => {
     render(await Home());
     expect(
-      screen.getByRole('heading', { level: 1, name: 'Chess Fundamentals' }),
+      screen.getByRole('heading', { level: 1, name: 'home.headline' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('home.tagline')).toBeInTheDocument();
-    expect(screen.getByText('home.idea')).toBeInTheDocument();
+    expect(screen.getByText('home.subhead')).toBeInTheDocument();
   });
 
-  it('primary CTA leads to key positions, secondary to lessons', async () => {
+  it('has one main button, to key positions', async () => {
     render(await Home());
     expect(
       screen.getByRole('link', { name: 'home.ctaPrimary' }),
     ).toHaveAttribute('href', '/think-time');
     expect(
-      screen.getByRole('link', { name: 'home.ctaSecondary' }),
-    ).toHaveAttribute('href', '/lessons');
+      screen.queryByRole('link', { name: 'home.ctaSecondary' }),
+    ).not.toBeInTheDocument();
   });
 
-  it('secondary CTA keeps its visible outline border', async () => {
+  it('shows a labelled sample question and answer', async () => {
     render(await Home());
-    const secondary = screen.getByRole('link', { name: 'home.ctaSecondary' });
-    expect(secondary).toHaveClass('border-border');
-    expect(secondary).not.toHaveClass('border-transparent');
+    expect(screen.getByText('home.demoLabel')).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('line-demo')).getByText(
+        'about.features.demo.questions.question',
+      ),
+    ).toBeInTheDocument();
   });
 
   it('explains how it works in three steps', async () => {

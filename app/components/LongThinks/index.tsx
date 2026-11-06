@@ -11,6 +11,7 @@ import { useMyCoachingRequests } from '@/lib/coaching/useMyCoachingRequests';
 import { threadStatus } from '@/lib/coaching/status';
 import { isUnseen } from '@/lib/coaching/notifications';
 import { markResponseSeen } from '@/lib/coaching/actions';
+import { rememberAsk, takePendingAsk } from '@/lib/coaching/pendingAsk';
 import {
   ASKED_FILTERS,
   matchesAskedFilter,
@@ -41,6 +42,23 @@ type EnrichedThink = { think: LongThink; game: Game };
 
 const thinkKey = ({ think, game }: EnrichedThink) =>
   `${game.id}-${think.moveIndex}`;
+
+// Brings a new user back to the position they asked about as a guest. The key
+// is spent on the first list that isn't empty, found or not.
+function RestorePendingAsk({
+  keys,
+  onRestore,
+}: {
+  keys: string[];
+  onRestore: (key: string) => void;
+}) {
+  useEffect(() => {
+    if (keys.length === 0) return;
+    const key = takePendingAsk();
+    if (key && keys.includes(key)) onRestore(key);
+  }, [keys, onRestore]);
+  return null;
+}
 
 type Props = {
   isAuthenticated: boolean;
@@ -99,6 +117,11 @@ export default function LongThinks({
     setMobileOpen(true);
   }, []);
 
+  const restoreAsk = useCallback((key: string) => {
+    setSelectedKey(key);
+    setMobileOpen(true);
+  }, []);
+
   // Opening the thread shows the coach's answer in full, so an unseen one
   // counts as read (spec 012); refetch so the badge drops.
   function openCoaching(target: EnrichedThink) {
@@ -152,6 +175,12 @@ export default function LongThinks({
 
           return (
             <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+              {isAuthenticated && (
+                <RestorePendingAsk
+                  keys={shown.map(thinkKey)}
+                  onRestore={restoreAsk}
+                />
+              )}
               <div className="flex flex-col gap-3">
                 <ThresholdSelector value={threshold} onChange={setThreshold} />
                 {timeFilter}
@@ -232,7 +261,11 @@ export default function LongThinks({
                     game={selected.game}
                     thread={selected.thread}
                     isAuthenticated={isAuthenticated}
-                    onAskCoach={() => openCoaching(selected)}
+                    onAskCoach={() =>
+                      isAuthenticated
+                        ? openCoaching(selected)
+                        : rememberAsk(thinkKey(selected))
+                    }
                     onOpenGame={() => setGameTarget(selected)}
                     onBack={() => setMobileOpen(false)}
                     counter={{ n: selectedIndex + 1, total: shown.length }}

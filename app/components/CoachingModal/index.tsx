@@ -17,6 +17,7 @@ import {
   XIcon,
 } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
+import { Link } from '@/i18n/navigation';
 import SectionLabel from '@/app/components/SectionLabel';
 import LikedMark from '@/app/components/LikedMark';
 import {
@@ -500,9 +501,21 @@ export default function CoachingModal({
                 />
                 <input type="hidden" name="body" value={plainText} />
 
-                <span className="text-sm font-medium text-foreground">
-                  {mode === 'student' ? t('bodyLabel') : tAdmin('yourResponse')}
-                </span>
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+                  <span className="text-sm font-medium text-foreground">
+                    {mode === 'student'
+                      ? t('bodyLabel')
+                      : tAdmin('yourResponse')}
+                  </span>
+                  {/* A new tab: this window and its text stay as they are. */}
+                  <Link
+                    href="/tutorial"
+                    target="_blank"
+                    className="text-xs text-primary underline-offset-4 hover:underline"
+                  >
+                    {t('editor.howToFill')}
+                  </Link>
+                </div>
                 <MoveEditor
                   ref={editorApi}
                   store={store}

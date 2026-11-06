@@ -18,6 +18,13 @@ jest.mock('@/app/components/FeedbackDialog', () => ({
 }));
 
 describe('Footer', () => {
+  it('links to the tutorial', async () => {
+    render(await Footer());
+    expect(
+      screen.getByRole('link', { name: 'footer.tutorial' }),
+    ).toHaveAttribute('href', '/tutorial');
+  });
+
   it('offers to send feedback', async () => {
     render(await Footer());
     expect(screen.getByRole('button', { name: 'feedback' })).toBeInTheDocument();

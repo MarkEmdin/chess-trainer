@@ -25,6 +25,7 @@ export default function CheckEmail({ maskedEmail }: Props) {
         <p className="text-sm text-muted-foreground">
           {t('body', { email: maskedEmail })}
         </p>
+        <p className="text-sm text-muted-foreground">{t('spamHint')}</p>
       </header>
 
       <form action={formAction} className="flex flex-col gap-4">

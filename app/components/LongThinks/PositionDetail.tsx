@@ -3,9 +3,10 @@
 import { useFormatter, useTranslations } from 'next-intl';
 import { ArrowLeftIcon, MessageSquareIcon } from 'lucide-react';
 import ChessboardWithNotation from '@/app/components/ChessboardWithNotation';
-import { Button } from '@/app/components/ui/button';
+import { Button, buttonVariants } from '@/app/components/ui/button';
 import LikedMark from '@/app/components/LikedMark';
 import SectionLabel from '@/app/components/SectionLabel';
+import { Link } from '@/i18n/navigation';
 import { formatSeconds } from '@/lib/chesscom/format';
 import type { LongThink } from '@/lib/games/longThinks';
 import type { Game, GameColor, GamePlayer } from '@/lib/games/types';
@@ -26,7 +27,8 @@ type Props = {
     }[];
   };
   isAuthenticated: boolean;
-  // Opens the coaching modal: a new question, or the existing thread.
+  // Opens the coaching modal: a new question, or the existing thread. For a
+  // guest it fires on the way to registration.
   onAskCoach: () => void;
   onOpenGame: () => void;
   // Mobile full-screen view only: back to the list, and where we are in it.
@@ -164,9 +166,19 @@ export default function PositionDetail({
               {thread ? t('openQuestion') : tCoaching('askCoach')}
             </Button>
           ) : (
-            <p className="rounded-[10px] border border-border bg-card p-3 text-sm text-muted-foreground">
-              {t('signInToAsk')}
-            </p>
+            <>
+              <Link
+                href="/register"
+                onClick={onAskCoach}
+                className={buttonVariants()}
+              >
+                <MessageSquareIcon />
+                {tCoaching('askCoach')}
+              </Link>
+              <p className="text-center text-xs text-muted-foreground">
+                {t('accountNeeded')}
+              </p>
+            </>
           )}
           <Button type="button" variant="secondary" onClick={onOpenGame}>
             {t('openGame')}

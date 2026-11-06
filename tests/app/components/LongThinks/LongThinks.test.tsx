@@ -120,10 +120,10 @@ jest.mock('@/lib/coaching/actions', () => ({
 
 const answered = { id: 'r1', fen: FEN_A, responses: [{ body: 'ok' }] };
 
-const renderIt = () =>
+const renderIt = (isAuthenticated = true) =>
   renderWithIntl(
     <LongThinks
-      isAuthenticated
+      isAuthenticated={isAuthenticated}
       initialChesscomUsername={null}
       initialLichessUsername={null}
     />,
@@ -132,12 +132,48 @@ const renderIt = () =>
 const detailText = () => screen.getByTestId('detail').textContent;
 
 beforeEach(() => {
+  localStorage.clear();
   mockFilterNotice = null;
   thinks = [item('g1', FEN_A), item('g2', FEN_B)];
   requests = {};
   markResponseSeen.mockReset();
   markResponseSeen.mockResolvedValue(undefined);
   mutate.mockClear();
+});
+
+describe('<LongThinks /> position kept through signing up', () => {
+  it('remembers the position a guest asks about', () => {
+    renderIt(false);
+    fireEvent.click(screen.getByRole('button', { name: 'row g2' }));
+    fireEvent.click(screen.getByRole('button', { name: 'ask' }));
+    expect(localStorage.getItem('pending-ask')).toBe('g2-5');
+    expect(screen.queryByTestId('modal')).not.toBeInTheDocument();
+  });
+
+  it('selects the remembered position once signed in, and forgets it', () => {
+    localStorage.setItem('pending-ask', 'g2-5');
+    renderIt();
+    expect(detailText()).toContain('detail g2');
+    expect(screen.getByTestId('detail').parentElement).toHaveAttribute(
+      'data-mobile-open',
+      'true',
+    );
+    expect(localStorage.getItem('pending-ask')).toBeNull();
+  });
+
+  it('forgets a remembered position that is not loaded', () => {
+    localStorage.setItem('pending-ask', 'gone-5');
+    renderIt();
+    expect(detailText()).toContain('detail g1');
+    expect(localStorage.getItem('pending-ask')).toBeNull();
+  });
+
+  it('does not restore for a guest', () => {
+    localStorage.setItem('pending-ask', 'g2-5');
+    renderIt(false);
+    expect(detailText()).toContain('detail g1');
+    expect(localStorage.getItem('pending-ask')).toBe('g2-5');
+  });
 });
 
 describe('<LongThinks /> selection', () => {
