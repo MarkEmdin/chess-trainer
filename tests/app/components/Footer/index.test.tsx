@@ -12,7 +12,17 @@ jest.mock('next-intl/server', () => ({
     `${namespace}.${key}`,
 }));
 
+jest.mock('@/app/components/FeedbackDialog', () => ({
+  __esModule: true,
+  default: () => <button>feedback</button>,
+}));
+
 describe('Footer', () => {
+  it('offers to send feedback', async () => {
+    render(await Footer());
+    expect(screen.getByRole('button', { name: 'feedback' })).toBeInTheDocument();
+  });
+
   it('links to the about page', async () => {
     render(await Footer());
     expect(screen.getByRole('link', { name: 'footer.about' })).toHaveAttribute(

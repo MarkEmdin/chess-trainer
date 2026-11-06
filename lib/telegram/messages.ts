@@ -1,6 +1,7 @@
 import { createTranslator } from 'next-intl';
 import en from '@/messages/en.json';
 import ru from '@/messages/ru.json';
+import type { Feedback } from '@/lib/feedback/types';
 import { escapeHtml, type BotMessage } from './api';
 
 export type BotLocale = 'en' | 'ru';
@@ -64,6 +65,28 @@ export function newApplicationMessage(
       name: escapeHtml(p.name),
     }),
     buttons: [{ text: tr('openApplications'), url: p.url }],
+  };
+}
+
+export function feedbackMessage(
+  locale: BotLocale,
+  p: Feedback,
+): BotMessage {
+  const tr = t(locale);
+  const sender = p.sender
+    ? `<b>${escapeHtml(p.sender.nickname)}</b> (${escapeHtml(p.sender.email)})`
+    : tr('feedbackGuest');
+  return {
+    text: tr('feedback', {
+      kind: `<b>${tr(`feedbackKinds.${p.kind}`)}</b>`,
+      body: escapeHtml(p.body),
+      sender,
+      contact: p.contact
+        ? tr('feedbackContact', { contact: escapeHtml(p.contact) })
+        : '',
+      page: escapeHtml(p.page),
+      device: escapeHtml(p.device),
+    }),
   };
 }
 
