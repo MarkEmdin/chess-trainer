@@ -19,8 +19,7 @@ export type LongThink = {
   lastOpponentMove?: { from: string; to: string };
 };
 
-// Parsing PGN with chess.js is the expensive step (≈5-10ms per game with
-// 30-60 moves). Cache the full unfiltered list of the user's thinks per Game
+// Parsing PGN with chess.js is the expensive step (about 10ms per game). Cache the full unfiltered list of the user's thinks per Game
 // object so threshold-slider re-renders are O(n) array filters instead of
 // full re-parses. Game objects keep stable identity across renders thanks to
 // SWR's cache, so a WeakMap is the natural store and entries are GC'd when
@@ -39,7 +38,6 @@ function computeAllThinks(game: Game): LongThink[] {
   const history = parser.history({ verbose: true });
 
   const result: LongThink[] = [];
-  const replay = new Chess();
 
   for (let i = 0; i < history.length; i++) {
     const move = history[i];
@@ -65,7 +63,7 @@ function computeAllThinks(game: Game): LongThink[] {
             fullMoveNumber: Math.ceil(halfMoveIndex / 2),
             san: move.san,
             color: moverColor,
-            fenBefore: replay.fen(),
+            fenBefore: move.before,
             seconds: spent,
             lastOpponentMove: prevMove
               ? { from: prevMove.from, to: prevMove.to }
@@ -74,12 +72,6 @@ function computeAllThinks(game: Game): LongThink[] {
         }
       }
     }
-
-    replay.move({
-      from: move.from,
-      to: move.to,
-      promotion: move.promotion,
-    });
   }
 
   return result;

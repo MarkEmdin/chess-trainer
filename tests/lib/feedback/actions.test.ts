@@ -11,8 +11,17 @@ jest.mock('@/lib/auth/getUser', () => ({
   getAuthedUser: () => getAuthedUser(),
 }));
 
+const rpc = jest.fn();
+jest.mock('@/lib/supabase/admin', () => ({
+  createAdminClient: () => ({ rpc: (...a: unknown[]) => rpc(...a) }),
+}));
+
 jest.mock('next/headers', () => ({
-  headers: async () => new Map([['user-agent', 'TestBrowser/1.0']]),
+  headers: async () =>
+    new Map([
+      ['user-agent', 'TestBrowser/1.0'],
+      ['x-forwarded-for', '203.0.113.7, 10.0.0.1'],
+    ]),
 }));
 
 jest.mock('next-intl/server', () => ({
@@ -37,9 +46,31 @@ function form(fields: Record<string, string> = {}) {
 beforeEach(() => {
   notify.mockReset().mockResolvedValue(true);
   getAuthedUser.mockReset().mockResolvedValue(null);
+  rpc.mockReset().mockResolvedValue({ data: true, error: null });
 });
 
 describe('sendFeedback', () => {
+  it('refuses a sender over the hourly limit', async () => {
+    rpc.mockResolvedValue({ data: false, error: null });
+    const state = await sendFeedback(undefined, form());
+    expect(state).toEqual({ error: 'errors.tooMany' });
+    expect(notify).not.toHaveBeenCalled();
+  });
+
+  it('counts by a hash of the first address, never the address', async () => {
+    await sendFeedback(undefined, form());
+    const [name, args] = rpc.mock.calls[0];
+    expect(name).toBe('allow_feedback');
+    expect(args.p_limit).toBe(5);
+    expect(args.p_key).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it('still delivers when the limit check fails', async () => {
+    rpc.mockResolvedValue({ data: null, error: { message: 'boom' } });
+    expect(await sendFeedback(undefined, form())).toEqual({ success: true });
+    expect(notify).toHaveBeenCalled();
+  });
+
   it('sends a guest message with its context', async () => {
     const state = await sendFeedback(undefined, form({ contact: '@me' }));
     expect(state).toEqual({ success: true });

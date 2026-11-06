@@ -15,8 +15,12 @@ let adminDb: FakeDb;
 jest.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({ from: (t: string) => userDb.from(t) }),
 }));
+const adminRpc = jest.fn();
 jest.mock('@/lib/supabase/admin', () => ({
-  createAdminClient: () => ({ from: (t: string) => adminDb.from(t) }),
+  createAdminClient: () => ({
+    from: (t: string) => adminDb.from(t),
+    rpc: (...a: unknown[]) => adminRpc(...a),
+  }),
 }));
 
 const getAuthedUser = jest.fn();
@@ -180,29 +184,20 @@ describe('admin actions', () => {
 });
 
 describe('approveApplication', () => {
-  it('makes the applicant a coach with a public profile', async () => {
-    adminDb.tables.coach_students = [{ student_id: 'u1', coach_id: 'c1' }];
+  beforeEach(() => {
+    adminRpc.mockReset();
+  });
+
+  it('approves in one database call and tells the applicant', async () => {
+    adminRpc.mockResolvedValue({ data: 'u1', error: null });
     const result = await approveApplication(
       undefined,
       form({ application_id: 'app1' }),
     );
     expect(result).toEqual({ success: true });
-    expect(adminDb.tables.user_profiles[1].role).toBe('coach');
-    expect(adminDb.writes).toContainEqual({
-      table: 'coach_profiles',
-      op: 'upsert',
-      value: {
-        user_id: 'u1',
-        first_name: 'Ivan',
-        last_name: 'Petrov',
-        title: 'IM',
-      },
+    expect(adminRpc).toHaveBeenCalledWith('approve_coach_application', {
+      p_application_id: 'app1',
     });
-    expect(adminDb.tables.coach_students).toEqual([]);
-    expect(adminDb.tables.coach_applications[0].status).toBe('approved');
-    expect(adminDb.tables.coach_applications[0].reviewed_at).toEqual(
-      expect.any(String),
-    );
     expect(notifyApplicantOfDecision).toHaveBeenCalledWith(
       'u1',
       true,
@@ -211,11 +206,18 @@ describe('approveApplication', () => {
   });
 
   it('ignores an application that is no longer pending', async () => {
-    adminDb.tables.coach_applications[0].status = 'rejected';
+    adminRpc.mockResolvedValue({ data: null, error: null });
     expect(
       await approveApplication(undefined, form({ application_id: 'app1' })),
     ).toEqual({ error: 'coaches.manage.errors.notFound' });
-    expect(adminDb.tables.user_profiles[1].role).toBe('user');
+    expect(notifyApplicantOfDecision).not.toHaveBeenCalled();
+  });
+
+  it('hides the database error from the admin', async () => {
+    adminRpc.mockResolvedValue({ data: null, error: { message: 'boom' } });
+    expect(
+      await approveApplication(undefined, form({ application_id: 'app1' })),
+    ).toEqual({ error: 'common.serverError' });
   });
 });
 

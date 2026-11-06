@@ -11,6 +11,7 @@ import {
   notifyStaffOfQuestion,
   notifyStudentOfAnswer,
 } from '@/lib/telegram/notify';
+import { serverError } from '@/lib/actionError';
 import { getAuthedUser } from '@/lib/auth/getUser';
 import { isStaff } from '@/lib/auth/roles';
 import { replayAroundKey } from '@/lib/chess/replay';
@@ -147,7 +148,7 @@ export async function createCoachingRequest(
     if (error.code === '23505') {
       return { error: t('alreadyAsked') };
     }
-    return { error: error.message };
+    return serverError('createCoachingRequest failed', error);
   }
 
   const origin = (await headers()).get('origin') ?? SITE_URL;
@@ -164,9 +165,9 @@ export async function createCoachingRequest(
 // RLS on coaching_responses already blocks non-staff and requests the coach
 // can't see (the request read below then returns nothing),
 // but explicit role check returns a clean error message instead of a
-// silent "0 rows" failure. One response per request is enforced here
-// at the action layer (schema permits multiple — keeping the door open
-// for threaded replies later without a migration).
+// silent "0 rows" failure. Coaches writing at the same time may both answer
+// and both answers are shown (spec 030); the unique index only stops one coach
+// answering twice.
 export async function respondToRequest(
   _prev: RespondState,
   formData: FormData,
@@ -206,22 +207,16 @@ export async function respondToRequest(
   if ('error' in message) return { error: messageError(t, message.error) };
   const { body, variation, content } = message;
 
-  const { data: existing } = await supabase
-    .from('coaching_responses')
-    .select('id')
-    .eq('request_id', request_id)
-    .maybeSingle();
-
-  if (existing) {
-    return { error: t('alreadyResponded') };
-  }
-
   const { error } = await supabase
     .from('coaching_responses')
     .insert({ request_id, body, variation, content, author_id: user.id });
 
   if (error) {
-    return { error: error.message };
+    // 23505: the one-answer-per-coach index.
+    if (error.code === '23505') {
+      return { error: t('alreadyResponded') };
+    }
+    return serverError('respondToRequest failed', error);
   }
 
   // Refresh the admin dashboard so the form swaps to read-only mode, the
@@ -268,7 +263,7 @@ export async function setResponseLiked(
     response_id: responseId,
     value: liked,
   });
-  if (error) return { error: error.message };
+  if (error) return serverError('setResponseLiked failed', error);
 
   revalidatePath('/[locale]/admin', 'page');
   revalidatePath('/[locale]/coaching', 'page');

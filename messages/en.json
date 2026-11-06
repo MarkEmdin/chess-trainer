@@ -49,7 +49,9 @@
       "resendTooSoon": "Please wait a minute before requesting another email.",
       "emailNotConfirmed": "Confirm your email first.",
       "resendSuggest": "Resend email?",
-      "linkExpired": "This link has expired. Log in to get a new one."
+      "linkExpired": "This link has expired. Log in to get a new one.",
+      "tooManyAttempts": "Too many attempts. Wait a couple of minutes and try again.",
+      "invalidEmail": "Check your email address."
     },
     "forgotPassword": {
       "title": "Reset your password",
@@ -539,7 +541,8 @@
       "title": "Something went wrong",
       "description": "An unexpected error occurred. Please try again.",
       "retry": "Try again"
-    }
+    },
+    "serverError": "Something went wrong. Please try again."
   },
   "telegram": {
     "title": "Telegram",
@@ -702,7 +705,8 @@
     "errors": {
       "empty": "Write a few words first.",
       "tooLong": "No more than {max} characters.",
-      "failed": "Could not send. Your text is still here, please try again later."
+      "failed": "Could not send. Your text is still here, please try again later.",
+      "tooMany": "Too many messages. Your text is still here, try again in an hour."
     }
   },
   "tutorial": {
