@@ -1,4 +1,5 @@
 import {
+  act,
   fireEvent,
   renderWithIntl,
   screen,
@@ -35,12 +36,31 @@ describe('ResponseLikeToggle', () => {
     await waitFor(() =>
       expect(setResponseLiked).toHaveBeenCalledWith('a1', false),
     );
-    await waitFor(() =>
-      expect(screen.getByRole('button')).toHaveAttribute(
-        'aria-pressed',
-        'false',
-      ),
+  });
+
+  it('changes at once, before the server answers', async () => {
+    let finish = (_: object) => {};
+    setResponseLiked.mockReturnValue(new Promise((r) => (finish = r)));
+    renderWithIntl(<ResponseLikeToggle responseId="a1" liked />);
+    fireEvent.click(screen.getByRole('button'));
+    const button = screen.getByRole('button');
+    expect(button).toHaveAttribute('aria-pressed', 'false');
+    expect(button).toBeEnabled();
+    await act(async () => finish({}));
+  });
+
+  it('takes a second tap while the first is on its way', async () => {
+    const pending: ((v: object) => void)[] = [];
+    setResponseLiked.mockImplementation(
+      () => new Promise((r) => pending.push(r)),
     );
+    renderWithIntl(<ResponseLikeToggle responseId="a1" liked />);
+    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByRole('button'));
+    expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
+    await waitFor(() => expect(setResponseLiked).toHaveBeenCalledTimes(2));
+    expect(setResponseLiked).toHaveBeenLastCalledWith('a1', true);
+    await act(async () => pending.forEach((finish) => finish({})));
   });
 
   it('shows a translated message and keeps the state when the action fails', async () => {
@@ -66,9 +86,9 @@ describe('ResponseLikeToggle', () => {
 
   it('follows a fresher liked prop from the server', () => {
     const { rerender } = renderWithIntl(
-      <ResponseLikeToggle key="a1-true" responseId="a1" liked />,
+      <ResponseLikeToggle responseId="a1" liked />,
     );
-    rerender(<ResponseLikeToggle key="a1-false" responseId="a1" liked={false} />);
+    rerender(<ResponseLikeToggle responseId="a1" liked={false} />);
     expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'false');
   });
 });
