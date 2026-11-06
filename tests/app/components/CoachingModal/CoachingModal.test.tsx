@@ -26,6 +26,8 @@ type BoardProps = {
 };
 
 let board: BoardProps;
+// `mock` prefix: read from inside the hoisted jest.mock factory.
+const mockRevealCaret = jest.fn();
 jest.mock('@/app/components/ChessboardWithNotation', () => ({
   __esModule: true,
   default: (props: BoardProps) => {
@@ -77,6 +79,7 @@ jest.mock('@/app/components/CoachingModal/MoveEditor', () => {
         return true;
       },
       focus() {},
+      revealCaret: () => mockRevealCaret(),
     }));
     // Like the real editor: a restored draft reports its text once.
     useEffect(() => {
@@ -178,6 +181,8 @@ beforeEach(() => {
 });
 
 describe('CoachingModal', () => {
+  beforeEach(() => mockRevealCaret.mockClear());
+
   it.each([
     [true, true],
     [false, false],
@@ -579,23 +584,27 @@ describe('CoachingModal game browsing', () => {
     );
   });
 
-  it('scrolls the current move into view', () => {
-    const scrolled: Element[] = [];
-    // jsdom has no scrollIntoView; record the calls instead.
+  it('scrolls only the move list to the current move', () => {
+    const scrollIntoView = jest.fn();
     const original = Element.prototype.scrollIntoView;
-    Element.prototype.scrollIntoView = function (this: Element) {
-      scrolled.push(this);
-    };
+    Element.prototype.scrollIntoView = scrollIntoView;
+    const rect = jest
+      .spyOn(Element.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: Element) {
+        const current = this.getAttribute('aria-current') === 'step';
+        return (
+          current ? { top: 200, bottom: 220 } : { top: 0, bottom: 100 }
+        ) as DOMRect;
+      });
     try {
       renderAsking();
-      expect(scrolled).toContain(
-        screen.getByRole('button', { name: /3\. Bb5 ★/ }),
-      );
-      fireEvent.click(screen.getByRole('button', { name: '4. Ba4' }));
-      expect(scrolled[scrolled.length - 1]).toBe(
-        screen.getByRole('button', { name: '4. Ba4' }),
-      );
+      const list = screen
+        .getByRole('button', { name: /3. Bb5 ★/ })
+        .closest('p') as HTMLElement;
+      expect(list.scrollTop).toBe(120);
+      expect(scrollIntoView).not.toHaveBeenCalled();
     } finally {
+      rect.mockRestore();
       Element.prototype.scrollIntoView = original;
     }
   });
@@ -653,6 +662,155 @@ describe('CoachingModal game browsing', () => {
         send.compareDocumentPosition(previous) &
           Node.DOCUMENT_POSITION_FOLLOWING,
       ).toBeTruthy();
+    });
+  });
+
+  describe('board bar on a narrow screen', () => {
+    const original = window.matchMedia;
+    afterEach(() => {
+      window.matchMedia = original;
+    });
+
+    function setWide(wide: boolean) {
+      window.matchMedia = ((query: string) => ({
+        ...original(query),
+        matches: wide && query.includes('min-width'),
+      })) as typeof window.matchMedia;
+    }
+
+    const column = () => screen.getByTestId('board-column');
+    const hide = () =>
+      fireEvent.click(screen.getByRole('button', { name: 'Hide board' }));
+
+    it('has one close button, in the bar', () => {
+      setWide(false);
+      const onClose = jest.fn();
+      renderWithIntl(
+        <CoachingModal
+          {...gameProps}
+          mode="coach"
+          thread={thread({ fen: KEY_FEN })}
+          onClose={onClose}
+        />,
+      );
+      const closes = screen.getAllByRole('button', { name: 'Close' });
+      expect(closes).toHaveLength(1);
+      fireEvent.click(closes[0]);
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    it('is absent on a wide screen', () => {
+      setWide(true);
+      renderAsking();
+      expect(
+        screen.queryByRole('button', { name: 'Hide board' }),
+      ).not.toBeInTheDocument();
+      fireEvent.focus(screen.getByRole('textbox'));
+      expect(column()).not.toHaveClass('sticky');
+    });
+
+    it('hides and shows the board without stopping the recording', () => {
+      setWide(false);
+      renderAsking();
+      fireEvent.focus(screen.getByRole('textbox'));
+      const button = screen.getByRole('button', { name: 'Hide board' });
+      fireEvent.pointerDown(button);
+      fireEvent.click(button);
+      expect(column()).toHaveClass('max-lg:hidden');
+      expect(frame()).toHaveClass('ring-primary');
+      fireEvent.click(screen.getByRole('button', { name: 'Show board' }));
+      expect(column()).not.toHaveClass('max-lg:hidden');
+      expect(frame()).toHaveClass('ring-primary');
+    });
+
+    it('brings the caret out from under the board when sizes change', () => {
+      const original = window.ResizeObserver;
+      let resized = () => {};
+      window.ResizeObserver = class {
+        constructor(callback: () => void) {
+          resized = callback;
+        }
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      } as unknown as typeof ResizeObserver;
+      try {
+        setWide(false);
+        renderAsking();
+        resized = () => {};
+        fireEvent.focus(screen.getByRole('textbox'));
+        resized();
+        expect(mockRevealCaret).toHaveBeenCalledTimes(1);
+      } finally {
+        window.ResizeObserver = original;
+      }
+    });
+
+    it('keeps the bar from taking focus from the text', () => {
+      setWide(false);
+      renderAsking();
+      const button = screen.getByRole('button', { name: 'Hide board' });
+      // fireEvent returns false when the default action was prevented.
+      expect(fireEvent.mouseDown(button)).toBe(false);
+    });
+
+    it('keeps the board hidden while typing', () => {
+      setWide(false);
+      renderAsking();
+      hide();
+      fireEvent.focus(screen.getByRole('textbox'));
+      expect(column()).toHaveClass('max-lg:hidden');
+    });
+
+    it('brings a hidden board back on a game move', () => {
+      setWide(false);
+      renderAsking();
+      hide();
+      fireEvent.click(screen.getByRole('button', { name: 'Previous move' }));
+      expect(column()).not.toHaveClass('max-lg:hidden');
+    });
+
+    it('brings a hidden board back on a chip and pins it', () => {
+      setWide(false);
+      renderWithIntl(
+        <CoachingModal
+          {...gameProps}
+          mode="student"
+          thread={thread({
+            fen: KEY_FEN,
+            responses: [
+              {
+                body: '3. Bb5',
+                created_at: '2026-10-21T10:00:00Z',
+                variation: null,
+                content: {
+                  v: 1,
+                  segments: [{ t: 'moves', line: 'l1', from: 0, to: 1 }],
+                  lines: { l1: ['Bb5'] },
+                  drawings: {},
+                },
+              },
+            ],
+          })}
+        />,
+      );
+      expect(column()).not.toHaveClass('sticky');
+      hide();
+      fireEvent.click(screen.getByRole('button', { name: '3. Bb5' }));
+      expect(column()).not.toHaveClass('max-lg:hidden');
+      expect(column()).toHaveClass('sticky');
+    });
+
+    it('pins the board while recording and after using the game moves', () => {
+      setWide(false);
+      renderAsking();
+      expect(column()).not.toHaveClass('sticky');
+      fireEvent.focus(screen.getByRole('textbox'));
+      expect(column()).toHaveClass('sticky');
+      fireEvent.pointerDown(screen.getByText('Ask the coach'));
+      expect(column()).not.toHaveClass('sticky');
+      fireEvent.click(screen.getByRole('button', { name: 'Previous move' }));
+      expect(column()).toHaveClass('sticky');
     });
   });
 

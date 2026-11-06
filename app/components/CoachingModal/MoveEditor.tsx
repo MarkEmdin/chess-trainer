@@ -23,6 +23,7 @@ import { Placeholder, UndoRedo } from '@tiptap/extensions';
 import { RotateCcwIcon, Undo2Icon } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import { MAX_VARIATION_MOVES } from '@/lib/chess/variation';
+import { scrollDelta, type VisibleArea } from '@/lib/coaching/scrollDelta';
 import { MAX_CHIPS, MAX_LINES, type Segment } from '@/lib/coaching/content';
 import {
   activateChip,
@@ -69,6 +70,7 @@ export type MoveEditorApi = {
   // A move played on the board; false when it was refused.
   move: (from: string, to: string) => boolean;
   focus: () => void;
+  revealCaret: () => void;
 };
 
 type Props = {
@@ -81,6 +83,8 @@ type Props = {
   initialDoc?: JSONContent;
   // Every change to the text, for saving a draft.
   onDocChange?: (doc: JSONContent) => void;
+  // Where the caret can be seen, when something is pinned over the text.
+  visibleArea?: () => (VisibleArea & { scroller: HTMLElement }) | null;
   ref?: Ref<MoveEditorApi>;
 };
 
@@ -109,6 +113,7 @@ export default function MoveEditor({
   onFocus,
   initialDoc,
   onDocChange,
+  visibleArea,
   ref,
 }: Props) {
   const t = useTranslations('coaching.editor');
@@ -119,9 +124,14 @@ export default function MoveEditor({
   // Where the caret was after our own last edit: a selection change that
   // lands anywhere else means the user moved the caret.
   const lastOwnPos = useRef<number | null>(null);
-  const latest = useRef({ onSegmentsChange, onFocus, onDocChange });
+  const latest = useRef({
+    onSegmentsChange,
+    onFocus,
+    onDocChange,
+    visibleArea,
+  });
   useEffect(() => {
-    latest.current = { onSegmentsChange, onFocus, onDocChange };
+    latest.current = { onSegmentsChange, onFocus, onDocChange, visibleArea };
   });
 
   const editor = useEditor({
@@ -149,6 +159,15 @@ export default function MoveEditor({
       handlePaste(view, event) {
         const text = event.clipboardData?.getData('text/plain') ?? '';
         view.dispatch(view.state.tr.insertText(text));
+        return true;
+      },
+      handleScrollToSelection(view) {
+        const area = latest.current.visibleArea?.();
+        if (!area) return false;
+        area.scroller.scrollTop += scrollDelta(
+          view.coordsAtPos(view.state.selection.head),
+          area,
+        );
         return true;
       },
       handleClickOn(view, _pos, node) {
@@ -265,8 +284,11 @@ export default function MoveEditor({
         return true;
       },
       focus,
+      revealCaret() {
+        if (editor && !editor.isDestroyed) editor.commands.scrollIntoView();
+      },
     }),
-    [store, apply, focus],
+    [store, apply, focus, editor],
   );
 
   const { state } = store;

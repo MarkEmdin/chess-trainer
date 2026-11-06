@@ -126,6 +126,11 @@
       "ownQuestion": "You can't answer your own question.",
       "invalidVariation": "This variation can't be saved. Try recording it again."
     },
+    "boardBar": {
+      "hide": "Hide board",
+      "show": "Show board",
+      "close": "Close"
+    },
     "editor": {
       "recording": "● Recording — moves go into the text",
       "startHint": "Click the text field to start recording",

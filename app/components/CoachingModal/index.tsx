@@ -10,12 +10,18 @@ import {
 } from 'react';
 import type { JSONContent } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
-import { ExternalLinkIcon } from 'lucide-react';
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  ExternalLinkIcon,
+  XIcon,
+} from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import SectionLabel from '@/app/components/SectionLabel';
 import LikedMark from '@/app/components/LikedMark';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -133,8 +139,14 @@ export default function CoachingModal({
   const editorApi = useRef<MoveEditorApi>(null);
   const [segments, setSegments] = useState<Segment[]>([]);
   const boardColumn = useRef<HTMLDivElement>(null);
+  const boardBar = useRef<HTMLDivElement>(null);
+  // Phone only (spec 024). Hidden with CSS, not unmounted: the board keeps
+  // the step of a viewed line and the tap-tap selection.
+  const [boardHidden, setBoardHidden] = useState(false);
+  const [usedGameMoves, setUsedGameMoves] = useState(false);
   const wide = useIsWide();
   const form = useRef<HTMLFormElement>(null);
+  const sendRow = useRef<HTMLDivElement>(null);
   const replay = useMemo(() => {
     if (!game) return null;
     const around = replayAroundKey(game.pgn, fen, game.moveIndex);
@@ -219,6 +231,7 @@ export default function CoachingModal({
     setBoardIndex(keyIndex);
     setRecording(false);
     setViewing(next);
+    if (next) setBoardHidden(false);
   }
 
   // Writing is about the key position: focusing the text shows it, and the
@@ -240,12 +253,44 @@ export default function CoachingModal({
     const onDown = (e: PointerEvent) => {
       const target = e.target as Node;
       if (boardColumn.current?.contains(target)) return;
+      if (boardBar.current?.contains(target)) return;
       if (form.current?.contains(target)) return;
       setRecording(false);
     };
     document.addEventListener('pointerdown', onDown, true);
     return () => document.removeEventListener('pointerdown', onDown, true);
   }, [recording]);
+
+  // A tap on a chip or a game move changes the board, so it must be on screen
+  // wherever the text has scrolled to. Otherwise it scrolls away with the text.
+  const pinned = (recording && canWrite) || !!viewing || usedGameMoves;
+
+  // Between the board (or the bar, when it is hidden) and the send row.
+  function visibleArea() {
+    const scroller = form.current?.closest<HTMLElement>(
+      '[data-slot="dialog-content"]',
+    );
+    if (wide || !scroller || !boardBar.current || !sendRow.current) return null;
+    const board = boardColumn.current?.getBoundingClientRect().bottom ?? 0;
+    return {
+      scroller,
+      top: Math.max(board, boardBar.current.getBoundingClientRect().bottom),
+      bottom: sendRow.current.getBoundingClientRect().top,
+    };
+  }
+
+  // Pinning or resizing the board, and the keyboard opening, all change what
+  // covers the text; the caret has to come back out from under it.
+  useEffect(() => {
+    const scroller = form.current?.closest('[data-slot="dialog-content"]');
+    if (wide || !recording || !scroller || !boardColumn.current) return;
+    const observer = new ResizeObserver(() =>
+      editorApi.current?.revealCaret(),
+    );
+    observer.observe(boardColumn.current);
+    observer.observe(scroller);
+    return () => observer.disconnect();
+  }, [wide, recording]);
 
   const questionLabel =
     mode === 'student' ? t('yourQuestion') : tAdmin('question');
@@ -262,14 +307,45 @@ export default function CoachingModal({
       }}
     >
       <DialogContent
-        className="sm:max-w-5xl max-h-[calc(100dvh-2rem)] overflow-y-auto"
+        // Under `lg` block, not grid: a sticky grid item stays in its own row.
+        className="sm:max-w-5xl max-h-[calc(100dvh-2rem)] overflow-y-auto max-lg:block max-lg:space-y-4"
+        showCloseButton={wide}
         // Focusing the text starts recording, so the dialog must not drop
         // focus there on open: it focuses itself and the user picks.
         onOpenAutoFocus={(e) => {
           e.preventDefault();
-          (e.currentTarget as HTMLElement).focus();
+          (e.currentTarget as HTMLElement).focus({ preventScroll: true });
         }}
       >
+        {!wide && (
+          <div
+            ref={boardBar}
+            className="sticky -top-4 z-20 -mx-4 -mt-4 flex h-11 items-center justify-between bg-popover px-2"
+            // Keeps the keyboard open: a tap here must not blur the text.
+            onMouseDown={(e) => e.preventDefault()}
+          >
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setBoardHidden((hidden) => !hidden)}
+            >
+              {boardHidden ? <ChevronDownIcon /> : <ChevronUpIcon />}
+              {t(boardHidden ? 'boardBar.show' : 'boardBar.hide')}
+            </Button>
+            <DialogClose asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                aria-label={t('boardBar.close')}
+              >
+                <XIcon />
+              </Button>
+            </DialogClose>
+          </div>
+        )}
+
         <DialogHeader>
           <DialogTitle className="font-normal text-base">
             {thread || justSubmitted ? t('threadTitle') : t('askTitle')}
@@ -299,7 +375,12 @@ export default function CoachingModal({
               allows, but leave room for the recording/viewing controls. */}
           <div
             ref={boardColumn}
-            className="sticky top-0 z-10 bg-popover pb-2 lg:static lg:z-auto lg:bg-transparent lg:pb-0 lg:shrink-0 lg:w-[max(280px,min(560px,calc(100dvh-330px)))]"
+            data-testid="board-column"
+            className={cn(
+              'lg:shrink-0 lg:w-[max(280px,min(560px,calc(100dvh-330px)))]',
+              !wide && pinned && 'sticky top-7 z-10 -mx-1 bg-popover px-1 pb-2',
+              boardHidden && 'max-lg:hidden',
+            )}
           >
             <div className="w-full mx-auto max-w-[min(100%,calc(100dvh-240px))] lg:max-w-none">
               <VariationBoard
@@ -440,6 +521,7 @@ export default function CoachingModal({
                     scheduleDraftSave();
                   }}
                   onFocus={startRecording}
+                  visibleArea={visibleArea}
                 />
                 <p
                   className={cn(
@@ -459,7 +541,10 @@ export default function CoachingModal({
                   </p>
                 )}
 
-                <div className="flex justify-end">
+                <div
+                  ref={sendRow}
+                  className="flex justify-end max-lg:sticky max-lg:-bottom-4 max-lg:z-10 max-lg:-mx-1 max-lg:bg-popover max-lg:px-1 max-lg:py-2"
+                >
                   {mode === 'student' ? (
                     <Button
                       type="submit"
@@ -489,6 +574,8 @@ export default function CoachingModal({
                   onChange={(index) => {
                     setViewing(null);
                     setBoardIndex(index);
+                    setUsedGameMoves(true);
+                    setBoardHidden(false);
                   }}
                 />
               </div>
