@@ -5,8 +5,8 @@ import {
   type MessageContent,
   type MoveSegment,
 } from '@/lib/coaching/content';
+import { CHIP_CLASS } from '@/lib/coaching/chipClass';
 import { cn } from '@/lib/utils';
-import { CHIP_CLASS } from './moveChip';
 
 type Props = {
   fen: string;

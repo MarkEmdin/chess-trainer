@@ -1,7 +1,5 @@
 import { Node } from '@tiptap/core';
-
-export const CHIP_CLASS =
-  'inline-block rounded bg-primary/15 px-1.5 mx-0.5 font-mono text-sm text-primary cursor-pointer select-none';
+import { CHIP_CLASS } from '@/lib/coaching/chipClass';
 
 // A move chip inside the editor: an inline atom that the caret steps over
 // and Backspace deletes whole. Its moves live in the recorder (by `id`); the

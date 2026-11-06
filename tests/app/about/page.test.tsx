@@ -6,8 +6,18 @@ jest.mock('next-intl/server', () => ({
     `${namespace}.${key}`,
 }));
 
+jest.mock('@/app/components/ChessboardWithNotation', () => ({
+  __esModule: true,
+  default: () => <div data-testid="board" />,
+}));
+
+jest.mock('@/app/components/LineDemo', () => ({
+  __esModule: true,
+  default: () => <div data-testid="line-demo" />,
+}));
+
 describe('about page', () => {
-  it('shows the sections in order: why, author, contact, source', async () => {
+  it('shows the sections in order: why, features, author, contact, source', async () => {
     render(await AboutPage());
     expect(
       screen.getByRole('heading', { level: 1, name: 'about.title' }),
@@ -17,10 +27,28 @@ describe('about page', () => {
       .map((h) => h.textContent);
     expect(headings).toEqual([
       'about.why.title',
+      'about.features.title',
       'about.author.title',
       'about.contact.title',
       'about.source.title',
     ]);
+  });
+
+  it('shows the features on example boards', async () => {
+    render(await AboutPage());
+    expect(screen.getAllByTestId('line-demo')).toHaveLength(2);
+    expect(screen.getAllByTestId('board')).toHaveLength(1);
+  });
+
+  it('says that moves on the board go into the text', async () => {
+    render(await AboutPage());
+    expect(
+      screen.getByText('about.features.items.moves.title'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('about.features.items.moves.text'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('about.features.items.feedback.title'));
   });
 
   it('links the contact email', async () => {
