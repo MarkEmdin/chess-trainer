@@ -39,7 +39,7 @@ describe('ResponseLikeToggle', () => {
   });
 
   it('changes at once, before the server answers', async () => {
-    let finish = (_: object) => {};
+    let finish: (value: object) => void = () => {};
     setResponseLiked.mockReturnValue(new Promise((r) => (finish = r)));
     renderWithIntl(<ResponseLikeToggle responseId="a1" liked />);
     fireEvent.click(screen.getByRole('button'));
