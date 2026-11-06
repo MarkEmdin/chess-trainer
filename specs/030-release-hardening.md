@@ -1,6 +1,6 @@
 # Spec: release hardening
 
-Status: in-progress
+Status: done
 Branch: fix/release-hardening
 
 ## Problem
@@ -62,12 +62,12 @@ Migration `20261107120000_release_hardening.sql`:
 
 ## Acceptance criteria
 
-- [ ] As `authenticated`, updating `role` fails
-- [ ] As `anon` and `authenticated`, calling `lookup_email_by_nickname` fails
-- [ ] Saving a profile, language, Telegram dismissal and signing in still work
-- [ ] Two coaches can answer one question; both show in order, signed
-- [ ] The same coach answering twice gets `alreadyResponded`
-- [ ] A second answer brings back the student's "new" badge
-- [ ] Direct inserts with a 2 MB body or `{"junk":true}` content fail
-- [ ] A sixth feedback message in an hour is refused; a failed check lets it through
-- [ ] `npm test`, `npm run lint`, `npm run build` pass
+- [x] As `authenticated`, updating `role` fails
+- [x] As `anon` and `authenticated`, calling `lookup_email_by_nickname` fails
+- [x] Saving a profile, language, Telegram dismissal and signing in still work
+- [x] Two coaches can answer one question; both show in order, signed
+- [x] The same coach answering twice gets `alreadyResponded`
+- [x] A second answer brings back the student's "new" badge
+- [x] Direct inserts with a 2 MB body or `{"junk":true}` content fail
+- [x] A sixth feedback message in an hour is refused; a failed check lets it through
+- [x] `npm test`, `npm run lint`, `npm run build` pass
