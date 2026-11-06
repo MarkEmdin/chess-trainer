@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { formatMoveLabel, type ReplayMove } from '@/lib/chess/replay';
+import { scrollDelta } from '@/lib/coaching/scrollDelta';
 import { cn } from '@/lib/utils';
 
 type Props = {
@@ -24,15 +25,25 @@ export default function GameMoveList({
 }: Props) {
   const current = boardIndex === keyIndex ? keyIndex : boardIndex - 1;
   const currentRef = useRef<HTMLButtonElement>(null);
+  const listRef = useRef<HTMLParagraphElement>(null);
 
   // The list scrolls inside a short box; keep the highlighted move (on open,
-  // the key move) visible without scrolling the dialog itself.
+  // the key move) visible. Not scrollIntoView: on a phone the list is below
+  // the form, and that would scroll the dialog past the board.
   useEffect(() => {
-    currentRef.current?.scrollIntoView?.({ block: 'nearest' });
+    const list = listRef.current;
+    if (!list || !currentRef.current) return;
+    list.scrollTop += scrollDelta(
+      currentRef.current.getBoundingClientRect(),
+      list.getBoundingClientRect(),
+    );
   }, [current]);
 
   return (
-    <p className="flex flex-wrap gap-x-1.5 gap-y-1 text-sm font-mono max-h-32 overflow-y-auto">
+    <p
+      ref={listRef}
+      className="flex flex-wrap gap-x-1.5 gap-y-1 text-sm font-mono max-h-32 overflow-y-auto"
+    >
       {moves.map((move, i) => {
         const isKey = i === keyIndex;
         return (
