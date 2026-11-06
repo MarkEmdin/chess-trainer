@@ -38,6 +38,14 @@ describe('Footer', () => {
     );
   });
 
+  it('stays at the bottom of the screen from lg up', async () => {
+    render(await Footer());
+    expect(screen.getByRole('contentinfo')).toHaveClass(
+      'lg:sticky',
+      'lg:bottom-0',
+    );
+  });
+
   it('shows the brand with the current year', async () => {
     render(await Footer());
     expect(
