@@ -11,6 +11,12 @@ export default async function Footer() {
         <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1">
           <FeedbackDialog />
           <Link
+            href="/tutorial"
+            className="hover:text-foreground transition-colors"
+          >
+            {t('tutorial')}
+          </Link>
+          <Link
             href="/about"
             className="hover:text-foreground transition-colors"
           >

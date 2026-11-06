@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import '@/app/globals.css';
 import Header from '@/app/components/Header';
+import FirstVisitPrompt from '@/app/components/FirstVisitPrompt';
 import Footer from '@/app/components/Footer';
 import ThemeProvider from '@/app/components/ThemeProvider';
 import { SITE_URL } from '@/lib/site';
@@ -84,7 +85,7 @@ export default async function LocaleLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col pb-16 sm:pb-0">
+      <body className="min-h-full flex flex-col pb-16 lg:pb-0">
         <NextIntlClientProvider>
           <ThemeProvider
             attribute="class"
@@ -96,6 +97,7 @@ export default async function LocaleLayout({
             disableTransitionOnChange
           >
             <Header />
+            <FirstVisitPrompt />
             {/* Grows to fill the screen so short pages keep the footer at
                 the bottom (spec 021). */}
             <div className="flex flex-1 flex-col">{children}</div>

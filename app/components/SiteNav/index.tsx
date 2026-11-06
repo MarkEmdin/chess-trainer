@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import {
+  CircleHelpIcon,
   CrosshairIcon,
   GraduationCapIcon,
   LayoutGridIcon,
@@ -14,16 +15,17 @@ import { cn } from '@/lib/utils';
 
 const links: ReadonlyArray<{
   href: string;
-  key: 'positions' | 'games' | 'learn' | 'leaderboard';
+  key: 'positions' | 'games' | 'learn' | 'leaderboard' | 'help';
   Icon: LucideIcon;
 }> = [
   { href: '/think-time', key: 'positions', Icon: CrosshairIcon },
   { href: '/games', key: 'games', Icon: LayoutGridIcon },
   { href: '/lessons', key: 'learn', Icon: GraduationCapIcon },
   { href: '/leaderboard', key: 'leaderboard', Icon: TrophyIcon },
+  { href: '/tutorial', key: 'help', Icon: CircleHelpIcon },
 ];
 
-// Four sections fit inline on desktop; under `sm` the same links move to a
+// The sections fit inline on desktop; under `lg` the same links move to a
 // fixed bottom tab bar (the body reserves room for it in the layout).
 export default function SiteNav() {
   const t = useTranslations('nav');
@@ -35,7 +37,7 @@ export default function SiteNav() {
     <>
       <ul
         data-testid="site-nav-desktop"
-        className="hidden sm:flex items-center gap-4 lg:gap-6"
+        className="hidden lg:flex items-center gap-6"
       >
         {links.map(({ href, key }) => (
           <li key={href}>
@@ -58,7 +60,7 @@ export default function SiteNav() {
 
       <nav
         aria-label={t('main')}
-        className="sm:hidden fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card"
+        className="lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card"
       >
         <ul className="flex justify-around">
           {links.map(({ href, key, Icon }) => (

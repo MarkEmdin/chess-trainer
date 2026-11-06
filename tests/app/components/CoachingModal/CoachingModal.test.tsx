@@ -244,6 +244,23 @@ describe('CoachingModal', () => {
     expect(fd.has('variation')).toBe(false);
   });
 
+  it('links to the tutorial in a new tab without ending the recording', () => {
+    renderWithIntl(
+      <CoachingModal
+        {...baseProps}
+        mode="student"
+        thread={undefined}
+        ask={{ gameUrl: 'https://lichess.org/abc', moveIndex: 5 }}
+      />,
+    );
+    fireEvent.focus(editor());
+    const link = screen.getByRole('link', { name: 'How to fill this in?' });
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link.getAttribute('href')).toContain('/tutorial');
+    fireEvent.pointerDown(link);
+    expect(frame()).toHaveClass('ring-primary');
+  });
+
   it('records only while the text is focused', () => {
     renderWithIntl(
       <CoachingModal
