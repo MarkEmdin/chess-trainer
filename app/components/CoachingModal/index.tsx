@@ -67,8 +67,8 @@ import VariationLine from './VariationLine';
 import Spinner from '@/app/components/Spinner';
 
 type Props = {
-  // Overrides the label above the answer (coach mode: "Answered by …").
-  answerLabel?: string;
+  // The signed-in staff member, to tell their own answers apart.
+  viewerId?: string;
   mode: 'student' | 'coach';
   fen: string;
   orientation: 'white' | 'black';
@@ -107,7 +107,7 @@ export default function CoachingModal({
   ask,
   game,
   gameUrl,
-  answerLabel: answerLabelOverride,
+  viewerId,
   onClose,
   onSubmitted,
 }: Props) {
@@ -295,10 +295,11 @@ export default function CoachingModal({
 
   const questionLabel =
     mode === 'student' ? t('yourQuestion') : tAdmin('question');
-  const studentAnswerLabel = useAnswerLabels().forStudent(thread?.responses[0]);
-  const answerLabel =
-    answerLabelOverride ??
-    (mode === 'student' ? studentAnswerLabel : tAdmin('yourResponse'));
+  const answerLabels = useAnswerLabels();
+  const answerLabel = (answer?: CoachingMessage) =>
+    mode === 'student'
+      ? answerLabels.forStudent(answer)
+      : answerLabels.forStaff(answer, viewerId);
 
   return (
     <Dialog
@@ -433,28 +434,28 @@ export default function CoachingModal({
               />
             )}
 
-            {thread && (thread.responses.length > 0 || mode === 'student') && (
-              <SectionLabel label={answerLabel}>
-                {thread.responses.length === 0 ? (
-                  <p className="text-sm text-muted-foreground italic">
-                    {t('awaitingReply')}
-                  </p>
-                ) : (
-                  thread.responses.map((response, i) => (
-                    <div key={i} className="flex flex-col gap-1">
-                      <MessageBody
-                        message={response}
-                        fen={fen}
-                        id={`response-${i}`}
-                        viewingKey={viewing?.key ?? null}
-                        onView={view}
-                      />
-                      {mode === 'student' && <LikedMark message={response} />}
-                    </div>
-                  ))
-                )}
+            {thread?.responses.length === 0 && mode === 'student' && (
+              <SectionLabel label={answerLabel()}>
+                <p className="text-sm text-muted-foreground italic">
+                  {t('awaitingReply')}
+                </p>
               </SectionLabel>
             )}
+
+            {thread?.responses.map((response, i) => (
+              <SectionLabel key={i} label={answerLabel(response)}>
+                <div className="flex flex-col gap-1">
+                  <MessageBody
+                    message={response}
+                    fen={fen}
+                    id={`response-${i}`}
+                    viewingKey={viewing?.key ?? null}
+                    onView={view}
+                  />
+                  {mode === 'student' && <LikedMark message={response} />}
+                </div>
+              </SectionLabel>
+            ))}
 
             {justSubmitted && (
               <p className="text-sm text-muted-foreground" role="status">

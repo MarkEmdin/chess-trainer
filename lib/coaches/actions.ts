@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
 import { after } from 'next/server';
 import { getTranslations } from 'next-intl/server';
+import { serverError } from '@/lib/actionError';
 import { getAuthedUser, type AuthedUser } from '@/lib/auth/getUser';
 import { isStaff } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
@@ -93,7 +94,7 @@ export async function applyForCoach(
   if (error) {
     // 23505: the one-pending-per-user index.
     if (error.code === '23505') return { error: t('alreadyPending') };
-    return { error: error.message };
+    return serverError('applyForCoach failed', error);
   }
 
   const site = await origin();
@@ -121,39 +122,16 @@ export async function approveApplication(
   if (typeof admin === 'string') return { error: admin };
   const t = await getTranslations('coaches.manage.errors');
 
-  const app = await pendingApplication(String(formData.get('application_id')));
-  if (!app) return { error: t('notFound') };
-
-  const db = createAdminClient();
-  const steps = await Promise.all([
-    db
-      .from('user_profiles')
-      .update({ role: 'coach' })
-      .eq('id', app.user_id)
-      .eq('role', 'user'),
-    db.from('coach_profiles').upsert(
-      {
-        user_id: app.user_id,
-        first_name: app.first_name,
-        last_name: app.last_name,
-        title: app.title,
-      },
-      { onConflict: 'user_id' },
-    ),
-    // A coach can't be anyone's student.
-    db.from('coach_students').delete().eq('student_id', app.user_id),
-  ]);
-  const failed = steps.find((s) => s.error);
-  if (failed?.error) return { error: failed.error.message };
-
-  const { error } = await db
-    .from('coach_applications')
-    .update({ status: 'approved', reviewed_at: new Date().toISOString() })
-    .eq('id', app.id);
-  if (error) return { error: error.message };
+  // One transaction: role, public profile, assignments and status.
+  const { data: applicantId, error } = await createAdminClient().rpc(
+    'approve_coach_application',
+    { p_application_id: String(formData.get('application_id')) },
+  );
+  if (error) return serverError('approveApplication failed', error);
+  if (!applicantId) return { error: t('notFound') };
 
   const site = await origin();
-  after(() => notifyApplicantOfDecision(app.user_id, true, site));
+  after(() => notifyApplicantOfDecision(applicantId, true, site));
   refresh();
   return { success: true };
 }
@@ -173,7 +151,7 @@ export async function rejectApplication(
     .from('coach_applications')
     .update({ status: 'rejected', reviewed_at: new Date().toISOString() })
     .eq('id', app.id);
-  if (error) return { error: error.message };
+  if (error) return serverError('rejectApplication failed', error);
 
   const site = await origin();
   after(() => notifyApplicantOfDecision(app.user_id, false, site));
@@ -223,7 +201,7 @@ export async function assignStudent(
       { student_id: student.id, coach_id: coach.id },
       { onConflict: 'student_id' },
     );
-  if (error) return { error: error.message };
+  if (error) return serverError('assignStudent failed', error);
   refresh();
   return { success: true };
 }
@@ -239,7 +217,7 @@ export async function unassignStudent(
     .from('coach_students')
     .delete()
     .eq('student_id', String(formData.get('student_id') ?? ''));
-  if (error) return { error: error.message };
+  if (error) return serverError('unassignStudent failed', error);
   refresh();
   return { success: true };
 }
@@ -263,7 +241,7 @@ export async function revokeCoach(
     db.from('coach_students').delete().eq('coach_id', coachId),
   ]);
   const failed = steps.find((s) => s.error);
-  if (failed?.error) return { error: failed.error.message };
+  if (failed?.error) return serverError('revokeCoach failed', failed.error);
   refresh();
   return { success: true };
 }
@@ -285,7 +263,7 @@ export async function saveMyCoachProfile(
       { user_id: admin.id, ...parsed.fields },
       { onConflict: 'user_id' },
     );
-  if (error) return { error: error.message };
+  if (error) return serverError('saveMyCoachProfile failed', error);
   refresh();
   return { success: true };
 }

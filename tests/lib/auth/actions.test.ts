@@ -153,13 +153,13 @@ describe('updatePassword', () => {
     expect(signOut).not.toHaveBeenCalled();
   });
 
-  it('surfaces the Supabase error message on failure', async () => {
+  it('shows a translated error on failure', async () => {
     updateUser.mockResolvedValue({ error: { message: 'Session expired' } });
     const result = await updatePassword(
       undefined,
       formData({ password: 'abcdef', confirmPassword: 'abcdef' }),
     );
-    expect(result).toEqual({ error: 'Session expired' });
+    expect(result).toEqual({ error: 'common.serverError' });
   });
 });
 
@@ -229,6 +229,21 @@ describe('signUp with an email that already has an account', () => {
     jest.mocked(redirect).mockClear();
   });
 
+  it.each([
+    ['over_email_send_rate_limit', 'auth.errors.tooManyAttempts'],
+    ['over_request_rate_limit', 'auth.errors.tooManyAttempts'],
+    ['email_address_invalid', 'auth.errors.invalidEmail'],
+    ['weak_password', 'auth.errors.passwordTooShort'],
+    ['unexpected_failure', 'common.serverError'],
+  ])('translates %s', async (code, expected) => {
+    authSignUp.mockResolvedValue({ error: { code, message: 'raw English' } });
+    const result = await signUp(
+      undefined,
+      formData({ email: 'a@example.com', nickname: 'newbie', password: 'abcdef' }),
+    );
+    expect(result).toEqual({ error: expected });
+  });
+
   it('shows the same check-email screen instead of revealing the account', async () => {
     authSignUp.mockResolvedValue({
       error: { code: 'user_already_exists', message: 'User already registered' },
@@ -268,6 +283,18 @@ describe('signIn', () => {
       'user@example.com',
       expect.anything(),
     );
+  });
+
+  it('says so when sign-ins are rate limited', async () => {
+    signInWithPassword.mockResolvedValue({
+      error: { code: 'over_request_rate_limit', message: 'slow down' },
+      data: { user: null },
+    });
+    const result = await signIn(
+      undefined,
+      formData({ nickname: 'alice', password: 'right1' }),
+    );
+    expect(result).toEqual({ error: 'auth.errors.tooManyAttempts' });
   });
 
   it('keeps reporting a wrong password without touching confirmation state', async () => {

@@ -39,6 +39,21 @@ describe('withAuthors', () => {
     expect(out[1].responses[0].author?.first_name).toBe('Ivan');
   });
 
+  it('lists answers oldest first', async () => {
+    const out = await withAuthors(client, [
+      {
+        responses: [
+          { author_id: null, created_at: '2026-11-06T12:00:02Z' },
+          { author_id: null, created_at: '2026-11-06T12:00:01Z' },
+        ],
+      },
+    ]);
+    expect(out[0].responses.map((r) => r.created_at)).toEqual([
+      '2026-11-06T12:00:01Z',
+      '2026-11-06T12:00:02Z',
+    ]);
+  });
+
   it('skips the query when no answer has an author', async () => {
     const out = await withAuthors(client, [
       { responses: [{ author_id: null }] },

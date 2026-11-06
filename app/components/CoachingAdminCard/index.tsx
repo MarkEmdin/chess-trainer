@@ -46,10 +46,7 @@ export default function CoachingAdminCard({
   const t = useTranslations('coachingAdmin');
   const tCoaches = useTranslations('coaches');
   const coachName = useCoachName();
-  const answerLabel = useAnswerLabels().forStaff(
-    request.responses[0],
-    viewerId,
-  );
+  const answerLabels = useAnswerLabels();
   const tCoaching = useTranslations('coaching');
   const format = useFormatter();
   const [open, setOpen] = useState(autoOpen ?? false);
@@ -116,26 +113,24 @@ export default function CoachingAdminCard({
               <MessagePreview fen={request.fen} message={request} />
             </SectionLabel>
 
-            {answered && (
-              <SectionLabel label={answerLabel}>
-                {request.responses.map((r, i) => (
-                  <div key={i} className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">
-                        {t('answeredAt', { date: when(r.created_at) })}
-                      </span>
-                      {r.id && (
-                        <ResponseLikeToggle
-                          responseId={r.id}
-                          liked={r.liked !== false}
-                        />
-                      )}
-                    </div>
-                    <MessagePreview fen={request.fen} message={r} />
+            {request.responses.map((r, i) => (
+              <SectionLabel key={i} label={answerLabels.forStaff(r, viewerId)}>
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">
+                      {t('answeredAt', { date: when(r.created_at) })}
+                    </span>
+                    {r.id && (
+                      <ResponseLikeToggle
+                        responseId={r.id}
+                        liked={r.liked !== false}
+                      />
+                    )}
                   </div>
-                ))}
+                  <MessagePreview fen={request.fen} message={r} />
+                </div>
               </SectionLabel>
-            )}
+            ))}
 
             <div className="flex gap-2 flex-wrap">
               <Button size="sm" onClick={() => setOpen(true)}>
@@ -170,7 +165,7 @@ export default function CoachingAdminCard({
               : undefined
           }
           gameUrl={request.game_url}
-          answerLabel={answerLabel}
+          viewerId={viewerId}
           onClose={() => setOpen(false)}
         />
       )}

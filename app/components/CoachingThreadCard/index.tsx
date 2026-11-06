@@ -76,20 +76,22 @@ export default function CoachingThreadCard({ thread }: Props) {
               <MessagePreview fen={thread.fen} message={thread} />
             </SectionLabel>
 
-            <SectionLabel label={answerLabels.forStudent(thread.responses[0])}>
-              {thread.responses.length === 0 ? (
+            {thread.responses.length === 0 ? (
+              <SectionLabel label={answerLabels.forStudent()}>
                 <p className="text-sm text-muted-foreground italic">
                   {t('awaitingReply')}
                 </p>
-              ) : (
-                thread.responses.map((r, i) => (
-                  <div key={i} className="flex flex-col gap-1">
+              </SectionLabel>
+            ) : (
+              thread.responses.map((r, i) => (
+                <SectionLabel key={i} label={answerLabels.forStudent(r)}>
+                  <div className="flex flex-col gap-1">
                     <MessagePreview fen={thread.fen} message={r} />
                     <LikedMark message={r} />
                   </div>
-                ))
-              )}
-            </SectionLabel>
+                </SectionLabel>
+              ))
+            )}
 
             <div className="flex gap-2 flex-wrap">
               <Button size="sm" onClick={openThread}>

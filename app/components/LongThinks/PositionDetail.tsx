@@ -81,7 +81,6 @@ export default function PositionDetail({
   const answerLabels = useAnswerLabels();
   const tTile = useTranslations('games.tile');
   const format = useFormatter();
-  const latestResponse = thread?.responses.at(-1);
   const opponentColor: GameColor =
     game.userColor === 'white' ? 'black' : 'white';
 
@@ -143,20 +142,20 @@ export default function PositionDetail({
               <SectionLabel label={tCoaching('yourQuestion')}>
                 <p className="line-clamp-2 text-sm">{thread.body}</p>
               </SectionLabel>
-              <SectionLabel label={answerLabels.forStudent(latestResponse)}>
-                {latestResponse ? (
-                  <>
-                    <p className="line-clamp-3 text-sm">
-                      {latestResponse.body}
-                    </p>
-                    <LikedMark message={latestResponse} />
-                  </>
-                ) : (
+              {thread.responses.length === 0 ? (
+                <SectionLabel label={answerLabels.forStudent()}>
                   <p className="text-sm italic text-muted-foreground">
                     {tCoaching('awaitingReply')}
                   </p>
-                )}
-              </SectionLabel>
+                </SectionLabel>
+              ) : (
+                thread.responses.map((r, i) => (
+                  <SectionLabel key={i} label={answerLabels.forStudent(r)}>
+                    <p className="line-clamp-3 text-sm">{r.body}</p>
+                    <LikedMark message={r} />
+                  </SectionLabel>
+                ))
+              )}
             </div>
           )}
 

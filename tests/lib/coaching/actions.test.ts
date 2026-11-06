@@ -13,7 +13,7 @@ const BLACK_TO_MOVE =
 const insert = jest.fn();
 const rpc = jest.fn();
 let requestRow: { fen: string; user_id: string } | null = null;
-let existingResponse: { id: string } | null = null;
+let insertError: { code: string; message: string } | null = null;
 
 // Minimal chainable stand-in for the Supabase query builder: only the calls
 // the coaching actions make.
@@ -29,8 +29,8 @@ function from(table: string) {
       table === 'coaching_requests' && !insertedRow()
         ? { data: requestRow, error: requestRow ? null : { code: 'PGRST116' } }
         : { data: { id: 'new-id' }, error: null },
-    maybeSingle: async () => ({ data: existingResponse, error: null }),
-    then: (resolve: (v: { error: null }) => void) => resolve({ error: null }),
+    then: (resolve: (v: { error: unknown }) => void) =>
+      resolve({ error: insertError }),
   };
   return builder;
 }
@@ -126,7 +126,7 @@ beforeEach(() => {
   notifyStaffOfQuestion.mockReset();
   notifyStudentOfAnswer.mockReset();
   requestRow = { fen: BLACK_TO_MOVE, user_id: 'student1' };
-  existingResponse = null;
+  insertError = null;
   getAuthedUser.mockResolvedValue({ id: 'c1', role: 'admin' });
   shouldOfferTelegram.mockReset().mockResolvedValue(true);
 });
@@ -262,6 +262,22 @@ describe('respondToRequest', () => {
       'coaching_responses',
       expect.objectContaining({ author_id: 'coach7' }),
     );
+  });
+
+  it('saves an answer without looking for earlier ones', async () => {
+    const result = await respondToRequest(undefined, replyForm());
+    expect(result).toEqual({ success: true });
+    expect(notifyStudentOfAnswer).toHaveBeenCalledWith(
+      'r1',
+      'https://site.test',
+    );
+  });
+
+  it('refuses a second answer from the same coach', async () => {
+    insertError = { code: '23505', message: 'duplicate key' };
+    const result = await respondToRequest(undefined, replyForm());
+    expect(result).toEqual({ error: 'coaching.errors.alreadyResponded' });
+    expect(notifyStudentOfAnswer).not.toHaveBeenCalled();
   });
 
   it('refreshes the layout so the header bell recounts', async () => {
@@ -523,10 +539,12 @@ describe('setResponseLiked', () => {
     );
   });
 
-  it('returns an RPC error as { error }', async () => {
+  it('returns a translated error when the RPC fails', async () => {
     getAuthedUser.mockResolvedValue({ id: 'c1', role: 'admin' });
     rpc.mockResolvedValue({ error: { message: 'boom' } });
-    expect(await setResponseLiked('resp1', true)).toEqual({ error: 'boom' });
+    expect(await setResponseLiked('resp1', true)).toEqual({
+      error: 'common.serverError',
+    });
     expect(revalidatePath).not.toHaveBeenCalled();
   });
 });

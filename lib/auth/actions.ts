@@ -6,6 +6,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getPendingEmail, setPendingEmail } from '@/lib/auth/pendingEmail';
+import { serverError } from '@/lib/actionError';
 
 export type AuthFormState =
   | { error: string; suggest?: 'register' | 'login' | 'resend' }
@@ -15,6 +16,14 @@ export type AuthFormState =
 // 3-30 chars, letters/digits/underscore/hyphen — keeps nicknames URL-safe
 // and prevents LIKE-wildcard tricks in lookups.
 const NICKNAME_RE = /^[a-zA-Z0-9_-]{3,30}$/;
+
+// Sign-ups the user can do something about, by Supabase Auth error code.
+const SIGN_UP_ERRORS: Record<string, string> = {
+  over_email_send_rate_limit: 'tooManyAttempts',
+  over_request_rate_limit: 'tooManyAttempts',
+  email_address_invalid: 'invalidEmail',
+  weak_password: 'passwordTooShort',
+};
 
 export async function signIn(
   _prev: AuthFormState,
@@ -51,6 +60,10 @@ export async function signIn(
   if (error?.code === 'email_not_confirmed') {
     await setPendingEmail(email);
     return { error: t('emailNotConfirmed'), suggest: 'resend' };
+  }
+
+  if (error?.code === 'over_request_rate_limit') {
+    return { error: t('tooManyAttempts') };
   }
 
   if (error || !data.user) {
@@ -116,7 +129,8 @@ export async function signUp(
   // accounts. Depending on settings Supabase reports it either as success
   // or as user_already_exists.
   if (error && error.code !== 'user_already_exists') {
-    return { error: error.message };
+    const known = error.code && SIGN_UP_ERRORS[error.code];
+    return known ? { error: t(known) } : serverError('signUp failed', error);
   }
 
   // With confirmations on there is no session yet.
@@ -215,7 +229,7 @@ export async function updatePassword(
     if (error.name === 'AuthSessionMissingError') {
       return { error: t('errors.sessionExpired') };
     }
-    return { error: error.message };
+    return serverError('updatePassword failed', error);
   }
 
   // Password reset should outlive a stolen session — sign out every other

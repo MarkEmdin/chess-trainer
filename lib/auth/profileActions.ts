@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { routing } from '@/i18n/routing';
+import { serverError } from '@/lib/actionError';
 
 export type ProfileFormState =
   | { error: string }
@@ -56,7 +57,7 @@ export async function updateExternalUsernames(
     .eq('id', user.id);
 
   if (error) {
-    return { error: error.message };
+    return serverError('updateExternalUsernames failed', error);
   }
 
   revalidatePath('/[locale]/profile', 'page');
