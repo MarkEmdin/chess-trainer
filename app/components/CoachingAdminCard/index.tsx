@@ -126,7 +126,6 @@ export default function CoachingAdminCard({
                       </span>
                       {r.id && (
                         <ResponseLikeToggle
-                          key={`${r.id}-${r.liked !== false}`}
                           responseId={r.id}
                           liked={r.liked !== false}
                         />
