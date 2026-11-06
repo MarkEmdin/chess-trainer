@@ -32,6 +32,11 @@ describe('<CheckEmail />', () => {
     expect(screen.getByText(/a\*\*\*@gmail\.com/)).toBeInTheDocument();
   });
 
+  it('says the email may land in spam', () => {
+    renderWithIntl(<CheckEmail maskedEmail="a***@gmail.com" />);
+    expect(screen.getByText(/spam folder/i)).toBeInTheDocument();
+  });
+
   it('resends the email on request', async () => {
     renderWithIntl(<CheckEmail maskedEmail="a***@gmail.com" />);
     fireEvent.click(screen.getByRole('button', { name: 'Resend email' }));

@@ -56,7 +56,7 @@
       "subtitle": "Enter your nickname or email and we'll send you a reset link.",
       "submit": "Send reset link",
       "pending": "Sending…",
-      "success": "If that account exists, a reset email was sent.",
+      "success": "If that account exists, a reset email was sent. Check your spam folder too.",
       "backToLogin": "Back to login",
       "identifier": "Nickname or email"
     },
@@ -73,6 +73,7 @@
       "resent": "If the account needs confirming, a new email was sent.",
       "title": "Check your email",
       "body": "We sent a confirmation link to {email}. Open it to finish creating your account.",
+      "spamHint": "Can’t find it? Check your spam folder: the email sometimes lands there.",
       "resend": "Resend email",
       "resendPending": "Sending…",
       "backToLogin": "Back to login"
