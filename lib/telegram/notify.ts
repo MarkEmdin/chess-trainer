@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { Role } from '@/lib/auth/roles';
+import type { Feedback } from '@/lib/feedback/types';
 import { canSeeRequest } from '@/lib/coaches/visibility';
 import { telegramConfig } from './config';
 import { sendMessage, type BotMessage } from './api';
@@ -7,6 +8,7 @@ import { unlinkChat } from './link';
 import {
   answeredMessage,
   applicationDecisionMessage,
+  feedbackMessage,
   newApplicationMessage,
   newQuestionMessage,
   questionListMessage,
@@ -235,6 +237,46 @@ export async function notifyAdminsOfApplication(
     );
   } catch (e) {
     console.error('telegram notifyAdminsOfApplication failed', e);
+  }
+}
+
+// Feedback is stored nowhere else (spec 025), so unlike the other notices this
+// one reports whether at least one admin got it.
+export async function notifyAdminsOfFeedback(
+  feedback: Feedback,
+): Promise<boolean> {
+  if (!telegramConfig()) return false;
+  try {
+    const db = createAdminClient();
+    const { data: admins } = await db
+      .from('user_profiles')
+      .select('id, preferred_locale')
+      .eq('role', 'admin');
+    const recipients = (admins ?? []) as Recipient[];
+    const { data: links } = await db
+      .from('telegram_links')
+      .select('user_id, chat_id')
+      .in(
+        'user_id',
+        recipients.map((r) => r.id),
+      );
+    const results = await Promise.all(
+      (links ?? []).map(async (link) => {
+        const locale = toBotLocale(
+          recipients.find((r) => r.id === link.user_id)?.preferred_locale,
+        );
+        const result = await sendMessage(
+          link.chat_id,
+          feedbackMessage(locale, feedback),
+        );
+        if (result === 'blocked') await unlinkChat(link.chat_id);
+        return result;
+      }),
+    );
+    return results.includes('ok');
+  } catch (e) {
+    console.error('telegram notifyAdminsOfFeedback failed', e);
+    return false;
   }
 }
 

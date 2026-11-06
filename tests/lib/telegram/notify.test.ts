@@ -1,5 +1,6 @@
 import {
   notifyAdminsOfApplication,
+  notifyAdminsOfFeedback,
   notifyApplicantOfDecision,
   notifyStaffOfQuestion,
   notifyStudentOfAnswer,
@@ -343,5 +344,68 @@ describe('unansweredList for a coach', () => {
       `${ORIGIN}/en/admin?request=mine`,
       `${ORIGIN}/en/admin`,
     ]);
+  });
+});
+
+describe('notifyAdminsOfFeedback', () => {
+  const feedback = {
+    kind: 'bug' as const,
+    body: 'Broken',
+    sender: null,
+    contact: '',
+    page: 'https://site.test/ru',
+    device: '393×760',
+  };
+
+  beforeEach(() => {
+    tables = {
+      user_profiles: [
+        { id: 'a1', role: 'admin', preferred_locale: 'ru' },
+        { id: 'a2', role: 'admin', preferred_locale: 'en' },
+        { id: 'c1', role: 'coach', preferred_locale: 'en' },
+      ],
+      telegram_links: [
+        { user_id: 'a1', chat_id: 1 },
+        { user_id: 'a2', chat_id: 2 },
+        { user_id: 'c1', chat_id: 3 },
+      ],
+    };
+  });
+
+  it('reaches admins only, each in their locale', async () => {
+    expect(await notifyAdminsOfFeedback(feedback)).toBe(true);
+    expect(sendMessage.mock.calls.map((c) => c[0]).sort()).toEqual([1, 2]);
+    const toRu = sendMessage.mock.calls.find((c) => c[0] === 1)?.[1];
+    expect(toRu.text).toContain('Баг');
+  });
+
+  it('counts as delivered when one admin blocked the bot', async () => {
+    sendMessage.mockImplementation(async (chatId: number) =>
+      chatId === 1 ? 'blocked' : 'ok',
+    );
+    expect(await notifyAdminsOfFeedback(feedback)).toBe(true);
+    expect(unlinkChat).toHaveBeenCalledWith(1);
+  });
+
+  it('is not delivered when no admin got it', async () => {
+    sendMessage.mockResolvedValue('error');
+    expect(await notifyAdminsOfFeedback(feedback)).toBe(false);
+  });
+
+  it('is not delivered when no admin is linked', async () => {
+    tables.telegram_links = [];
+    expect(await notifyAdminsOfFeedback(feedback)).toBe(false);
+  });
+
+  it('is not delivered without the bot configured', async () => {
+    telegramConfig.mockReturnValue(null);
+    expect(await notifyAdminsOfFeedback(feedback)).toBe(false);
+  });
+
+  it('is not delivered when the database fails', async () => {
+    dbError = new Error('down');
+    const log = jest.spyOn(console, 'error').mockImplementation(() => {});
+    expect(await notifyAdminsOfFeedback(feedback)).toBe(false);
+    log.mockRestore();
   });
 });

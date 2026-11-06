@@ -572,7 +572,15 @@
       "openApplications": "Review applications",
       "applicationApproved": "🎉 Your coach application was approved. You can now answer students' questions.",
       "applicationRejected": "Your coach application was not approved. You can update it and apply again.",
-      "openApplicationForm": "Open the application"
+      "openApplicationForm": "Open the application",
+      "feedback": "{kind}\n\n{body}\n\n👤 {sender}{contact}\n📄 {page}\n📱 {device}",
+      "feedbackKinds": {
+        "bug": "🐞 Bug",
+        "idea": "💡 Idea",
+        "inconvenient": "😣 Inconvenient"
+      },
+      "feedbackGuest": "Guest",
+      "feedbackContact": "\n✉️ Contact: {contact}"
     },
     "prompt": {
       "text": "Want to know when the coach answers? We'll message you in Telegram.",
@@ -616,5 +624,29 @@
   },
   "metadata": {
     "description": "Learn to analyze chess positions yourself — find the key moments in your games and discuss them with a coach."
+  },
+  "feedback": {
+    "open": "Report a problem",
+    "title": "Report a problem or share an idea",
+    "description": "Tell us what went wrong or what could be better.",
+    "kindLabel": "Type",
+    "kinds": {
+      "bug": "Bug",
+      "idea": "Idea",
+      "inconvenient": "Inconvenient"
+    },
+    "bodyLabel": "Your message",
+    "bodyPlaceholder": "What happened, and what did you expect?",
+    "contactLabel": "Contact (optional)",
+    "contactPlaceholder": "Telegram or email, if you want a reply",
+    "send": "Send",
+    "sending": "Sending…",
+    "sent": "Thank you! Your message has been sent.",
+    "close": "Close",
+    "errors": {
+      "empty": "Write a few words first.",
+      "tooLong": "No more than {max} characters.",
+      "failed": "Could not send. Your text is still here, please try again later."
+    }
   }
 }

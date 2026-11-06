@@ -5,6 +5,7 @@ import {
   previewBody,
   questionListMessage,
   toBotLocale,
+  feedbackMessage,
 } from '@/lib/telegram/messages';
 
 const now = new Date('2026-10-30T12:00:00Z');
@@ -77,5 +78,38 @@ describe('telegram messages', () => {
       { text: 'Open profile', url: 'https://x.test/p' },
     ]);
     expect(infoMessage('en', 'help', 'https://x.test/p').buttons).toBeUndefined();
+  });
+});
+
+describe('feedbackMessage', () => {
+  const base = {
+    kind: 'idea' as const,
+    body: 'Add <b>dark</b> & light',
+    sender: null,
+    contact: '',
+    page: 'https://site.test/ru/games',
+    device: '393×760, Chrome',
+  };
+
+  it('shows a guest with page and device, and escapes html', () => {
+    const { text } = feedbackMessage('en', base);
+    expect(text).toContain('Idea');
+    expect(text).toContain('Add &lt;b&gt;dark&lt;/b&gt; &amp; light');
+    expect(text).toContain('Guest');
+    expect(text).toContain('https://site.test/ru/games');
+    expect(text).toContain('393×760, Chrome');
+    expect(text).not.toContain('Contact');
+  });
+
+  it('shows the sender and the contact', () => {
+    const { text } = feedbackMessage('ru', {
+      ...base,
+      sender: { nickname: 'Mark', email: 'm@x.test' },
+      contact: '@mark',
+    });
+    expect(text).toContain('Идея');
+    expect(text).toContain('Mark');
+    expect(text).toContain('m@x.test');
+    expect(text).toContain('@mark');
   });
 });
