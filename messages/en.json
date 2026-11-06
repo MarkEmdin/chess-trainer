@@ -596,6 +596,58 @@
       "p1": "Most chess players play hundreds of fast games and hardly ever review them. Experience piles up, understanding does not: the same mistakes repeat from game to game.",
       "p2": "Chess Fundamentals offers another way. It finds the positions in your games where you thought the longest — that is where the game was decided. Work through them yourself, without an engine, write down your thinking and discuss it with a coach. That is how you grow your thinking at the board, not just your game count."
     },
+    "features": {
+      "title": "What you can do here",
+      "items": {
+        "positions": {
+          "title": "Key positions",
+          "text": "Enter your Chess.com or Lichess nickname, and the site finds the moves you thought longest about. They are the best material for analysing on your own."
+        },
+        "games": {
+          "title": "Games",
+          "text": "Replay your recent games move by move with the clocks, and filter them by bullet, blitz and rapid."
+        },
+        "questions": {
+          "title": "Questions to a coach",
+          "text": "Write down your thoughts on a position and send them to a coach. The answer appears in “My questions”."
+        },
+        "moves": {
+          "title": "Moves on the board",
+          "text": "While you write a question or an answer, play moves on the board: they land in the text where the caret is. Tap a line in the text to step through it on the board."
+        },
+        "notifications": {
+          "title": "Notifications",
+          "text": "The bell in the header shows new answers, and the Telegram bot sends them right away. You can connect it in your profile."
+        },
+        "leaderboard": {
+          "title": "Leaderboard",
+          "text": "Coaches like good questions, and the most liked players of the week get to the top."
+        },
+        "learning": {
+          "title": "Learning materials",
+          "text": "Theory and the world champions. Russian only for now."
+        },
+        "feedback": {
+          "title": "Report a problem",
+          "text": "The button in the footer sends a bug, an idea or anything inconvenient straight to the author."
+        }
+      },
+      "demo": {
+        "hint": "Tap a line, then step through it with the arrows.",
+        "positions": {
+          "badge": "3:24 on this move"
+        },
+        "moves": {
+          "before": "Black should play ",
+          "middle": ". Taking with the knight is risky, White gets a strong attack: "
+        },
+        "questions": {
+          "question": "I thought for five minutes here. Can Black take on e4?",
+          "liked": "The coach liked your question",
+          "answer": "Yes, White wins the pawn back and the game is equal: "
+        }
+      }
+    },
     "author": {
       "title": "Author",
       "text": "I'm Mark Emdin, a chess player and developer. I built this site myself and I answer students' questions in the coaching section."
