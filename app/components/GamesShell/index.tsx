@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Loader2Icon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useChessComGames } from '@/lib/chesscom/useChessComGames';
@@ -79,6 +79,34 @@ export default function GamesShell({
   const [profileLichessUsername, setProfileLichessUsername] = useState<
     string | null
   >(initialLichessUsername);
+
+  // A new account with no nickname takes the one entered as a guest in this
+  // browser, once. A nickname already in the profile always wins.
+  const emptyProfile =
+    isAuthenticated && !initialChesscomUsername && !initialLichessUsername;
+  if (emptyProfile && storedChesscomUsername && !profileChesscomUsername) {
+    setProfileChesscomUsername(storedChesscomUsername);
+  }
+  if (emptyProfile && storedLichessUsername && !profileLichessUsername) {
+    setProfileLichessUsername(storedLichessUsername);
+  }
+  useEffect(() => {
+    if (!emptyProfile) return;
+    if (storedChesscomUsername) {
+      void updateChesscomUsername(storedChesscomUsername);
+      setStoredChesscomUsername(null);
+    }
+    if (storedLichessUsername) {
+      void updateLichessUsername(storedLichessUsername);
+      setStoredLichessUsername(null);
+    }
+  }, [
+    emptyProfile,
+    storedChesscomUsername,
+    storedLichessUsername,
+    setStoredChesscomUsername,
+    setStoredLichessUsername,
+  ]);
 
   const chesscomUsername = isAuthenticated
     ? profileChesscomUsername

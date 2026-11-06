@@ -30,7 +30,7 @@ export default async function EmailConfirmedPage() {
         <p className="text-sm text-muted-foreground">{t('body')}</p>
       </header>
       <Link
-        href="/lessons"
+        href="/think-time"
         className="inline-block self-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
       >
         {t('cta')}

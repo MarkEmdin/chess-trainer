@@ -29,7 +29,7 @@
     },
     "register": {
       "title": "Create account",
-      "subtitle": "Start tracking your chess progress.",
+      "subtitle": "Create an account to ask a coach questions.",
       "submit": "Register",
       "pending": "Creating…",
       "switchPrompt": "Already have an account?",
@@ -80,7 +80,7 @@
     "emailConfirmed": {
       "title": "Email confirmed",
       "body": "You're logged in. Welcome!",
-      "cta": "Start learning"
+      "cta": "Go to my positions"
     },
     "accountMenu": "Account menu",
     "profile": "Profile"
@@ -312,10 +312,10 @@
     }
   },
   "home": {
-    "tagline": "Learn to think through chess positions on your own.",
-    "idea": "This project helps beginner players analyze positions themselves — without engine help. Find the moments in your own games where you thought the longest, work out what was going on, and put your ideas into words. Then discuss them with a coach — and soon with other players too.",
-    "ctaPrimary": "Find my key positions",
-    "ctaSecondary": "Learning materials",
+    "headline": "A real coach reviews your games",
+    "subhead": "Enter your Chess.com or Lichess nickname and we’ll find the moves you thought about longest. Write down your thoughts and get an answer from a real coach, with comments and lines.",
+    "ctaPrimary": "Try it on my games",
+    "demoLabel": "Sample question and answer",
     "howItWorks": {
       "title": "How it works",
       "find": {
@@ -515,9 +515,9 @@
       "overMove": "over",
       "openQuestion": "Open question",
       "openGame": "Open the whole game",
-      "signInToAsk": "Sign in to ask a coach about this position.",
       "back": "Back",
-      "counter": "{n} / {total}"
+      "counter": "{n} / {total}",
+      "accountNeeded": "You need an account to ask a coach."
     }
   },
   "videoModal": {
@@ -678,7 +678,7 @@
     "tutorial": "How it works"
   },
   "metadata": {
-    "description": "Learn to analyze chess positions yourself — find the key moments in your games and discuss them with a coach."
+    "description": "A real coach reviews your games: find the moves you thought about longest and get an answer with comments and lines."
   },
   "feedback": {
     "open": "Report a problem",

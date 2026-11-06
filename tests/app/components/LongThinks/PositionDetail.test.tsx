@@ -107,12 +107,14 @@ describe('<PositionDetail />', () => {
     expect(screen.getByText('Answer from IM Anna Ivanova')).toBeInTheDocument();
   });
 
-  it('shows a sign-in hint to guests', () => {
-    detail({ isAuthenticated: false });
-    expect(
-      screen.queryByRole('button', { name: /ask coach|open question/i }),
-    ).not.toBeInTheDocument();
-    expect(screen.getByText(/sign in to ask a coach/i)).toBeInTheDocument();
+  it('sends guests to register, reporting the click', async () => {
+    const { onAskCoach } = detail({ isAuthenticated: false });
+    const link = screen.getByRole('link', { name: /ask coach/i });
+    expect(link.getAttribute('href')).toContain('/register');
+    expect(screen.getByText(/you need an account/i)).toBeInTheDocument();
+    link.addEventListener('click', (e) => e.preventDefault());
+    await userEvent.click(link);
+    expect(onAskCoach).toHaveBeenCalled();
   });
 
   it('always offers the whole game', async () => {
