@@ -70,6 +70,34 @@ describe('LineDemo', () => {
     );
   });
 
+  it('steps with the keyboard arrows after a chip is tapped', () => {
+    renderDemo();
+    const chip = button('4… d5 5. exd5');
+    fireEvent.click(chip);
+    fireEvent.keyDown(chip, { key: 'ArrowRight' });
+    expect(position()).toBe(fenAfter(9));
+    fireEvent.keyDown(chip, { key: 'ArrowLeft' });
+    expect(position()).toBe(fenAfter(8));
+  });
+
+  it('stays inside the line at both ends of the keyboard arrows', () => {
+    renderDemo();
+    const chip = button('4… d5 5. exd5');
+    fireEvent.keyDown(chip, { key: 'ArrowLeft' });
+    expect(position()).toBe(fenAfter(MOVES_START));
+    fireEvent.click(button('Go to end'));
+    fireEvent.keyDown(chip, { key: 'ArrowRight' });
+    expect(position()).toBe(fenAfter(MOVES_LINE.length));
+  });
+
+  it('keeps focus in the demo when an arrow button disables itself', () => {
+    renderDemo();
+    const end = button('Go to end');
+    end.focus();
+    fireEvent.click(end);
+    expect(screen.getByTestId('line-demo')).toHaveFocus();
+  });
+
   it('jumps to the end and back to the start', () => {
     renderDemo();
     fireEvent.click(button('Go to end'));
