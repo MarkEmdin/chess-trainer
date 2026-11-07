@@ -30,6 +30,13 @@ describe('Footer', () => {
     expect(screen.getByRole('button', { name: 'feedback' })).toBeInTheDocument();
   });
 
+  it('links to the privacy policy', async () => {
+    render(await Footer());
+    expect(
+      screen.getByRole('link', { name: 'footer.privacy' }),
+    ).toHaveAttribute('href', '/privacy');
+  });
+
   it('links to the about page', async () => {
     render(await Footer());
     expect(screen.getByRole('link', { name: 'footer.about' })).toHaveAttribute(

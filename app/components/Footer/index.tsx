@@ -22,6 +22,12 @@ export default async function Footer() {
           >
             {t('about')}
           </Link>
+          <Link
+            href="/privacy"
+            className="hover:text-foreground transition-colors"
+          >
+            {t('privacy')}
+          </Link>
         </div>
       </div>
     </footer>
