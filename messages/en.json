@@ -375,8 +375,8 @@
       "description": "Basic checkmates: two rooks, queen, rook."
     },
     "worldChampions": {
-      "title": "World Champions USSR history",
-      "description": "World Champions USSR history."
+      "title": "World champions",
+      "description": "From Steinitz to Kasparov: the first 13 world champions."
     }
   },
   "theory": {
@@ -402,7 +402,9 @@
     }
   },
   "champions": {
-    "title": "World Champions",
+    "title": "The first 13 world champions",
+    "photoCredits": "Photo credits",
+    "photoCreditsNote": "Photos from Wikimedia Commons, cropped to the face.",
     "list": {
       "steinitz": {
         "name": "Wilhelm Steinitz",

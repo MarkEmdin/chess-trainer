@@ -13,6 +13,8 @@ import {
   AvatarImage,
 } from '@/app/components/ui/avatar';
 
+const creditLinkClass = 'underline hover:text-foreground';
+
 const getInitials = (name: string) =>
   name
     .split(' ')
@@ -31,7 +33,7 @@ export default async function WorldChampionsPage() {
           {t('title')}
         </h1>
         <div className="flex flex-col gap-4">
-          {worldChampions.map((champion) => {
+          {worldChampions.map((champion, index) => {
             const name = t(`list.${champion.id}.name`);
             const description = t(`list.${champion.id}.description`);
             return (
@@ -39,13 +41,13 @@ export default async function WorldChampionsPage() {
                 <CardContent>
                   <div className="flex gap-4">
                     <Avatar className="size-20">
-                      {champion.photo && (
-                        <AvatarImage src={champion.photo} alt={name} />
-                      )}
+                      <AvatarImage src={champion.photo} alt={name} />
                       <AvatarFallback>{getInitials(name)}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col gap-1 flex-1">
-                      <CardTitle className="text-lg">{name}</CardTitle>
+                      <CardTitle className="text-lg">
+                        {index + 1}. {name}
+                      </CardTitle>
                       <CardDescription>{champion.years}</CardDescription>
                       <p className="text-sm text-muted-foreground mt-2">
                         {description}
@@ -60,6 +62,33 @@ export default async function WorldChampionsPage() {
             );
           })}
         </div>
+        <section
+          aria-labelledby="photo-credits"
+          className="mt-10 flex flex-col gap-2 text-xs text-muted-foreground"
+        >
+          <h2 id="photo-credits" className="font-medium text-foreground">
+            {t('photoCredits')}
+          </h2>
+          <p>{t('photoCreditsNote')}</p>
+          <ul className="flex flex-col gap-1">
+            {worldChampions.map(({ id, credit }) => (
+              <li key={id}>
+                {t(`list.${id}.name`)}: {credit.author},{' '}
+                {credit.licenseUrl ? (
+                  <a href={credit.licenseUrl} className={creditLinkClass}>
+                    {credit.license}
+                  </a>
+                ) : (
+                  credit.license
+                )}
+                ,{' '}
+                <a href={credit.source} className={creditLinkClass}>
+                  Wikimedia Commons
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
     </div>
   );
