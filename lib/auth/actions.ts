@@ -6,16 +6,13 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getPendingEmail, setPendingEmail } from '@/lib/auth/pendingEmail';
+import { NICKNAME_RE } from '@/lib/auth/nickname';
 import { serverError } from '@/lib/actionError';
 
 export type AuthFormState =
   | { error: string; suggest?: 'register' | 'login' | 'resend' }
   | { success: string }
   | undefined;
-
-// 3-30 chars, letters/digits/underscore/hyphen — keeps nicknames URL-safe
-// and prevents LIKE-wildcard tricks in lookups.
-const NICKNAME_RE = /^[a-zA-Z0-9_-]{3,30}$/;
 
 // Sign-ups the user can do something about, by Supabase Auth error code.
 const SIGN_UP_ERRORS: Record<string, string> = {
