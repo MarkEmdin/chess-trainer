@@ -36,6 +36,18 @@ describe('<AuthForm />', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('asks for an email, not a nickname, at login', () => {
+    renderWithIntl(<AuthForm mode="login" />);
+    expect(screen.getByLabelText(/email/i)).toHaveAttribute('name', 'email');
+    expect(screen.queryByLabelText(/nickname/i)).not.toBeInTheDocument();
+  });
+
+  it('asks for email and nickname at registration', () => {
+    renderWithIntl(<AuthForm mode="register" />);
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/nickname/i)).toBeInTheDocument();
+  });
+
   it('shows a notice passed in by the page', () => {
     renderWithIntl(<AuthForm mode="login" notice="Link expired." />);
     expect(screen.getByRole('status')).toHaveTextContent('Link expired.');

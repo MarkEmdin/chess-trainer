@@ -37,11 +37,9 @@
     },
     "errors": {
       "fieldsRequired": "All fields are required",
-      "noAccount": "No account with this nickname.",
-      "wrongPassword": "Wrong password.",
+      "invalidCredentials": "Wrong email or password.",
       "nicknameTaken": "This nickname is already taken.",
       "nicknameFormat": "Nickname must be 3-30 letters, digits, \"-\" or \"_\"",
-      "registerSuggest": "Register?",
       "loginSuggest": "Login?",
       "passwordMismatch": "Passwords don't match.",
       "passwordTooShort": "Password must be at least 6 characters.",
@@ -55,12 +53,11 @@
     },
     "forgotPassword": {
       "title": "Reset your password",
-      "subtitle": "Enter your nickname or email and we'll send you a reset link.",
+      "subtitle": "Enter your email and we will send you a password reset link.",
       "submit": "Send reset link",
       "pending": "Sending…",
       "success": "If that account exists, a reset email was sent. Check your spam folder too.",
-      "backToLogin": "Back to login",
-      "identifier": "Nickname or email"
+      "backToLogin": "Back to login"
     },
     "resetPassword": {
       "title": "Set a new password",

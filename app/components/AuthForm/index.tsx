@@ -40,25 +40,25 @@ export default function AuthForm({ mode, notice }: Props) {
       )}
 
       <form action={formAction} className="flex flex-col gap-4">
+        <FormField
+          label={t('email')}
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+        />
+
         {mode === 'register' && (
           <FormField
-            label={t('email')}
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
+            label={t('nickname')}
+            id="nickname"
+            name="nickname"
+            type="text"
+            autoComplete="username"
             required
           />
         )}
-
-        <FormField
-          label={t('nickname')}
-          id="nickname"
-          name="nickname"
-          type="text"
-          autoComplete="username"
-          required
-        />
 
         <FormField
           label={t('password')}
@@ -82,17 +82,6 @@ export default function AuthForm({ mode, notice }: Props) {
         {state && 'error' in state && (
           <p className="text-sm text-destructive" role="alert">
             {state.error}
-            {state.suggest === 'register' && (
-              <>
-                {' '}
-                <Link
-                  href="/register"
-                  className="text-foreground underline hover:no-underline"
-                >
-                  {t('errors.registerSuggest')}
-                </Link>
-              </>
-            )}
             {state.suggest === 'login' && (
               <>
                 {' '}
