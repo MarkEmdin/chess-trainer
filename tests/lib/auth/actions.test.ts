@@ -2,10 +2,12 @@ import {
   requestPasswordReset,
   resendConfirmation,
   signIn,
+  signInWithGoogle,
   signUp,
   updatePassword,
 } from '@/lib/auth/actions';
 import { redirect } from '@/i18n/navigation';
+import { redirect as externalRedirect } from 'next/navigation';
 
 const resetPasswordForEmail = jest.fn();
 const updateUser = jest.fn();
@@ -13,6 +15,7 @@ const signOut = jest.fn();
 const resend = jest.fn();
 const authSignUp = jest.fn();
 const signInWithPassword = jest.fn();
+const signInWithOAuth = jest.fn();
 const rpc = jest.fn();
 const cookieGet = jest.fn();
 const cookieSet = jest.fn();
@@ -26,7 +29,13 @@ jest.mock('@/lib/supabase/server', () => ({
       resend,
       signUp: authSignUp,
       signInWithPassword,
+      signInWithOAuth,
     },
+    from: () => ({
+      select: () => ({
+        eq: () => ({ single: async () => ({ data: null }) }),
+      }),
+    }),
   }),
 }));
 
@@ -35,6 +44,8 @@ jest.mock('@/lib/supabase/admin', () => ({
 }));
 
 jest.mock('@/i18n/navigation', () => ({ redirect: jest.fn() }));
+
+jest.mock('next/navigation', () => ({ redirect: jest.fn() }));
 
 jest.mock('next/headers', () => ({
   headers: async () => new Map([['origin', 'https://example.com']]),
@@ -63,7 +74,7 @@ describe('requestPasswordReset', () => {
   it('sends the reset straight to a typed email, normalised', async () => {
     const result = await requestPasswordReset(
       undefined,
-      formData({ identifier: ' User@Example.com ' }),
+      formData({ email: ' User@Example.com ' }),
     );
     expect(rpc).not.toHaveBeenCalled();
     expect(resetPasswordForEmail).toHaveBeenCalledWith(
@@ -73,17 +84,16 @@ describe('requestPasswordReset', () => {
     expect(result).toEqual({ success: 'auth.forgotPassword.success' });
   });
 
-  it('returns an error when nickname is missing', async () => {
+  it('returns an error when the email is missing', async () => {
     const result = await requestPasswordReset(undefined, formData({}));
     expect(result).toEqual({ error: 'auth.errors.fieldsRequired' });
     expect(rpc).not.toHaveBeenCalled();
   });
 
-  it('sends a reset email and returns a neutral success message when the nickname exists', async () => {
-    rpc.mockResolvedValue({ data: 'user@example.com' });
-    const result = await requestPasswordReset(
+  it('sends the reset through the confirm route of the current locale', async () => {
+    await requestPasswordReset(
       undefined,
-      formData({ identifier: 'alice' }),
+      formData({ email: 'user@example.com' }),
     );
     expect(resetPasswordForEmail).toHaveBeenCalledWith(
       'user@example.com',
@@ -91,17 +101,6 @@ describe('requestPasswordReset', () => {
         redirectTo: expect.stringContaining('/en/auth/confirm?next='),
       }),
     );
-    expect(result).toEqual({ success: 'auth.forgotPassword.success' });
-  });
-
-  it('returns the same neutral success message when the nickname does not exist', async () => {
-    rpc.mockResolvedValue({ data: null });
-    const result = await requestPasswordReset(
-      undefined,
-      formData({ identifier: 'ghost' }),
-    );
-    expect(resetPasswordForEmail).not.toHaveBeenCalled();
-    expect(result).toEqual({ success: 'auth.forgotPassword.success' });
   });
 });
 
@@ -265,6 +264,22 @@ describe('signIn', () => {
     cookieSet.mockReset();
   });
 
+  it('signs in with the typed email, normalised, and no lookup', async () => {
+    signInWithPassword.mockResolvedValue({
+      error: null,
+      data: { user: { id: 'u1' } },
+    });
+    await signIn(
+      undefined,
+      formData({ email: ' User@Example.com ', password: 'abcdef' }),
+    );
+    expect(rpc).not.toHaveBeenCalled();
+    expect(signInWithPassword).toHaveBeenCalledWith({
+      email: 'user@example.com',
+      password: 'abcdef',
+    });
+  });
+
   it('asks an unconfirmed user to confirm and remembers their address', async () => {
     signInWithPassword.mockResolvedValue({
       error: { code: 'email_not_confirmed', message: 'Email not confirmed' },
@@ -272,7 +287,7 @@ describe('signIn', () => {
     });
     const result = await signIn(
       undefined,
-      formData({ nickname: 'alice', password: 'abcdef' }),
+      formData({ email: 'user@example.com', password: 'abcdef' }),
     );
     expect(result).toEqual({
       error: 'auth.errors.emailNotConfirmed',
@@ -292,21 +307,56 @@ describe('signIn', () => {
     });
     const result = await signIn(
       undefined,
-      formData({ nickname: 'alice', password: 'right1' }),
+      formData({ email: 'user@example.com', password: 'right1' }),
     );
     expect(result).toEqual({ error: 'auth.errors.tooManyAttempts' });
   });
 
-  it('keeps reporting a wrong password without touching confirmation state', async () => {
+  it('gives one error for a wrong email or password, without touching confirmation state', async () => {
     signInWithPassword.mockResolvedValue({
       error: { code: 'invalid_credentials', message: 'Invalid login' },
       data: { user: null },
     });
     const result = await signIn(
       undefined,
-      formData({ nickname: 'alice', password: 'wrong1' }),
+      formData({ email: 'user@example.com', password: 'wrong1' }),
     );
-    expect(result).toEqual({ error: 'auth.errors.wrongPassword' });
+    expect(result).toEqual({ error: 'auth.errors.invalidCredentials' });
     expect(cookieSet).not.toHaveBeenCalled();
+  });
+});
+
+describe('signInWithGoogle', () => {
+  beforeEach(() => {
+    signInWithOAuth.mockReset();
+    jest.mocked(redirect).mockClear();
+    jest.mocked(externalRedirect).mockClear();
+  });
+
+  it('sends the browser to Google, returning through the locale confirm route', async () => {
+    signInWithOAuth.mockResolvedValue({
+      data: { url: 'https://accounts.example/o' },
+      error: null,
+    });
+    await signInWithGoogle();
+    expect(signInWithOAuth).toHaveBeenCalledWith({
+      provider: 'google',
+      options: { redirectTo: 'https://example.com/en/auth/confirm' },
+    });
+    expect(externalRedirect).toHaveBeenCalledWith('https://accounts.example/o');
+  });
+
+  it('returns to login with a notice when Supabase refuses', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    signInWithOAuth.mockResolvedValue({
+      data: { url: null },
+      error: { message: 'nope' },
+    });
+    await signInWithGoogle();
+    expect(externalRedirect).not.toHaveBeenCalled();
+    expect(redirect).toHaveBeenCalledWith({
+      href: { pathname: '/login', query: { error: 'google_failed' } },
+      locale: 'en',
+    });
   });
 });

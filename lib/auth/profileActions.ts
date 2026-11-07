@@ -1,9 +1,11 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
+import { redirect } from '@/i18n/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { routing } from '@/i18n/routing';
+import { NICKNAME_RE } from '@/lib/auth/nickname';
 import { serverError } from '@/lib/actionError';
 
 export type ProfileFormState =
@@ -62,6 +64,47 @@ export async function updateExternalUsernames(
 
   revalidatePath('/[locale]/profile', 'page');
   return { success: true };
+}
+
+async function saveNickname(formData: FormData): Promise<ProfileFormState> {
+  const t = await getTranslations('auth.errors');
+  const nickname = String(formData.get('nickname') ?? '').trim();
+
+  if (!NICKNAME_RE.test(nickname)) {
+    return { error: t('nicknameFormat') };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('set_nickname', {
+    p_nickname: nickname,
+  });
+
+  if (error?.code === '23505') {
+    return { error: t('nicknameTaken') };
+  }
+  if (error) {
+    return serverError('set_nickname failed', error);
+  }
+
+  // The layout, because the header shows the nickname on every page.
+  revalidatePath('/[locale]', 'layout');
+  return { success: true };
+}
+
+export async function updateNickname(
+  _prev: ProfileFormState,
+  formData: FormData,
+): Promise<ProfileFormState> {
+  return saveNickname(formData);
+}
+
+export async function chooseNickname(
+  _prev: ProfileFormState,
+  formData: FormData,
+): Promise<ProfileFormState> {
+  const result = await saveNickname(formData);
+  if (result && 'error' in result) return result;
+  redirect({ href: '/', locale: await getLocale() });
 }
 
 // Fire-and-forget DB write triggered by the language toggle. Silently

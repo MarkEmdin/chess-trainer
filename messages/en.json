@@ -37,11 +37,9 @@
     },
     "errors": {
       "fieldsRequired": "All fields are required",
-      "noAccount": "No account with this nickname.",
-      "wrongPassword": "Wrong password.",
+      "invalidCredentials": "Wrong email or password.",
       "nicknameTaken": "This nickname is already taken.",
       "nicknameFormat": "Nickname must be 3-30 letters, digits, \"-\" or \"_\"",
-      "registerSuggest": "Register?",
       "loginSuggest": "Login?",
       "passwordMismatch": "Passwords don't match.",
       "passwordTooShort": "Password must be at least 6 characters.",
@@ -51,16 +49,16 @@
       "resendSuggest": "Resend email?",
       "linkExpired": "This link has expired. Log in to get a new one.",
       "tooManyAttempts": "Too many attempts. Wait a couple of minutes and try again.",
-      "invalidEmail": "Check your email address."
+      "invalidEmail": "Check your email address.",
+      "googleFailed": "Google sign-in didn't complete. Try again."
     },
     "forgotPassword": {
       "title": "Reset your password",
-      "subtitle": "Enter your nickname or email and we'll send you a reset link.",
+      "subtitle": "Enter your email and we will send you a password reset link.",
       "submit": "Send reset link",
       "pending": "Sending…",
       "success": "If that account exists, a reset email was sent. Check your spam folder too.",
-      "backToLogin": "Back to login",
-      "identifier": "Nickname or email"
+      "backToLogin": "Back to login"
     },
     "resetPassword": {
       "title": "Set a new password",
@@ -86,7 +84,16 @@
       "cta": "Go to my positions"
     },
     "accountMenu": "Account menu",
-    "profile": "Profile"
+    "profile": "Profile",
+    "google": "Continue with Google",
+    "or": "or",
+    "chooseNickname": {
+      "title": "Choose your nickname",
+      "subtitle": "Other players see it on the site. You can change it later in your profile.",
+      "submit": "Continue",
+      "pending": "Saving…",
+      "strip": "Choose your nickname"
+    }
   },
   "coaching": {
     "askCoach": "Ask coach",
@@ -312,7 +319,10 @@
       "chesscomFormat": "Chess.com username: 3-25 chars, letters, digits, \"-\" or \"_\"",
       "lichessFormat": "Lichess username: 2-20 chars, letters, digits, \"-\" or \"_\"",
       "notAuthenticated": "You must be signed in"
-    }
+    },
+    "nickname": "Nickname",
+    "nicknameSave": "Save nickname",
+    "nicknameSaved": "Nickname saved."
   },
   "home": {
     "headline": "A real coach reviews your games",

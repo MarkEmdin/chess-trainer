@@ -25,10 +25,19 @@ export async function GET(
   const tokenHash = searchParams.get('token_hash');
   const type = searchParams.get('type');
   const code = searchParams.get('code');
+  const oauthError = searchParams.get('error');
   const rawNext = searchParams.get('next');
   // Only accept an absolute-path next (never an absolute URL/scheme) — the
   // param is attacker-editable since it rides on an emailed link.
-  const next = rawNext && rawNext.startsWith('/') ? rawNext : `/${locale}`;
+  const safeNext = rawNext && rawNext.startsWith('/') ? rawNext : null;
+  const next = safeNext ?? `/${locale}`;
+
+  // Google sends the user back here with ?error= when they cancel.
+  if (oauthError) {
+    return NextResponse.redirect(
+      `${origin}/${locale}/login?error=google_failed`,
+    );
+  }
 
   if (tokenHash) {
     if (isOtpType(type)) {
@@ -44,9 +53,30 @@ export async function GET(
     }
   } else if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      if (safeNext) {
+        return NextResponse.redirect(`${origin}${safeNext}`);
+      }
+      // No next means a Google sign-in. Metadata can't be passed through
+      // OAuth, so the language is stored here instead of by the trigger.
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('nickname_set, preferred_locale')
+        .eq('id', data.user.id)
+        .single();
+      if (profile && !profile.preferred_locale) {
+        await supabase
+          .from('user_profiles')
+          .update({ preferred_locale: locale })
+          .eq('id', data.user.id);
+      }
+      const home = profile?.preferred_locale ?? locale;
+      return NextResponse.redirect(
+        profile?.nickname_set === false
+          ? `${origin}/${home}/choose-nickname`
+          : `${origin}/${home}`,
+      );
     }
     console.error('exchangeCodeForSession failed:', error.message);
   }

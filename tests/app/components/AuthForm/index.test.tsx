@@ -19,6 +19,7 @@ jest.mock('@/i18n/navigation', () => ({
 jest.mock('@/lib/auth/actions', () => ({
   signIn: jest.fn(),
   signUp: jest.fn(),
+  signInWithGoogle: jest.fn(),
 }));
 
 describe('<AuthForm />', () => {
@@ -34,6 +35,25 @@ describe('<AuthForm />', () => {
     expect(
       screen.queryByRole('link', { name: /forgot password/i }),
     ).not.toBeInTheDocument();
+  });
+
+  it('asks for an email, not a nickname, at login', () => {
+    renderWithIntl(<AuthForm mode="login" />);
+    expect(screen.getByLabelText(/email/i)).toHaveAttribute('name', 'email');
+    expect(screen.queryByLabelText(/nickname/i)).not.toBeInTheDocument();
+  });
+
+  it('asks for email and nickname at registration', () => {
+    renderWithIntl(<AuthForm mode="register" />);
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/nickname/i)).toBeInTheDocument();
+  });
+
+  it.each(['login', 'register'] as const)('offers Google on %s', (mode) => {
+    renderWithIntl(<AuthForm mode={mode} />);
+    expect(
+      screen.getByRole('button', { name: /continue with google/i }),
+    ).toBeInTheDocument();
   });
 
   it('shows a notice passed in by the page', () => {

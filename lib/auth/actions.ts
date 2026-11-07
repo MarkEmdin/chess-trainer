@@ -1,21 +1,19 @@
 'use server';
 
 import { headers } from 'next/headers';
+import { redirect as redirectExternal } from 'next/navigation';
 import { redirect } from '@/i18n/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getPendingEmail, setPendingEmail } from '@/lib/auth/pendingEmail';
+import { NICKNAME_RE } from '@/lib/auth/nickname';
 import { serverError } from '@/lib/actionError';
 
 export type AuthFormState =
-  | { error: string; suggest?: 'register' | 'login' | 'resend' }
+  | { error: string; suggest?: 'login' | 'resend' }
   | { success: string }
   | undefined;
-
-// 3-30 chars, letters/digits/underscore/hyphen — keeps nicknames URL-safe
-// and prevents LIKE-wildcard tricks in lookups.
-const NICKNAME_RE = /^[a-zA-Z0-9_-]{3,30}$/;
 
 // Sign-ups the user can do something about, by Supabase Auth error code.
 const SIGN_UP_ERRORS: Record<string, string> = {
@@ -31,22 +29,13 @@ export async function signIn(
 ): Promise<AuthFormState> {
   const t = await getTranslations('auth.errors');
   const currentLocale = await getLocale();
-  const nickname = String(formData.get('nickname') ?? '').trim();
+  const email = String(formData.get('email') ?? '')
+    .trim()
+    .toLowerCase();
   const password = String(formData.get('password') ?? '');
 
-  if (!nickname || !password) {
+  if (!email || !password) {
     return { error: t('fieldsRequired') };
-  }
-
-  // Translate nickname -> email server-side. Uses service_role because
-  // anonymous users have no SELECT on other people's profiles via RLS.
-  const admin = createAdminClient();
-  const { data: email } = await admin.rpc('lookup_email_by_nickname', {
-    p_nickname: nickname,
-  });
-
-  if (!email) {
-    return { error: t('noAccount'), suggest: 'register' };
   }
 
   const supabase = await createClient();
@@ -67,7 +56,7 @@ export async function signIn(
   }
 
   if (error || !data.user) {
-    return { error: t('wrongPassword') };
+    return { error: t('invalidCredentials') };
   }
 
   // Honour the user's stored language preference over the URL they
@@ -138,38 +127,55 @@ export async function signUp(
   redirect({ href: '/check-email', locale: currentLocale });
 }
 
+// A form action. The verifier cookie is set here on the server, so the
+// return trip goes through the existing code branch of /auth/confirm.
+export async function signInWithGoogle(): Promise<void> {
+  const locale = await getLocale();
+  const origin = (await headers()).get('origin');
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: `${origin}/${locale}/auth/confirm` },
+  });
+
+  if (error || !data.url) {
+    console.error('signInWithOAuth failed:', error?.message);
+    redirect({
+      href: { pathname: '/login', query: { error: 'google_failed' } },
+      locale,
+    });
+    return;
+  }
+
+  redirectExternal(data.url);
+}
+
 export async function requestPasswordReset(
   _prev: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
   const t = await getTranslations('auth');
   const locale = await getLocale();
-  const identifier = String(formData.get('identifier') ?? '').trim();
+  const email = String(formData.get('email') ?? '')
+    .trim()
+    .toLowerCase();
 
-  if (!identifier) {
+  if (!email) {
     return { error: t('errors.fieldsRequired') };
   }
 
-  // Nicknames can't contain "@", so its presence means an email. Supabase
-  // stays silent for unknown addresses, so no lookup is needed for those.
-  const email = identifier.includes('@')
-    ? identifier.toLowerCase()
-    : await lookupEmail(identifier);
-
-  if (email) {
-    const origin = (await headers()).get('origin');
-    const next = encodeURIComponent(`/${locale}/reset-password`);
-    const supabase = await createClient();
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${origin}/${locale}/auth/confirm?next=${next}`,
-    });
-    if (error) {
-      console.error('resetPasswordForEmail failed:', error.message);
-    }
+  const origin = (await headers()).get('origin');
+  const next = encodeURIComponent(`/${locale}/reset-password`);
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/${locale}/auth/confirm?next=${next}`,
+  });
+  if (error) {
+    console.error('resetPasswordForEmail failed:', error.message);
   }
 
-  // Same message whether or not the nickname matched — avoids account
-  // enumeration via response timing/content.
+  // Supabase stays silent for unknown addresses, so the message never
+  // reveals whether an account exists.
   return { success: t('forgotPassword.success') };
 }
 
@@ -192,14 +198,6 @@ export async function resendConfirmation(): Promise<AuthFormState> {
   // Same message whether or not anything was sent — the account may
   // already be confirmed, or the address may belong to someone else.
   return { success: t('checkEmail.resent') };
-}
-
-async function lookupEmail(nickname: string): Promise<string | null> {
-  const admin = createAdminClient();
-  const { data } = await admin.rpc('lookup_email_by_nickname', {
-    p_nickname: nickname,
-  });
-  return data ?? null;
 }
 
 export async function updatePassword(

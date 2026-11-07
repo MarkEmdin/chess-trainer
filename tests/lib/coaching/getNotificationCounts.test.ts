@@ -33,6 +33,7 @@ const student = {
   id: 'u1',
   email: '',
   nickname: 'kid',
+  nicknameSet: true,
   role: 'user' as const,
   preferredLocale: null,
 };

@@ -24,6 +24,7 @@ const user = {
   id: 'u1',
   email: 'a@b.c',
   nickname: 'alice',
+  nicknameSet: true,
   role: 'user' as const,
   preferredLocale: 'en',
 };

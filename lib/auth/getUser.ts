@@ -6,6 +6,7 @@ export type AuthedUser = {
   id: string;
   email: string;
   nickname: string;
+  nicknameSet: boolean;
   role: Role;
   preferredLocale: string | null;
 };
@@ -24,7 +25,7 @@ export const getAuthedUser = cache(async (): Promise<AuthedUser | null> => {
 
   const { data: profile } = await supabase
     .from('user_profiles')
-    .select('role, nickname, preferred_locale')
+    .select('role, nickname, nickname_set, preferred_locale')
     .eq('id', user.id)
     .single();
 
@@ -32,6 +33,7 @@ export const getAuthedUser = cache(async (): Promise<AuthedUser | null> => {
     id: user.id,
     email: user.email ?? '',
     nickname: profile?.nickname ?? '',
+    nicknameSet: profile?.nickname_set ?? true,
     role: isRole(profile?.role) ? profile.role : 'user',
     preferredLocale: profile?.preferred_locale ?? null,
   };

@@ -7,6 +7,7 @@ import { Button } from '@/app/components/ui/button';
 import FormField from '@/app/components/FormField';
 import { signIn, signUp, type AuthFormState } from '@/lib/auth/actions';
 import Spinner from '@/app/components/Spinner';
+import GoogleButton from '@/app/components/GoogleButton';
 
 type Props = {
   mode: 'login' | 'register';
@@ -39,26 +40,34 @@ export default function AuthForm({ mode, notice }: Props) {
         </p>
       )}
 
+      <GoogleButton />
+
+      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <span className="h-px flex-1 bg-border" />
+        {t('or')}
+        <span className="h-px flex-1 bg-border" />
+      </div>
+
       <form action={formAction} className="flex flex-col gap-4">
+        <FormField
+          label={t('email')}
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+        />
+
         {mode === 'register' && (
           <FormField
-            label={t('email')}
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
+            label={t('nickname')}
+            id="nickname"
+            name="nickname"
+            type="text"
+            autoComplete="username"
             required
           />
         )}
-
-        <FormField
-          label={t('nickname')}
-          id="nickname"
-          name="nickname"
-          type="text"
-          autoComplete="username"
-          required
-        />
 
         <FormField
           label={t('password')}
@@ -82,17 +91,6 @@ export default function AuthForm({ mode, notice }: Props) {
         {state && 'error' in state && (
           <p className="text-sm text-destructive" role="alert">
             {state.error}
-            {state.suggest === 'register' && (
-              <>
-                {' '}
-                <Link
-                  href="/register"
-                  className="text-foreground underline hover:no-underline"
-                >
-                  {t('errors.registerSuggest')}
-                </Link>
-              </>
-            )}
             {state.suggest === 'login' && (
               <>
                 {' '}

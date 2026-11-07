@@ -14,6 +14,10 @@ export default async function LoginPage({
   // /auth/confirm sends dead confirmation/reset links here.
   const { error } = await searchParams;
   const t = await getTranslations('auth.errors');
-  const notice = error === 'link_expired' ? t('linkExpired') : undefined;
+  const notices: Record<string, string> = {
+    link_expired: t('linkExpired'),
+    google_failed: t('googleFailed'),
+  };
+  const notice = typeof error === 'string' ? notices[error] : undefined;
   return <AuthForm mode="login" notice={notice} />;
 }
