@@ -689,7 +689,8 @@
   },
   "footer": {
     "about": "About",
-    "tutorial": "How it works"
+    "tutorial": "How it works",
+    "privacy": "Privacy"
   },
   "metadata": {
     "description": "A real coach reviews your games: find the moves you thought about longest and get an answer with comments and lines."
@@ -776,5 +777,32 @@
       "text": "Open “Student questions” in your account menu and press “Reply”. It is the same window: you write an answer the same way as a question, with moves on the board."
     },
     "cta": "Find my key positions"
+  },
+  "privacy": {
+    "metaTitle": "Privacy policy",
+    "title": "Privacy policy",
+    "updated": "Last updated: November 7, 2026",
+    "sections": {
+      "data": {
+        "title": "What we store",
+        "body": "Your email, nickname and a hash of your password. If you sign in with Google, Google gives us your email, name and picture; the name and picture stay in the sign-in record and are not shown on the site. We also store the Chess.com and Lichess usernames you enter, your questions and the coach's answers with game links and positions, likes, your language, and your Telegram account if you connect it. Coach applications are stored too. If you send feedback, we receive your message, plus your email and nickname when you are signed in, and keep a hash of your IP address for an hour-long spam limit."
+      },
+      "use": {
+        "title": "How we use it",
+        "body": "To run your account, show your questions to coaches, send you notifications and answer your feedback. Your nickname and likes appear on the public leaderboard unless you hide them in your profile. We show no ads, use no analytics and do not sell your data."
+      },
+      "sharing": {
+        "title": "Who else sees it",
+        "body": "Coaches see your nickname, questions and the games you ask about. The service runs on Supabase (database and sign-in) and Vercel (hosting). Google handles Google sign-in, Gmail sends account emails, and Telegram delivers notifications if you connect it. Usernames you enter are sent to Chess.com and Lichess to load public games."
+      },
+      "browser": {
+        "title": "Your browser",
+        "body": "We use cookies to keep you signed in and remember your language. Your browser's local storage keeps your settings and unsent drafts on your device."
+      },
+      "removal": {
+        "title": "Removing your data",
+        "body": "We keep your data while your account exists. Write to us from your account email and we will delete your account and data."
+      }
+    }
   }
 }
