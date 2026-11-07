@@ -2,10 +2,12 @@ import {
   requestPasswordReset,
   resendConfirmation,
   signIn,
+  signInWithGoogle,
   signUp,
   updatePassword,
 } from '@/lib/auth/actions';
 import { redirect } from '@/i18n/navigation';
+import { redirect as externalRedirect } from 'next/navigation';
 
 const resetPasswordForEmail = jest.fn();
 const updateUser = jest.fn();
@@ -42,6 +44,8 @@ jest.mock('@/lib/supabase/admin', () => ({
 }));
 
 jest.mock('@/i18n/navigation', () => ({ redirect: jest.fn() }));
+
+jest.mock('next/navigation', () => ({ redirect: jest.fn() }));
 
 jest.mock('next/headers', () => ({
   headers: async () => new Map([['origin', 'https://example.com']]),
@@ -319,5 +323,40 @@ describe('signIn', () => {
     );
     expect(result).toEqual({ error: 'auth.errors.invalidCredentials' });
     expect(cookieSet).not.toHaveBeenCalled();
+  });
+});
+
+describe('signInWithGoogle', () => {
+  beforeEach(() => {
+    signInWithOAuth.mockReset();
+    jest.mocked(redirect).mockClear();
+    jest.mocked(externalRedirect).mockClear();
+  });
+
+  it('sends the browser to Google, returning through the locale confirm route', async () => {
+    signInWithOAuth.mockResolvedValue({
+      data: { url: 'https://accounts.example/o' },
+      error: null,
+    });
+    await signInWithGoogle();
+    expect(signInWithOAuth).toHaveBeenCalledWith({
+      provider: 'google',
+      options: { redirectTo: 'https://example.com/en/auth/confirm' },
+    });
+    expect(externalRedirect).toHaveBeenCalledWith('https://accounts.example/o');
+  });
+
+  it('returns to login with a notice when Supabase refuses', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    signInWithOAuth.mockResolvedValue({
+      data: { url: null },
+      error: { message: 'nope' },
+    });
+    await signInWithGoogle();
+    expect(externalRedirect).not.toHaveBeenCalled();
+    expect(redirect).toHaveBeenCalledWith({
+      href: { pathname: '/login', query: { error: 'google_failed' } },
+      locale: 'en',
+    });
   });
 });

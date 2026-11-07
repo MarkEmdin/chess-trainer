@@ -1,6 +1,7 @@
 'use server';
 
 import { headers } from 'next/headers';
+import { redirect as redirectExternal } from 'next/navigation';
 import { redirect } from '@/i18n/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
@@ -124,6 +125,29 @@ export async function signUp(
   // With confirmations on there is no session yet.
   await setPendingEmail(email);
   redirect({ href: '/check-email', locale: currentLocale });
+}
+
+// A form action. The verifier cookie is set here on the server, so the
+// return trip goes through the existing code branch of /auth/confirm.
+export async function signInWithGoogle(): Promise<void> {
+  const locale = await getLocale();
+  const origin = (await headers()).get('origin');
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: `${origin}/${locale}/auth/confirm` },
+  });
+
+  if (error || !data.url) {
+    console.error('signInWithOAuth failed:', error?.message);
+    redirect({
+      href: { pathname: '/login', query: { error: 'google_failed' } },
+      locale,
+    });
+    return;
+  }
+
+  redirectExternal(data.url);
 }
 
 export async function requestPasswordReset(

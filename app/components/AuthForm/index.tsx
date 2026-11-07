@@ -7,6 +7,7 @@ import { Button } from '@/app/components/ui/button';
 import FormField from '@/app/components/FormField';
 import { signIn, signUp, type AuthFormState } from '@/lib/auth/actions';
 import Spinner from '@/app/components/Spinner';
+import GoogleButton from '@/app/components/GoogleButton';
 
 type Props = {
   mode: 'login' | 'register';
@@ -38,6 +39,14 @@ export default function AuthForm({ mode, notice }: Props) {
           {notice}
         </p>
       )}
+
+      <GoogleButton />
+
+      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <span className="h-px flex-1 bg-border" />
+        {t('or')}
+        <span className="h-px flex-1 bg-border" />
+      </div>
 
       <form action={formAction} className="flex flex-col gap-4">
         <FormField

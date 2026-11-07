@@ -19,6 +19,7 @@ jest.mock('@/i18n/navigation', () => ({
 jest.mock('@/lib/auth/actions', () => ({
   signIn: jest.fn(),
   signUp: jest.fn(),
+  signInWithGoogle: jest.fn(),
 }));
 
 describe('<AuthForm />', () => {
@@ -46,6 +47,13 @@ describe('<AuthForm />', () => {
     renderWithIntl(<AuthForm mode="register" />);
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/nickname/i)).toBeInTheDocument();
+  });
+
+  it.each(['login', 'register'] as const)('offers Google on %s', (mode) => {
+    renderWithIntl(<AuthForm mode={mode} />);
+    expect(
+      screen.getByRole('button', { name: /continue with google/i }),
+    ).toBeInTheDocument();
   });
 
   it('shows a notice passed in by the page', () => {

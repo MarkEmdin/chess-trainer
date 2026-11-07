@@ -6,10 +6,20 @@ import { GET } from '@/app/[locale]/auth/confirm/route';
 
 const exchangeCodeForSession = jest.fn();
 const verifyOtp = jest.fn();
+const profileSingle = jest.fn();
+const profileUpdate = jest.fn();
+const profileUpdateEq = jest.fn();
 
 jest.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
     auth: { exchangeCodeForSession, verifyOtp },
+    from: () => ({
+      select: () => ({ eq: () => ({ single: profileSingle }) }),
+      update: (values: unknown) => {
+        profileUpdate(values);
+        return { eq: profileUpdateEq };
+      },
+    }),
   }),
 }));
 
@@ -17,6 +27,10 @@ describe('GET /auth/confirm', () => {
   beforeEach(() => {
     exchangeCodeForSession.mockClear();
     verifyOtp.mockReset();
+    profileSingle.mockReset();
+    profileUpdate.mockClear();
+    profileUpdateEq.mockReset();
+    profileUpdateEq.mockResolvedValue({ error: null });
   });
 
   const get = (query: string) =>
@@ -104,12 +118,62 @@ describe('GET /auth/confirm', () => {
   });
 
   it('falls back to locale-prefixed home when next is not an absolute path', async () => {
-    exchangeCodeForSession.mockResolvedValue({ error: null });
+    exchangeCodeForSession.mockResolvedValue({
+      data: { user: { id: 'u1' } },
+      error: null,
+    });
+    profileSingle.mockResolvedValue({ data: null });
     const request = new NextRequest(
       'https://example.com/en/auth/confirm?code=abc123&next=https://evil.com',
     );
     const response = await GET(request, { params: Promise.resolve({ locale: 'en' }) });
     expect(exchangeCodeForSession).toHaveBeenCalledWith('abc123');
     expect(response.headers.get('location')).toBe('https://example.com/en');
+  });
+
+  describe('returning from Google', () => {
+    const signedIn = (profile: object) => {
+      exchangeCodeForSession.mockResolvedValue({
+        data: { user: { id: 'u1' } },
+        error: null,
+      });
+      profileSingle.mockResolvedValue({ data: profile });
+    };
+
+    it('sends a cancelled sign-in to login with the Google notice', async () => {
+      const response = await get('error=access_denied');
+      expect(exchangeCodeForSession).not.toHaveBeenCalled();
+      expect(response.headers.get('location')).toBe(
+        'https://example.com/en/login?error=google_failed',
+      );
+    });
+
+    it('asks a new user for a nickname', async () => {
+      signedIn({ nickname_set: false, preferred_locale: null });
+      const response = await get('code=c1');
+      expect(response.headers.get('location')).toBe(
+        'https://example.com/en/choose-nickname',
+      );
+    });
+
+    it('stores the page language for a new user', async () => {
+      signedIn({ nickname_set: false, preferred_locale: null });
+      await get('code=c1');
+      expect(profileUpdate).toHaveBeenCalledWith({ preferred_locale: 'en' });
+      expect(profileUpdateEq).toHaveBeenCalledWith('id', 'u1');
+    });
+
+    it('sends a returning user home in their language', async () => {
+      signedIn({ nickname_set: true, preferred_locale: 'ru' });
+      const response = await get('code=c1');
+      expect(profileUpdate).not.toHaveBeenCalled();
+      expect(response.headers.get('location')).toBe('https://example.com/ru');
+    });
+
+    it('never reads the profile when a next path was passed', async () => {
+      signedIn({ nickname_set: false, preferred_locale: null });
+      await get('code=c1&next=%2Fen%2Freset-password');
+      expect(profileSingle).not.toHaveBeenCalled();
+    });
   });
 });

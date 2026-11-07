@@ -49,7 +49,8 @@
       "resendSuggest": "Resend email?",
       "linkExpired": "This link has expired. Log in to get a new one.",
       "tooManyAttempts": "Too many attempts. Wait a couple of minutes and try again.",
-      "invalidEmail": "Check your email address."
+      "invalidEmail": "Check your email address.",
+      "googleFailed": "Google sign-in didn't complete. Try again."
     },
     "forgotPassword": {
       "title": "Reset your password",
@@ -83,7 +84,9 @@
       "cta": "Go to my positions"
     },
     "accountMenu": "Account menu",
-    "profile": "Profile"
+    "profile": "Profile",
+    "google": "Continue with Google",
+    "or": "or"
   },
   "coaching": {
     "askCoach": "Ask coach",
