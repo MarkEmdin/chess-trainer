@@ -693,7 +693,11 @@
     "privacy": "Privacy"
   },
   "metadata": {
-    "description": "A real coach reviews your games: find the moves you thought about longest and get an answer with comments and lines."
+    "description": "A real coach reviews your games: find the moves you thought about longest and get an answer with comments and lines.",
+    "ogTitle": "A real coach reviews your games",
+    "ogSubtitle": "Find the moves you thought about longest and ask why",
+    "ogCoachLabel": "Coach",
+    "ogCoachLine": "You spent 4 minutes here. This is the idea."
   },
   "feedback": {
     "open": "Report a problem",

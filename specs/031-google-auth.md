@@ -1,6 +1,6 @@
 # Spec: Google sign-in, email login, editable nickname
 
-Status: in-progress
+Status: done
 Branch: feature/google-auth
 
 ## Problem

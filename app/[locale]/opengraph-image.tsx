@@ -1,56 +1,66 @@
 import { ImageResponse } from 'next/og';
 import { getTranslations } from 'next-intl/server';
+import KnightMark from '@/app/components/KnightMark';
 
-export const alt = 'Chess Fundamentals — learn the basics of chess';
+export const alt = 'Chess Fundamentals — a real coach reviews your games';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
 const LIGHT = '#e8eaed';
+const MUTED = '#9aa3ae';
 const ACCENT = '#6fcf97';
 const INK = '#0f1115';
+const SQUARE_DARK = '#171a20';
+const SQUARE_LIGHT = '#232833';
+const SQUARE = 105;
+const COLS = 5;
+const ROWS = 6;
+const FROM = { col: 1, row: 3 };
+const TO = { col: 2, row: 1 };
 
-// Knight outline from public/pieces/knight.svg, recolored for the dark card.
-function Knight({ size }: { size: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 45 45">
-      <g
-        fill={LIGHT}
-        stroke={INK}
-        strokeWidth={1.5}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        transform="translate(0,0.3)"
-      >
-        <path d="M 22,10 C 32.5,11 38.5,18 38,39 L 15,39 C 15,30 25,32.5 23,18" />
-        <path d="M 24,18 C 24.38,20.91 18.45,25.37 16,27 C 13,29 13.18,31.34 11,31 C 9.958,30.06 12.41,27.96 11,28 C 10,28 11.19,29.23 10,30 C 9,30 5.997,31 6,26 C 6,24 12,14 12,14 C 12,14 13.89,12.1 14,10.5 C 13.27,9.506 13.5,8.5 13.5,7.5 C 14.5,6.5 16.5,10 16.5,10 L 18.5,10 C 18.5,10 19.28,8.008 21,7 C 22,7 22,10 22,10" />
-        <path
-          d="M 9.5 25.5 A 0.5 0.5 0 1 1 8.5,25.5 A 0.5 0.5 0 1 1 9.5 25.5 z"
-          fill={INK}
-        />
-        <path
-          d="M 15 15.5 A 0.5 1.5 0 1 1  14,15.5 A 0.5 1.5 0 1 1  15 15.5 z"
-          transform="matrix(0.866,0.5,-0.5,0.866,9.693,-5.173)"
-          fill={INK}
-        />
-      </g>
-    </svg>
-  );
-}
+function Board() {
+  const squares = Array.from({ length: COLS * ROWS }, (_, i) => ({
+    col: i % COLS,
+    row: Math.floor(i / COLS),
+  }));
 
-// A thought-bubble dot; the trail runs from the knight up to the cloud.
-function Dot({ left, top, size }: { left: number; top: number; size: number }) {
   return (
     <div
       style={{
         position: 'absolute',
-        left,
-        top,
-        width: size,
-        height: size,
-        borderRadius: size,
-        background: LIGHT,
+        right: 0,
+        top: 0,
+        width: SQUARE * COLS,
+        height: SQUARE * ROWS,
+        display: 'flex',
+        flexWrap: 'wrap',
       }}
-    />
+    >
+      {squares.map(({ col, row }) => {
+        const isTo = col === TO.col && row === TO.row;
+        const marked = isTo || (col === FROM.col && row === FROM.row);
+        const light = (col + row) % 2 === 0;
+        return (
+          <div
+            key={`${col}-${row}`}
+            style={{
+              width: SQUARE,
+              height: SQUARE,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: marked
+                ? 'rgba(111, 207, 151, 0.35)'
+                : light
+                  ? SQUARE_LIGHT
+                  : SQUARE_DARK,
+            }}
+          >
+            {isTo && <KnightMark size={88} color={LIGHT} eye={INK} />}
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -75,63 +85,62 @@ export default async function Image({
         overflow: 'hidden',
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          position: 'absolute',
-          right: -120,
-          bottom: -90,
-        }}
-      >
-        <Knight size={640} />
-      </div>
-
-      <Dot left={792} top={196} size={20} />
-      <Dot left={760} top={160} size={30} />
-      <div
-        style={{
-          position: 'absolute',
-          left: 690,
-          top: 36,
-          width: 150,
-          height: 112,
-          borderRadius: 56,
-          background: LIGHT,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: ACCENT,
-          fontSize: 84,
-          lineHeight: 1,
-        }}
-      >
-        ?
-      </div>
+      <Board />
 
       <div
         style={{
           position: 'absolute',
-          left: 0,
-          top: 0,
-          width: 16,
-          height: '100%',
-          background: ACCENT,
+          right: 32,
+          bottom: 36,
+          width: 420,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          padding: '20px 24px',
+          borderRadius: 14,
+          background: INK,
+          border: `2px solid ${ACCENT}`,
         }}
-      />
+      >
+        <div style={{ fontSize: 22, color: ACCENT }}>{t('ogCoachLabel')}</div>
+        <div style={{ fontSize: 27, lineHeight: 1.3 }}>{t('ogCoachLine')}</div>
+      </div>
+
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
-          gap: 32,
-          width: 680,
-          paddingLeft: 96,
+          width: 675,
+          height: '100%',
+          padding: '0 56px 0 72px',
         }}
       >
-        <div style={{ fontSize: 30, color: ACCENT, letterSpacing: 6 }}>
-          CHESS FUNDAMENTALS
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 14,
+            fontSize: 30,
+            color: ACCENT,
+          }}
+        >
+          <KnightMark size={40} color={ACCENT} eye={INK} />
+          Chess Fundamentals
         </div>
-        <div style={{ fontSize: 40, lineHeight: 1.3 }}>{t('description')}</div>
+        <div style={{ marginTop: 44, fontSize: 66, lineHeight: 1.12 }}>
+          {t('ogTitle')}
+        </div>
+        <div
+          style={{
+            marginTop: 28,
+            fontSize: 30,
+            lineHeight: 1.35,
+            color: MUTED,
+          }}
+        >
+          {t('ogSubtitle')}
+        </div>
       </div>
     </div>,
     { ...size },
