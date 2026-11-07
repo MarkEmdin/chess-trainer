@@ -30,6 +30,10 @@ jest.mock('@/app/components/PageLayout', () => ({
     <main>{children}</main>
   ),
 }));
+jest.mock('@/app/components/NicknameForm', () => ({
+  __esModule: true,
+  default: () => <div>nickname-form</div>,
+}));
 jest.mock('@/app/components/ProfileForm', () => ({
   __esModule: true,
   default: () => <div>profile-form</div>,
