@@ -4,6 +4,7 @@ import SiteNav from '@/app/components/SiteNav';
 import LanguageToggle from '@/app/components/LanguageToggle';
 import AccountMenu from '@/app/components/AccountMenu';
 import NotificationBell from '@/app/components/NotificationBell';
+import NicknameStrip from '@/app/components/NicknameStrip';
 import { getAuthedUser } from '@/lib/auth/getUser';
 import { cn } from '@/lib/utils';
 
@@ -51,6 +52,7 @@ export default async function Header() {
           )}
         </div>
       </nav>
+      {user?.nicknameSet === false && <NicknameStrip />}
     </header>
   );
 }

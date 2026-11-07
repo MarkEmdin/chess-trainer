@@ -46,6 +46,22 @@ async function renderHeader() {
 }
 
 describe('<Header />', () => {
+  it('asks a user with a placeholder nickname to choose one', async () => {
+    getAuthedUser.mockResolvedValue({ ...ann, nicknameSet: false });
+    await renderHeader();
+    expect(
+      screen.getByRole('link', { name: /choose your nickname/i }),
+    ).toHaveAttribute('href', '/choose-nickname');
+  });
+
+  it('shows no such prompt once a nickname is chosen', async () => {
+    getAuthedUser.mockResolvedValue({ ...ann, nicknameSet: true });
+    await renderHeader();
+    expect(
+      screen.queryByRole('link', { name: /choose your nickname/i }),
+    ).not.toBeInTheDocument();
+  });
+
   it('shows the account menu, not a login link, when signed in', async () => {
     getAuthedUser.mockResolvedValue(ann);
     await renderHeader();

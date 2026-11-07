@@ -86,7 +86,14 @@
     "accountMenu": "Account menu",
     "profile": "Profile",
     "google": "Continue with Google",
-    "or": "or"
+    "or": "or",
+    "chooseNickname": {
+      "title": "Choose your nickname",
+      "subtitle": "Other players see it on the site. You can change it later in your profile.",
+      "submit": "Continue",
+      "pending": "Saving…",
+      "strip": "Choose your nickname"
+    }
   },
   "coaching": {
     "askCoach": "Ask coach",
@@ -312,7 +319,10 @@
       "chesscomFormat": "Chess.com username: 3-25 chars, letters, digits, \"-\" or \"_\"",
       "lichessFormat": "Lichess username: 2-20 chars, letters, digits, \"-\" or \"_\"",
       "notAuthenticated": "You must be signed in"
-    }
+    },
+    "nickname": "Nickname",
+    "nicknameSave": "Save nickname",
+    "nicknameSaved": "Nickname saved."
   },
   "home": {
     "headline": "A real coach reviews your games",

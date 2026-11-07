@@ -4,6 +4,7 @@ import { getAuthedUser } from '@/lib/auth/getUser';
 import { isStaff } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 import PageLayout from '@/app/components/PageLayout';
+import NicknameForm from '@/app/components/NicknameForm';
 import ProfileForm from '@/app/components/ProfileForm';
 import TelegramConnect from '@/app/components/TelegramConnect';
 import { Card, CardContent } from '@/app/components/ui/card';
@@ -33,6 +34,7 @@ export default async function ProfilePage() {
 
   return (
     <PageLayout title={t('title')} subtitle={t('subtitle')} maxWidth="2xl">
+      <NicknameForm nickname={user.nickname} />
       <ProfileForm
         initial={{
           chesscom: profile?.chesscom_username ?? '',
