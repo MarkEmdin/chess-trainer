@@ -1,10 +1,17 @@
 import { ImageResponse } from 'next/og';
 import { getTranslations } from 'next-intl/server';
 import KnightMark from '@/app/components/KnightMark';
+import { routing } from '@/i18n/routing';
 
 export const alt = 'Chess Fundamentals — a real coach reviews your games';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
+
+// One image per locale, rendered at build time and served from the CDN.
+// Rendering it per request was slow enough that LinkedIn's preview gave up.
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 const LIGHT = '#e8eaed';
 const MUTED = '#9aa3ae';
