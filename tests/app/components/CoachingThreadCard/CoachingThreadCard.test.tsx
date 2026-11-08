@@ -187,4 +187,34 @@ describe('CoachingThreadCard', () => {
       expect(screen.getByText("Coach's response")).toBeInTheDocument();
     });
   });
+
+  describe('tapping the card', () => {
+    it.each([
+      ['question', 'What now?'],
+      ['answer', 'Play Nf6'],
+    ])('opens the thread from the %s text', (_, text) => {
+      renderWithIntl(<CoachingThreadCard thread={thread} />);
+      fireEvent.click(screen.getByText(text));
+      expect(screen.getByTestId('coaching-modal')).toBeInTheDocument();
+    });
+
+    it('opens the thread from the board', () => {
+      renderWithIntl(<CoachingThreadCard thread={thread} />);
+      fireEvent.click(screen.getByTestId('board'));
+      expect(screen.getByTestId('coaching-modal')).toBeInTheDocument();
+    });
+
+    it('leaves the game link to open the game only', () => {
+      renderWithIntl(<CoachingThreadCard thread={thread} />);
+      fireEvent.click(screen.getByRole('link', { name: /open game/i }));
+      expect(screen.queryByTestId('coaching-modal')).toBeNull();
+    });
+
+    it('stays closed after closing the thread from inside it', () => {
+      renderWithIntl(<CoachingThreadCard thread={thread} />);
+      fireEvent.click(screen.getByText('What now?'));
+      fireEvent.click(screen.getByText('close-stub'));
+      expect(screen.queryByTestId('coaching-modal')).toBeNull();
+    });
+  });
 });

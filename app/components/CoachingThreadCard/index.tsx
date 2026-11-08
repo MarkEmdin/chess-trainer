@@ -15,6 +15,7 @@ import type { CoachingMessage, CoachingThreadData } from '@/lib/coaching/types';
 import { isUnseen } from '@/lib/coaching/notifications';
 import { markResponseSeen } from '@/lib/coaching/actions';
 import { useAnswerLabels } from '@/lib/coaches/useCoachName';
+import { tapToOpen } from '@/lib/tapToOpen';
 
 // The modal pulls in chess.js and the interactive board; load it only when
 // the card is opened.
@@ -51,7 +52,10 @@ export default function CoachingThreadCard({ thread }: Props) {
   }
 
   return (
-    <Card>
+    <Card
+      onClick={tapToOpen(openThread)}
+      className="cursor-pointer transition-colors hover:border-foreground/20"
+    >
       <CardContent>
         <div className="flex flex-col sm:flex-row gap-4">
           <ChessboardContainer

@@ -14,6 +14,7 @@ import { sideToMove } from '@/lib/chess/fen';
 import type { CoachingThreadData } from '@/lib/coaching/types';
 import type { CoachProfile } from '@/lib/coaches/displayName';
 import { useAnswerLabels, useCoachName } from '@/lib/coaches/useCoachName';
+import { tapToOpen } from '@/lib/tapToOpen';
 
 const CoachingModal = dynamic(() => import('@/app/components/CoachingModal'), {
   ssr: false,
@@ -76,7 +77,11 @@ export default function CoachingAdminCard({
   const answered = request.responses.length > 0;
 
   return (
-    <Card ref={ref}>
+    <Card
+      ref={ref}
+      onClick={tapToOpen(() => setOpen(true))}
+      className="cursor-pointer transition-colors hover:border-foreground/20"
+    >
       <CardContent>
         <div className="flex flex-col sm:flex-row gap-4">
           <ChessboardContainer

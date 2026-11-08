@@ -12,6 +12,7 @@ import type { LongThink } from '@/lib/games/longThinks';
 import type { Game, GameColor, GamePlayer } from '@/lib/games/types';
 import { cn } from '@/lib/utils';
 import { useAnswerLabels } from '@/lib/coaches/useCoachName';
+import { tapToOpen } from '@/lib/tapToOpen';
 import type { CoachProfile } from '@/lib/coaches/displayName';
 import { formatThinkMove, lastMoveStyles } from './format';
 
@@ -81,6 +82,10 @@ export default function PositionDetail({
   const answerLabels = useAnswerLabels();
   const tTile = useTranslations('games.tile');
   const format = useFormatter();
+  // With a thread, the board and its preview open it too: a bigger target
+  // than the button on phones. Without one, the board stays inert.
+  const openOnTap =
+    thread && isAuthenticated ? tapToOpen(onAskCoach) : undefined;
   const opponentColor: GameColor =
     game.userColor === 'white' ? 'black' : 'white';
 
@@ -101,7 +106,10 @@ export default function PositionDetail({
       )}
 
       <div className="flex flex-col gap-6 xl:flex-row">
-        <div className="w-full max-w-[460px]">
+        <div
+          onClick={openOnTap}
+          className={cn('w-full max-w-[460px]', openOnTap && 'cursor-pointer')}
+        >
           <ChessboardWithNotation
             position={think.fenBefore}
             boardOrientation={game.userColor}
@@ -138,7 +146,14 @@ export default function PositionDetail({
           </div>
 
           {thread && (
-            <div className="flex flex-col gap-2 rounded-[10px] border border-border bg-card p-3">
+            <div
+              onClick={openOnTap}
+              className={cn(
+                'flex flex-col gap-2 rounded-[10px] border border-border bg-card p-3',
+                openOnTap &&
+                  'cursor-pointer transition-colors hover:border-foreground/20',
+              )}
+            >
               <SectionLabel label={tCoaching('yourQuestion')}>
                 <p className="line-clamp-2 text-sm">{thread.body}</p>
               </SectionLabel>

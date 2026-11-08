@@ -227,4 +227,24 @@ describe('CoachingAdminCard', () => {
       expect(screen.getByText('Answered by a coach')).toBeInTheDocument();
     });
   });
+
+  describe('tapping the card', () => {
+    it('opens the thread from the question text', () => {
+      renderWithIntl(<CoachingAdminCard request={request()} />);
+      fireEvent.click(screen.getByText('What now?'));
+      expect(screen.getByTestId('coaching-modal')).toBeInTheDocument();
+    });
+
+    it('opens the thread from the board', () => {
+      renderWithIntl(<CoachingAdminCard request={request()} />);
+      fireEvent.click(screen.getByTestId('board'));
+      expect(screen.getByTestId('coaching-modal')).toBeInTheDocument();
+    });
+
+    it('leaves the game link to open the game only', () => {
+      renderWithIntl(<CoachingAdminCard request={request()} />);
+      fireEvent.click(screen.getByRole('link', { name: /open game/i }));
+      expect(screen.queryByTestId('coaching-modal')).toBeNull();
+    });
+  });
 });
