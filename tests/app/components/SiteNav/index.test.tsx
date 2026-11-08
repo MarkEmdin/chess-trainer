@@ -27,39 +27,37 @@ describe('<SiteNav />', () => {
     pathname = '/';
   });
 
-  it('links to positions, games, learn, leaderboard and help', () => {
+  it('links to positions, games, leaderboard and help (learn hidden for now)', () => {
     renderWithIntl(<SiteNav />);
     expect(desktopLinks().map((a) => a.getAttribute('href'))).toEqual([
       '/think-time',
       '/games',
-      '/lessons',
       '/leaderboard',
       '/tutorial',
     ]);
     expect(desktopLinks().map((a) => a.textContent)).toEqual([
       'Positions',
       'Games',
-      'Learn',
       'Leaderboard',
       'Help',
     ]);
   });
 
   it('marks the current section', () => {
-    pathname = '/lessons/theory';
+    pathname = '/games/123';
     renderWithIntl(<SiteNav />);
     const current = screen
       .getAllByRole('link')
       .filter((a) => a.getAttribute('aria-current') === 'page');
     expect(current.map((a) => a.getAttribute('href'))).toEqual([
-      '/lessons',
-      '/lessons',
+      '/games',
+      '/games',
     ]);
   });
 
   it('renders a bottom tab bar for mobile', () => {
     renderWithIntl(<SiteNav />);
     const bar = screen.getByRole('navigation', { name: 'Main navigation' });
-    expect(within(bar).getAllByRole('link')).toHaveLength(5);
+    expect(within(bar).getAllByRole('link')).toHaveLength(4);
   });
 });

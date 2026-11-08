@@ -12,18 +12,23 @@ import {
 import { Link, usePathname } from '@/i18n/navigation';
 import LinkPending from '@/app/components/LinkPending';
 import { cn } from '@/lib/utils';
+import { SHOW_LESSONS } from '@/lib/site';
 
-const links: ReadonlyArray<{
+type NavLink = {
   href: string;
   key: 'positions' | 'games' | 'learn' | 'leaderboard' | 'help';
   Icon: LucideIcon;
-}> = [
-  { href: '/think-time', key: 'positions', Icon: CrosshairIcon },
-  { href: '/games', key: 'games', Icon: LayoutGridIcon },
-  { href: '/lessons', key: 'learn', Icon: GraduationCapIcon },
-  { href: '/leaderboard', key: 'leaderboard', Icon: TrophyIcon },
-  { href: '/tutorial', key: 'help', Icon: CircleHelpIcon },
-];
+};
+
+const links = (
+  [
+    { href: '/think-time', key: 'positions', Icon: CrosshairIcon },
+    { href: '/games', key: 'games', Icon: LayoutGridIcon },
+    { href: '/lessons', key: 'learn', Icon: GraduationCapIcon },
+    { href: '/leaderboard', key: 'leaderboard', Icon: TrophyIcon },
+    { href: '/tutorial', key: 'help', Icon: CircleHelpIcon },
+  ] satisfies NavLink[]
+).filter(({ key }) => SHOW_LESSONS || key !== 'learn');
 
 // The sections fit inline on desktop; under `lg` the same links move to a
 // fixed bottom tab bar (the body reserves room for it in the layout).

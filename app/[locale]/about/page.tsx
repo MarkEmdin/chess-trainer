@@ -22,7 +22,7 @@ import {
   MOVES_LINE,
   MOVES_START,
 } from '@/app/constants/aboutExamples';
-import { CONTACT_EMAIL, REPO_URL } from '@/lib/site';
+import { CONTACT_EMAIL, REPO_URL, SHOW_REPO_LINK } from '@/lib/site';
 import { cn } from '@/lib/utils';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -41,16 +41,9 @@ const MORE_FEATURES: {
   { id: 'feedback', icon: MessageSquareWarningIcon },
 ];
 
-const linkClass =
-  'font-medium text-primary underline-offset-4 hover:underline';
+const linkClass = 'font-medium text-primary underline-offset-4 hover:underline';
 
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) {
+function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="flex flex-col gap-3">
       <h2 className="text-2xl font-semibold text-foreground">{title}</h2>
@@ -186,19 +179,21 @@ export default async function AboutPage() {
             </p>
           </Section>
 
-          <Section title={t('source.title')}>
-            <p className="text-muted-foreground">
-              {t('source.text')}{' '}
-              <a
-                href={REPO_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={linkClass}
-              >
-                {t('source.link')}
-              </a>
-            </p>
-          </Section>
+          {SHOW_REPO_LINK && (
+            <Section title={t('source.title')}>
+              <p className="text-muted-foreground">
+                {t('source.text')}{' '}
+                <a
+                  href={REPO_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={linkClass}
+                >
+                  {t('source.link')}
+                </a>
+              </p>
+            </Section>
+          )}
         </div>
       </div>
     </main>
