@@ -1,6 +1,7 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 import { Link, redirect } from '@/i18n/navigation';
 import { getAuthedUser } from '@/lib/auth/getUser';
+import { SHOW_LESSONS } from '@/lib/site';
 import { buttonVariants } from '@/app/components/ui/button';
 import LineDemo from '@/app/components/LineDemo';
 import {
@@ -17,12 +18,14 @@ import {
 
 const steps = ['find', 'think', 'discuss'] as const;
 
-const features = [
-  { href: '/think-time', key: 'keyPositions' },
-  { href: '/games', key: 'games' },
-  { href: '/coaching', key: 'coaching' },
-  { href: '/lessons', key: 'lessons' },
-] as const;
+const features = (
+  [
+    { href: '/think-time', key: 'keyPositions' },
+    { href: '/games', key: 'games' },
+    { href: '/coaching', key: 'coaching' },
+    { href: '/lessons', key: 'lessons' },
+  ] as const
+).filter(({ key }) => SHOW_LESSONS || key !== 'lessons');
 
 export default async function Home() {
   // The landing is for guests; signed-in users go straight to the product
@@ -43,10 +46,7 @@ export default async function Home() {
               {t('headline')}
             </h1>
             <p className="text-lg text-muted-foreground">{t('subhead')}</p>
-            <Link
-              href="/think-time"
-              className={buttonVariants({ size: 'lg' })}
-            >
+            <Link href="/think-time" className={buttonVariants({ size: 'lg' })}>
               {t('ctaPrimary')}
             </Link>
           </div>

@@ -107,7 +107,6 @@ describe('home page', () => {
       keyPositions: '/think-time',
       games: '/games',
       coaching: '/coaching',
-      lessons: '/lessons',
     };
     for (const [key, href] of Object.entries(cards)) {
       expect(
@@ -116,6 +115,10 @@ describe('home page', () => {
         }),
       ).toHaveAttribute('href', href);
     }
+    // Lessons are hidden for now.
+    expect(
+      screen.queryByRole('link', { name: /home\.features\.lessons\.title/ }),
+    ).not.toBeInTheDocument();
   });
 
   it('feature cards show a focus ring for keyboard users', async () => {

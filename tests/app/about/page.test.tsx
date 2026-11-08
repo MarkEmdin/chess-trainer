@@ -17,7 +17,7 @@ jest.mock('@/app/components/LineDemo', () => ({
 }));
 
 describe('about page', () => {
-  it('shows the sections in order: why, features, author, contact, source', async () => {
+  it('shows the sections in order: why, features, author, contact', async () => {
     render(await AboutPage());
     expect(
       screen.getByRole('heading', { level: 1, name: 'about.title' }),
@@ -30,7 +30,6 @@ describe('about page', () => {
       'about.features.title',
       'about.author.title',
       'about.contact.title',
-      'about.source.title',
     ]);
   });
 
@@ -58,14 +57,10 @@ describe('about page', () => {
     ).toHaveAttribute('href', 'mailto:chesstrainer.notify@gmail.com');
   });
 
-  it('opens the repository in a new tab', async () => {
+  it('hides the repository link for now', async () => {
     render(await AboutPage());
-    const repo = screen.getByRole('link', { name: 'about.source.link' });
-    expect(repo).toHaveAttribute(
-      'href',
-      'https://github.com/MarkEmdin/chess-trainer',
-    );
-    expect(repo).toHaveAttribute('target', '_blank');
-    expect(repo).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(
+      screen.queryByRole('link', { name: 'about.source.link' }),
+    ).not.toBeInTheDocument();
   });
 });
