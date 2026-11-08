@@ -89,7 +89,9 @@ describe('<PositionDetail />', () => {
         responses: [{ body: 'Play Qd2', liked }],
       },
     });
-    expect(screen.queryByText('The coach liked this question') !== null).toBe(shown);
+    expect(screen.queryByText('The coach liked this question') !== null).toBe(
+      shown,
+    );
   });
 
   it('names the coach who answered', () => {
@@ -138,5 +140,39 @@ describe('<PositionDetail />', () => {
     expect(
       screen.queryByRole('button', { name: /back/i }),
     ).not.toBeInTheDocument();
+  });
+
+  describe('with a thread, tapping', () => {
+    const thread = { body: 'Was Nf5 ok?', responses: [{ body: 'Play Qd2' }] };
+
+    it.each([
+      ['question', 'Was Nf5 ok?'],
+      ['answer', 'Play Qd2'],
+    ])('the %s opens it', async (_, text) => {
+      const { onAskCoach } = detail({ thread });
+      await userEvent.click(screen.getByText(text));
+      expect(onAskCoach).toHaveBeenCalledTimes(1);
+    });
+
+    it('the board opens it', async () => {
+      const { onAskCoach } = detail({ thread });
+      await userEvent.click(screen.getByTestId('board'));
+      expect(onAskCoach).toHaveBeenCalledTimes(1);
+    });
+
+    it('the whole-game button opens only the game', async () => {
+      const { onAskCoach, onOpenGame } = detail({ thread });
+      await userEvent.click(
+        screen.getByRole('button', { name: /whole game/i }),
+      );
+      expect(onOpenGame).toHaveBeenCalled();
+      expect(onAskCoach).not.toHaveBeenCalled();
+    });
+  });
+
+  it('without a thread, tapping the board does nothing', async () => {
+    const { onAskCoach } = detail();
+    await userEvent.click(screen.getByTestId('board'));
+    expect(onAskCoach).not.toHaveBeenCalled();
   });
 });
