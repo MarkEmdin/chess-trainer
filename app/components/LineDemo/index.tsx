@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { DEFAULT_POSITION } from 'chess.js';
 import {
   ChevronFirstIcon,
@@ -33,7 +33,9 @@ type Props = {
 };
 
 // A sample message on /about whose chips and board work like the real ones: a
-// chip opens at its first move, and the arrows step through the line.
+// chip opens at its first move, and the arrows step through the line, on screen
+// or on the keyboard. A page can hold several demos, so the keys go to the one
+// holding focus.
 export default function LineDemo({
   line,
   start,
@@ -46,16 +48,36 @@ export default function LineDemo({
 }: Props) {
   const t = useTranslations('games.modal');
   const [ply, setPly] = useState(start);
+  const root = useRef<HTMLDivElement>(null);
   const current = playVariation(DEFAULT_POSITION, line)?.moves[ply - 1];
+  const prev = Math.max(start, ply - 1);
+  const next = Math.min(line.length, ply + 1);
   const steps = [
     { label: t('firstMove'), icon: <ChevronFirstIcon />, to: start },
-    { label: t('prevMove'), icon: <ChevronLeftIcon />, to: Math.max(start, ply - 1) },
-    { label: t('nextMove'), icon: <ChevronRightIcon />, to: Math.min(line.length, ply + 1) },
+    { label: t('prevMove'), icon: <ChevronLeftIcon />, to: prev },
+    { label: t('nextMove'), icon: <ChevronRightIcon />, to: next },
     { label: t('lastMove'), icon: <ChevronLastIcon />, to: line.length },
   ];
 
+  function onKeyDown(e: KeyboardEvent) {
+    if (e.key === 'ArrowLeft') setPly(prev);
+    else if (e.key === 'ArrowRight') setPly(next);
+  }
+
+  // A button disabled by its own click drops focus, which would end the keys.
+  function step(to: number) {
+    setPly(to);
+    root.current?.focus({ preventScroll: true });
+  }
+
   return (
-    <div className="flex flex-col gap-3">
+    <div
+      ref={root}
+      data-testid="line-demo"
+      tabIndex={-1}
+      className="flex flex-col gap-3 outline-none"
+      onKeyDown={onKeyDown}
+    >
       <ExampleBoard
         moves={line.slice(0, ply)}
         showCoordinates={showCoordinates}
@@ -69,7 +91,7 @@ export default function LineDemo({
             size="icon"
             aria-label={label}
             disabled={to === ply}
-            onClick={() => setPly(to)}
+            onClick={() => step(to)}
           >
             {icon}
           </Button>
