@@ -62,13 +62,16 @@ const item = (gameId: string, fen: string) => ({
   },
 });
 
+let mockLower: number | null = 15;
+const mockSetThreshold = jest.fn();
 let thinks = [item('g1', FEN_A), item('g2', FEN_B)];
 jest.mock('@/lib/games/longThinks', () => ({
   collectLongThinks: () => thinks,
+  lowerThresholdWithThinks: () => mockLower,
 }));
 
 jest.mock('@/lib/chesscom/useStoredThreshold', () => ({
-  useStoredThreshold: () => [30, () => {}],
+  useStoredThreshold: () => [30, mockSetThreshold],
 }));
 
 jest.mock('@/app/components/LongThinks/PositionRow', () => ({
@@ -134,6 +137,8 @@ const detailText = () => screen.getByTestId('detail').textContent;
 beforeEach(() => {
   localStorage.clear();
   mockFilterNotice = null;
+  mockLower = 15;
+  mockSetThreshold.mockClear();
   thinks = [item('g1', FEN_A), item('g2', FEN_B)];
   requests = {};
   markResponseSeen.mockReset();
@@ -210,6 +215,27 @@ describe('<LongThinks /> selection', () => {
     renderIt();
     expect(screen.queryByTestId('detail')).not.toBeInTheDocument();
     expect(screen.getByText(/No moves crossed the 30s/)).toBeInTheDocument();
+  });
+
+  it('offers the highest lower threshold that finds moves', () => {
+    thinks = [];
+    renderIt();
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Show moves from 15 s' }),
+    );
+    expect(mockSetThreshold).toHaveBeenCalledWith(15);
+  });
+
+  it('suggests a rapid game when no threshold finds moves', () => {
+    thinks = [];
+    mockLower = null;
+    renderIt();
+    expect(
+      screen.getByText(/no long thinks in these games/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /show moves from/i }),
+    ).toBeNull();
   });
 
   it('keeps load more available when no position qualifies', () => {

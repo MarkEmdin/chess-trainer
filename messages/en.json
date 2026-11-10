@@ -533,7 +533,9 @@
       "back": "Back",
       "counter": "{n} / {total}",
       "accountNeeded": "You need an account to ask a coach."
-    }
+    },
+    "showLower": "Show moves from {seconds} s",
+    "noThinks": "No long thinks in these games. Play a rapid game and come back: fresh games work best."
   },
   "videoModal": {
     "watchVideo": "Watch video"
