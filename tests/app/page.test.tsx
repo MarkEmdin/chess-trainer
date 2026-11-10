@@ -19,6 +19,11 @@ jest.mock('@/i18n/navigation', () => ({
   ),
 }));
 
+jest.mock('@/app/components/LandingNickForm', () => ({
+  __esModule: true,
+  default: () => <form data-testid="nick-form" />,
+}));
+
 jest.mock('@/app/components/LineDemo', () => ({
   __esModule: true,
   default: ({ header }: { header: React.ReactNode }) => (
@@ -69,16 +74,6 @@ describe('home page', () => {
     expect(screen.getByText('home.subhead')).toBeInTheDocument();
   });
 
-  it('has one main button, to key positions', async () => {
-    render(await Home());
-    expect(
-      screen.getByRole('link', { name: 'home.ctaPrimary' }),
-    ).toHaveAttribute('href', '/think-time');
-    expect(
-      screen.queryByRole('link', { name: 'home.ctaSecondary' }),
-    ).not.toBeInTheDocument();
-  });
-
   it('shows a labelled sample question and answer', async () => {
     render(await Home());
     expect(screen.getByText('home.demoLabel')).toBeInTheDocument();
@@ -101,38 +96,15 @@ describe('home page', () => {
     expect(steps[2]).toHaveTextContent('home.howItWorks.discuss.title');
   });
 
-  it('links every feature card', async () => {
+  it('asks for the nickname right on the first screen', async () => {
     render(await Home());
-    const cards = {
-      keyPositions: '/think-time',
-      games: '/games',
-      coaching: '/coaching',
-    };
-    for (const [key, href] of Object.entries(cards)) {
-      expect(
-        screen.getByRole('link', {
-          name: new RegExp(`home\\.features\\.${key}\\.title`),
-        }),
-      ).toHaveAttribute('href', href);
-    }
-    // Lessons are hidden for now.
-    expect(
-      screen.queryByRole('link', { name: /home\.features\.lessons\.title/ }),
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('nick-form')).toBeInTheDocument();
   });
 
-  it('feature cards show a focus ring for keyboard users', async () => {
+  it('has no feature cards and no coming-soon block', async () => {
     render(await Home());
-    expect(
-      screen.getByRole('link', { name: /home\.features\.games\.title/ }),
-    ).toHaveClass('focus-visible:ring-3');
-  });
-
-  it('announces discussion with other players as coming soon', async () => {
-    render(await Home());
-    expect(
-      screen.getByRole('heading', { name: 'home.future.title' }),
-    ).toBeInTheDocument();
-    expect(screen.getByText('home.future.description')).toBeInTheDocument();
+    expect(screen.queryAllByRole('link')).toHaveLength(0);
+    expect(screen.queryByText(/home.future/)).toBeNull();
+    expect(screen.queryByText(/home.features/)).toBeNull();
   });
 });

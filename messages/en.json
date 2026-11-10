@@ -326,46 +326,25 @@
   },
   "home": {
     "headline": "A real coach reviews your games",
-    "subhead": "Enter your Chess.com or Lichess nickname and we’ll find the moves you thought about longest. Write down your thoughts and get an answer from a real coach, with comments and lines.",
-    "ctaPrimary": "Try it on my games",
+    "subhead": "We find the moves you thought about longest. Describe your thinking and a coach will answer. The answer can come to Telegram.",
     "demoLabel": "Sample question and answer",
     "howItWorks": {
       "title": "How it works",
       "find": {
         "title": "Bring your games",
-        "text": "Enter your Chess.com or Lichess username — your recent games load automatically."
+        "text": "Your recent Chess.com or Lichess games load on their own."
       },
       "think": {
         "title": "Think it through yourself",
-        "text": "Key Positions shows the moves you spent the most time on. Open one, look for candidate moves and plans, and write down your reasoning — no engine."
+        "text": "Open a move you thought about for long and write down what you considered. No engine."
       },
       "discuss": {
         "title": "Discuss with a coach",
-        "text": "Send your analysis to a coach on the platform and get a reply with comments and variations."
+        "text": "A real coach answers with comments and lines on the board."
       }
     },
-    "features": {
-      "title": "What you can do here",
-      "keyPositions": {
-        "title": "Key Positions",
-        "description": "Positions from your games where you thought for a long time — the best material for self-analysis."
-      },
-      "games": {
-        "title": "Games",
-        "description": "Your recent Chess.com and Lichess games, with a board to replay every move."
-      },
-      "coaching": {
-        "title": "My coaching",
-        "description": "Your questions to coaches: your analysis, their replies and suggested variations."
-      },
-      "lessons": {
-        "title": "Learning materials",
-        "description": "Theory and world champions. Currently in Russian only."
-      }
-    },
-    "future": {
-      "title": "Coming soon",
-      "description": "Discuss your analysis with other players — compare ideas on the same position and learn from each other."
+    "form": {
+      "submit": "Find my positions"
     }
   },
   "lessons": {

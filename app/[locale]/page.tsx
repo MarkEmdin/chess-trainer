@@ -1,15 +1,8 @@
 import { getLocale, getTranslations } from 'next-intl/server';
-import { Link, redirect } from '@/i18n/navigation';
+import { redirect } from '@/i18n/navigation';
 import { getAuthedUser } from '@/lib/auth/getUser';
-import { SHOW_LESSONS } from '@/lib/site';
-import { buttonVariants } from '@/app/components/ui/button';
+import LandingNickForm from '@/app/components/LandingNickForm';
 import LineDemo from '@/app/components/LineDemo';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardTitle,
-} from '@/app/components/ui/card';
 import {
   COACH_CHIPS,
   COACH_LINE,
@@ -17,15 +10,6 @@ import {
 } from '@/app/constants/aboutExamples';
 
 const steps = ['find', 'think', 'discuss'] as const;
-
-const features = (
-  [
-    { href: '/think-time', key: 'keyPositions' },
-    { href: '/games', key: 'games' },
-    { href: '/coaching', key: 'coaching' },
-    { href: '/lessons', key: 'lessons' },
-  ] as const
-).filter(({ key }) => SHOW_LESSONS || key !== 'lessons');
 
 export default async function Home() {
   // The landing is for guests; signed-in users go straight to the product
@@ -46,9 +30,7 @@ export default async function Home() {
               {t('headline')}
             </h1>
             <p className="text-lg text-muted-foreground">{t('subhead')}</p>
-            <Link href="/think-time" className={buttonVariants({ size: 'lg' })}>
-              {t('ctaPrimary')}
-            </Link>
+            <LandingNickForm />
           </div>
           <div className="relative mx-auto w-full max-w-sm rounded-xl border border-border bg-card p-3 shadow-lg shadow-primary/5">
             <span className="absolute -top-3 right-3 z-10 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow">
@@ -88,39 +70,6 @@ export default async function Home() {
               </li>
             ))}
           </ol>
-        </section>
-
-        <section className="flex flex-col gap-6">
-          <h2 className="text-2xl font-semibold text-foreground">
-            {t('features.title')}
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {features.map((feature) => (
-              <Link
-                key={feature.href}
-                href={feature.href}
-                className="rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-              >
-                <Card className="h-full transition-colors hover:border-foreground/20">
-                  <CardContent>
-                    <CardTitle>{t(`features.${feature.key}.title`)}</CardTitle>
-                    <CardDescription className="mt-1">
-                      {t(`features.${feature.key}.description`)}
-                    </CardDescription>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        <section className="flex flex-col gap-2 rounded-lg border border-dashed border-border p-6">
-          <h2 className="text-lg font-semibold text-foreground">
-            {t('future.title')}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {t('future.description')}
-          </p>
         </section>
       </div>
     </main>

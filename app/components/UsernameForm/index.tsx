@@ -9,9 +9,15 @@ import type { Platform } from '@/lib/games/types';
 type Props = {
   platform: Platform;
   onSubmit: (username: string) => void;
+  // Button text; defaults to "Load games".
+  submitLabel?: string;
 };
 
-export default function UsernameForm({ platform, onSubmit }: Props) {
+export default function UsernameForm({
+  platform,
+  onSubmit,
+  submitLabel,
+}: Props) {
   const t = useTranslations('games.usernameForm');
   const [input, setInput] = useState('');
 
@@ -44,7 +50,7 @@ export default function UsernameForm({ platform, onSubmit }: Props) {
           spellCheck={false}
         />
         <Button type="submit" disabled={!input.trim()}>
-          {t('submit')}
+          {submitLabel ?? t('submit')}
         </Button>
       </div>
     </form>
