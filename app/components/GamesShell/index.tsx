@@ -17,7 +17,7 @@ import {
   updateLichessUsername,
 } from '@/lib/auth/profileActions';
 import type { Game, Platform } from '@/lib/games/types';
-import { Button } from '@/app/components/ui/button';
+import { Button, buttonVariants } from '@/app/components/ui/button';
 import PlatformToggle from '@/app/components/PlatformToggle';
 import TimeClassFilter from '@/app/components/TimeClassFilter';
 import UsernameForm from '@/app/components/UsernameForm';
@@ -48,7 +48,6 @@ type Props = {
   renderStatus: (
     props: Omit<RenderProps, 'loadMore' | 'timeFilter' | 'filterNotice'>,
   ) => React.ReactNode;
-  emptyMessage: string;
   children: (props: RenderProps) => React.ReactNode;
   // Hand the load-more controls to `children` instead of rendering them
   // under everything (Key Positions puts them under its list column).
@@ -64,7 +63,6 @@ export default function GamesShell({
   initialChesscomUsername,
   initialLichessUsername,
   renderStatus,
-  emptyMessage,
   children,
   loadMoreInChildren = false,
 }: Props) {
@@ -167,6 +165,27 @@ export default function GamesShell({
     }
   };
 
+  // The nickname was not found here: try the same one on the other platform
+  // (spec 036). The current platform's nickname is cleared, so the other one
+  // is the only one saved and loads straight away.
+  const otherPlatform: Platform =
+    effectivePlatform === 'chesscom' ? 'lichess' : 'chesscom';
+  const switchPlatform = (nick: string) => {
+    const chesscom = otherPlatform === 'chesscom' ? nick : null;
+    const lichess = otherPlatform === 'lichess' ? nick : null;
+    setEditingPlatform(null);
+    setPlatform(otherPlatform);
+    if (isAuthenticated) {
+      setProfileChesscomUsername(chesscom);
+      setProfileLichessUsername(lichess);
+      void updateChesscomUsername(chesscom);
+      void updateLichessUsername(lichess);
+    } else {
+      setStoredChesscomUsername(chesscom);
+      setStoredLichessUsername(lichess);
+    }
+  };
+
   const chesscomResult = useChessComGames(
     effectivePlatform === 'chesscom' ? username : null,
   );
@@ -205,6 +224,7 @@ export default function GamesShell({
     ) : null;
   const tForm = useTranslations('games.usernameForm');
   const tLoadMore = useTranslations('games.loadMore');
+  const tPlatform = useTranslations('games.platformToggle');
 
   const loadMoreControls = !allGames?.length ? null : loadMoreError ? (
     <div className="flex items-center gap-3 flex-wrap">
@@ -266,14 +286,51 @@ export default function GamesShell({
         </div>
       )}
 
-      {error && !isLoading && (
-        <p className="text-destructive">
-          {isNotFound ? tCommon('errorNotFound') : tCommon('errorGeneric')}
-        </p>
+      {error && !isLoading && isNotFound && (
+        <div className="flex flex-col items-start gap-3">
+          <p className="text-destructive">
+            {tCommon('notFound', {
+              username,
+              platform: tPlatform(effectivePlatform),
+            })}
+          </p>
+          <Button variant="outline" onClick={() => switchPlatform(username)}>
+            {tCommon('tryOther', {
+              username,
+              platform: tPlatform(otherPlatform),
+            })}
+          </Button>
+        </div>
+      )}
+
+      {error && !isLoading && !isNotFound && (
+        <p className="text-destructive">{tCommon('errorGeneric')}</p>
       )}
 
       {allGames && !isLoading && allGames.length === 0 && (
-        <p className="text-muted-foreground">{emptyMessage}</p>
+        <div className="flex flex-col items-start gap-3">
+          <p className="text-muted-foreground">
+            {tCommon('noGames', { username })}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href="https://www.chess.com/play/online"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonVariants({ variant: 'outline', size: 'sm' })}
+            >
+              {tCommon('playChesscom')}
+            </a>
+            <a
+              href="https://lichess.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonVariants({ variant: 'outline', size: 'sm' })}
+            >
+              {tCommon('playLichess')}
+            </a>
+          </div>
+        </div>
       )}
 
       {/* Children still render when the chips hide every loaded game, so

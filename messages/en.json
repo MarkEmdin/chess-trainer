@@ -543,11 +543,14 @@
     "games": {
       "loading": "Loading games…",
       "errorGeneric": "Could not load games. Try again.",
-      "errorNotFound": "Player not found.",
-      "emptyGames": "This player has no games yet.",
       "timeFilterLabel": "Time controls",
       "emptyFiltered": "No games with the selected time controls among the loaded ones.",
-      "emptyOnlyDaily": "Only daily games among the loaded ones. They aren't shown here."
+      "emptyOnlyDaily": "Only daily games among the loaded ones. They aren't shown here.",
+      "notFound": "Player {username} not found on {platform}. Check the spelling.",
+      "tryOther": "Search {username} on {platform}",
+      "noGames": "{username} has no games yet. Play a rapid game (10 minutes or more) and come back: it will have moves you thought about.",
+      "playChesscom": "Play on Chess.com",
+      "playLichess": "Play on Lichess"
     },
     "error": {
       "title": "Something went wrong",

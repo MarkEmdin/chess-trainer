@@ -141,7 +141,6 @@ export default function LongThinks({
         isAuthenticated={isAuthenticated}
         initialChesscomUsername={initialChesscomUsername}
         initialLichessUsername={initialLichessUsername}
-        emptyMessage={t('empty', { threshold: deferredThreshold })}
         renderStatus={({ games }) =>
           t('showing', {
             count: collectLongThinks(games, deferredThreshold).length,

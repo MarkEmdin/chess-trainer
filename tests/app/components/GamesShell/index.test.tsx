@@ -67,7 +67,6 @@ function shell(
       isAuthenticated={false}
       initialChesscomUsername={null}
       initialLichessUsername={null}
-      emptyMessage="no-games-here"
       renderStatus={({ games }) => `status-${games.length}`}
     >
       {children}
@@ -137,7 +136,7 @@ describe('<GamesShell />', () => {
       isNotFound: true,
     });
     shell();
-    expect(screen.getByText(/player not found/i)).toBeInTheDocument();
+    expect(screen.getByText(/not found on chess.com/i)).toBeInTheDocument();
   });
 
   it('shows a generic error for any other failure', () => {
@@ -288,7 +287,6 @@ describe('<GamesShell />', () => {
           isAuthenticated={false}
           initialChesscomUsername={null}
           initialLichessUsername={null}
-          emptyMessage="no-games-here"
           renderStatus={({ games }) => `status-${games.length}`}
           loadMoreInChildren
         >
@@ -323,7 +321,6 @@ describe('<GamesShell /> nickname entered before signing up', () => {
         isAuthenticated
         initialChesscomUsername={chesscom}
         initialLichessUsername={lichess}
-        emptyMessage="no-games-here"
         renderStatus={({ games }) => `status-${games.length}`}
       >
         {() => <div data-testid="children">CONTENT</div>}
@@ -391,7 +388,6 @@ describe('<GamesShell /> time-control filter', () => {
         isAuthenticated={false}
         initialChesscomUsername={null}
         initialLichessUsername={null}
-        emptyMessage="no-games-here"
         renderStatus={({ games }) => `status-${games.length}`}
         loadMoreInChildren={loadMoreInChildren}
       >
@@ -443,7 +439,7 @@ describe('<GamesShell /> time-control filter', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Rapid' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /load more/i })).toBeInTheDocument();
-    expect(screen.queryByText('no-games-here')).toBeNull();
+    expect(screen.queryByText(/has no games yet/i)).toBeNull();
   });
 
   it('hands the notice and load-more to children when they own load-more', () => {
@@ -477,5 +473,76 @@ describe('<GamesShell /> time-control filter', () => {
     expect(
       screen.queryByText(/no games with the selected time controls/i),
     ).toBeNull();
+  });
+});
+
+describe('<GamesShell /> empty accounts (spec 036)', () => {
+  const notFound = (): UseGamesResult => ({
+    ...idleResult(),
+    error: new Error('fail'),
+    isNotFound: true,
+  });
+
+  beforeEach(() => {
+    localStorage.clear();
+    jest.mocked(updateChesscomUsername).mockClear();
+    jest.mocked(updateLichessUsername).mockClear();
+    mockUseChessComGames.mockReturnValue(idleResult());
+    mockUseLichessGames.mockReturnValue(idleResult());
+  });
+
+  it('names the nickname and the platform when not found', () => {
+    localStorage.setItem('chesscom-username', 'ghost');
+    mockUseChessComGames.mockReturnValue(notFound());
+    shell();
+    expect(
+      screen.getByText('Player ghost not found on Chess.com. Check the spelling.'),
+    ).toBeInTheDocument();
+  });
+
+  it('searches the same nickname on the other platform', async () => {
+    localStorage.setItem('chesscom-username', 'ghost');
+    mockUseChessComGames.mockReturnValue(notFound());
+    shell();
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Search ghost on Lichess' }),
+    );
+    expect(mockUseLichessGames).toHaveBeenLastCalledWith('ghost');
+    expect(mockUseChessComGames).toHaveBeenLastCalledWith(null);
+    expect(localStorage.getItem('chesscom-username')).toBeNull();
+  });
+
+  it('moves a signed-in nickname to the other platform in the profile', async () => {
+    mockUseLichessGames.mockReturnValue(notFound());
+    renderWithIntl(
+      <GamesShell
+        isAuthenticated
+        initialChesscomUsername={null}
+        initialLichessUsername="ghost"
+        renderStatus={() => ''}
+      >
+        {() => null}
+      </GamesShell>,
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Search ghost on Chess.com' }),
+    );
+    expect(updateChesscomUsername).toHaveBeenCalledWith('ghost');
+    expect(updateLichessUsername).toHaveBeenCalledWith(null);
+    expect(mockUseChessComGames).toHaveBeenLastCalledWith('ghost');
+  });
+
+  it('suggests playing a rapid game when the account has no games', () => {
+    localStorage.setItem('chesscom-username', 'newbie');
+    mockUseChessComGames.mockReturnValue({ ...idleResult(), games: [] });
+    shell();
+    expect(screen.getByText(/newbie has no games yet/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Play on Chess.com' }),
+    ).toHaveAttribute('href', 'https://www.chess.com/play/online');
+    expect(screen.getByRole('link', { name: 'Play on Lichess' })).toHaveAttribute(
+      'href',
+      'https://lichess.org/',
+    );
   });
 });
