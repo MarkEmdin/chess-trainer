@@ -1,5 +1,6 @@
 import { Chess } from 'chess.js';
 import type { Game, GameColor } from './types';
+import { THRESHOLD_PRESETS } from './constants';
 
 export type LongThink = {
   gameId: string;
@@ -105,4 +106,15 @@ export function collectLongThinks(
       .sort((a, b) => b.seconds - a.seconds)
       .map((think) => ({ think, game })),
   );
+}
+
+// The highest preset below `threshold` that finds at least one think, so an
+// empty list can offer one tap that fills it (spec 036). Null when none does.
+export function lowerThresholdWithThinks(
+  games: Game[],
+  threshold: number,
+  presets: readonly number[] = THRESHOLD_PRESETS,
+): number | null {
+  const lower = presets.filter((p) => p < threshold).sort((a, b) => b - a);
+  return lower.find((p) => collectLongThinks(games, p).length > 0) ?? null;
 }

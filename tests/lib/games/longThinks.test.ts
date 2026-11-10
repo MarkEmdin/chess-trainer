@@ -1,4 +1,8 @@
-import { collectLongThinks, findLongThinks } from '@/lib/games/longThinks';
+import {
+  collectLongThinks,
+  findLongThinks,
+  lowerThresholdWithThinks,
+} from '@/lib/games/longThinks';
 import type { Game } from '@/lib/games/types';
 
 // Four half-moves, 3-minute time control, no increment unless overridden.
@@ -121,5 +125,38 @@ describe('collectLongThinks', () => {
       ({ game, think }) => `${game.id} ${think.san}`,
     );
     expect(order).toEqual(['newer Nf3', 'newer e4', 'older Nf3', 'older e4']);
+  });
+});
+
+describe('lowerThresholdWithThinks', () => {
+  // White thinks 20 s on e4 and 35 s on Nf3.
+  const slowGame = makeGame({
+    clockSnapshots: [
+      { whiteSeconds: 600, blackSeconds: 600 },
+      { whiteSeconds: 580, blackSeconds: 600 },
+      { whiteSeconds: 580, blackSeconds: 595 },
+      { whiteSeconds: 545, blackSeconds: 595 },
+      { whiteSeconds: 545, blackSeconds: 590 },
+    ],
+  });
+
+  it('returns the highest preset below the threshold that finds thinks', () => {
+    expect(lowerThresholdWithThinks([slowGame], 45)).toBe(30);
+  });
+
+  it('steps further down when a higher preset finds nothing', () => {
+    expect(lowerThresholdWithThinks([slowGame], 30)).toBe(15);
+  });
+
+  it('is null at the lowest preset', () => {
+    expect(lowerThresholdWithThinks([slowGame], 15)).toBeNull();
+  });
+
+  it('is null when no preset finds anything', () => {
+    expect(lowerThresholdWithThinks([makeGame()], 45)).toBeNull();
+  });
+
+  it('uses the given presets', () => {
+    expect(lowerThresholdWithThinks([makeGame()], 10, [3, 6, 8])).toBe(6);
   });
 });
