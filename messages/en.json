@@ -100,7 +100,7 @@
     "open": "Open",
     "askTitle": "Ask the coach",
     "threadTitle": "Coaching thread",
-    "bodyLabel": "What were you thinking in this position?",
+    "bodyLabel": "What were you thinking — or what do you think now — in this position?",
     "bodyPlaceholder": "Describe your thoughts, the candidate moves you considered, what made you hesitate…",
     "charCount": "{count} / {max}",
     "submit": "Send to coach",
@@ -326,46 +326,25 @@
   },
   "home": {
     "headline": "A real coach reviews your games",
-    "subhead": "Enter your Chess.com or Lichess nickname and we’ll find the moves you thought about longest. Write down your thoughts and get an answer from a real coach, with comments and lines.",
-    "ctaPrimary": "Try it on my games",
+    "subhead": "We find the moves you thought about longest. Describe your thinking and a coach will answer. The answer can come to Telegram.",
     "demoLabel": "Sample question and answer",
     "howItWorks": {
       "title": "How it works",
       "find": {
         "title": "Bring your games",
-        "text": "Enter your Chess.com or Lichess username — your recent games load automatically."
+        "text": "Your recent Chess.com or Lichess games load on their own."
       },
       "think": {
         "title": "Think it through yourself",
-        "text": "Key Positions shows the moves you spent the most time on. Open one, look for candidate moves and plans, and write down your reasoning — no engine."
+        "text": "Open a move you thought about for long and write down what you considered. No engine."
       },
       "discuss": {
         "title": "Discuss with a coach",
-        "text": "Send your analysis to a coach on the platform and get a reply with comments and variations."
+        "text": "A real coach answers with comments and lines on the board."
       }
     },
-    "features": {
-      "title": "What you can do here",
-      "keyPositions": {
-        "title": "Key Positions",
-        "description": "Positions from your games where you thought for a long time — the best material for self-analysis."
-      },
-      "games": {
-        "title": "Games",
-        "description": "Your recent Chess.com and Lichess games, with a board to replay every move."
-      },
-      "coaching": {
-        "title": "My coaching",
-        "description": "Your questions to coaches: your analysis, their replies and suggested variations."
-      },
-      "lessons": {
-        "title": "Learning materials",
-        "description": "Theory and world champions. Currently in Russian only."
-      }
-    },
-    "future": {
-      "title": "Coming soon",
-      "description": "Discuss your analysis with other players — compare ideas on the same position and learn from each other."
+    "form": {
+      "submit": "Find my positions"
     }
   },
   "lessons": {
@@ -532,8 +511,11 @@
       "openGame": "Open the whole game",
       "back": "Back",
       "counter": "{n} / {total}",
-      "accountNeeded": "You need an account to ask a coach."
-    }
+      "accountNeeded": "You need an account to ask a coach.",
+      "oldGame": "Don't remember what you were thinking? That's fine: solve the position now, like a puzzle. The coach will review your reasoning."
+    },
+    "showLower": "Show moves from {seconds} s",
+    "noThinks": "No long thinks in these games. Play a rapid game and come back: fresh games work best."
   },
   "videoModal": {
     "watchVideo": "Watch video"
@@ -543,11 +525,14 @@
     "games": {
       "loading": "Loading games…",
       "errorGeneric": "Could not load games. Try again.",
-      "errorNotFound": "Player not found.",
-      "emptyGames": "This player has no games yet.",
       "timeFilterLabel": "Time controls",
       "emptyFiltered": "No games with the selected time controls among the loaded ones.",
-      "emptyOnlyDaily": "Only daily games among the loaded ones. They aren't shown here."
+      "emptyOnlyDaily": "Only daily games among the loaded ones. They aren't shown here.",
+      "notFound": "Player {username} not found on {platform}. Check the spelling.",
+      "tryOther": "Search {username} on {platform}",
+      "noGames": "{username} has no games yet. Play a rapid game (10 minutes or more) and come back: it will have moves you thought about.",
+      "playChesscom": "Play on Chess.com",
+      "playLichess": "Play on Lichess"
     },
     "error": {
       "title": "Something went wrong",

@@ -8,6 +8,7 @@ import LikedMark from '@/app/components/LikedMark';
 import SectionLabel from '@/app/components/SectionLabel';
 import { Link } from '@/i18n/navigation';
 import { formatSeconds } from '@/lib/chesscom/format';
+import { isOldGame } from '@/lib/games/age';
 import type { LongThink } from '@/lib/games/longThinks';
 import type { Game, GameColor, GamePlayer } from '@/lib/games/types';
 import { cn } from '@/lib/utils';
@@ -172,6 +173,12 @@ export default function PositionDetail({
                 ))
               )}
             </div>
+          )}
+
+          {/* Old games: the player may not remember their thoughts, so
+              invite them to think about it now (spec 036). */}
+          {!thread && isOldGame(game.endTime, new Date()) && (
+            <p className="text-xs text-muted-foreground">{t('oldGame')}</p>
           )}
 
           {isAuthenticated ? (

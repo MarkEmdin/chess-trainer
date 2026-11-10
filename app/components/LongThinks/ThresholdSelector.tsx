@@ -2,9 +2,8 @@
 
 import { useId } from 'react';
 import { useTranslations } from 'next-intl';
+import { THRESHOLD_PRESETS as PRESETS } from '@/lib/games/constants';
 import { cn } from '@/lib/utils';
-
-const PRESETS = [15, 30, 45, 60, 90] as const;
 
 type Props = {
   value: number;

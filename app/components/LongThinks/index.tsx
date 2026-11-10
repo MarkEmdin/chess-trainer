@@ -4,7 +4,12 @@ import { useCallback, useDeferredValue, useEffect, useState } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { Loader2Icon } from 'lucide-react';
-import { collectLongThinks, type LongThink } from '@/lib/games/longThinks';
+import {
+  collectLongThinks,
+  lowerThresholdWithThinks,
+  type LongThink,
+} from '@/lib/games/longThinks';
+import { Button } from '@/app/components/ui/button';
 import type { Game } from '@/lib/games/types';
 import { useStoredThreshold } from '@/lib/chesscom/useStoredThreshold';
 import { useMyCoachingRequests } from '@/lib/coaching/useMyCoachingRequests';
@@ -58,6 +63,31 @@ function RestorePendingAsk({
     if (key && keys.includes(key)) onRestore(key);
   }, [keys, onRestore]);
   return null;
+}
+
+// Nothing over the threshold: one tap to the highest preset that finds moves,
+// or, if none does, a nudge to play a fresh rapid game (spec 036).
+function NoThinks({
+  threshold,
+  lower,
+  onLower,
+}: {
+  threshold: number;
+  lower: number | null;
+  onLower: (seconds: number) => void;
+}) {
+  const t = useTranslations('thinkTime');
+  if (lower === null) {
+    return <p className="text-muted-foreground">{t('noThinks')}</p>;
+  }
+  return (
+    <div className="flex flex-col items-start gap-3">
+      <p className="text-muted-foreground">{t('empty', { threshold })}</p>
+      <Button variant="outline" size="sm" onClick={() => onLower(lower)}>
+        {t('showLower', { seconds: lower })}
+      </Button>
+    </div>
+  );
 }
 
 type Props = {
@@ -141,7 +171,6 @@ export default function LongThinks({
         isAuthenticated={isAuthenticated}
         initialChesscomUsername={initialChesscomUsername}
         initialLichessUsername={initialLichessUsername}
-        emptyMessage={t('empty', { threshold: deferredThreshold })}
         renderStatus={({ games }) =>
           t('showing', {
             count: collectLongThinks(games, deferredThreshold).length,
@@ -218,9 +247,11 @@ export default function LongThinks({
                   </div>
                 ) : enriched.length === 0 ? (
                   (filterNotice ?? (
-                    <p className="text-muted-foreground">
-                      {t('empty', { threshold: deferredThreshold })}
-                    </p>
+                    <NoThinks
+                      threshold={deferredThreshold}
+                      lower={lowerThresholdWithThinks(games, deferredThreshold)}
+                      onLower={setThreshold}
+                    />
                   ))
                 ) : shown.length === 0 ? (
                   <p className="text-muted-foreground">

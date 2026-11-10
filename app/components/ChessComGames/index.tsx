@@ -25,7 +25,6 @@ export default function ChessComGames({
 }: Props) {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const t = useTranslations('games.list');
-  const tCommon = useTranslations('common.games');
 
   return (
     <>
@@ -33,7 +32,6 @@ export default function ChessComGames({
         isAuthenticated={isAuthenticated}
         initialChesscomUsername={initialChesscomUsername}
         initialLichessUsername={initialLichessUsername}
-        emptyMessage={tCommon('emptyGames')}
         renderStatus={({ games, username }) =>
           t('showing', { username, count: games.length })
         }
