@@ -176,3 +176,26 @@ describe('<PositionDetail />', () => {
     expect(onAskCoach).not.toHaveBeenCalled();
   });
 });
+
+describe('<PositionDetail /> old games (spec 036)', () => {
+  const DAY = 24 * 60 * 60 * 1000;
+  const HINT = /don't remember what you were thinking/i;
+
+  it('suggests thinking about an old position now', () => {
+    detail({ game: { ...game, endTime: new Date(Date.now() - 30 * DAY) } });
+    expect(screen.getByText(HINT)).toBeInTheDocument();
+  });
+
+  it('says nothing for a fresh game', () => {
+    detail({ game: { ...game, endTime: new Date() } });
+    expect(screen.queryByText(HINT)).toBeNull();
+  });
+
+  it('says nothing once the question is asked', () => {
+    detail({
+      game: { ...game, endTime: new Date(Date.now() - 30 * DAY) },
+      thread: { body: 'Was Nf5 ok?', responses: [] },
+    });
+    expect(screen.queryByText(HINT)).toBeNull();
+  });
+});
