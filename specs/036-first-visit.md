@@ -1,6 +1,6 @@
 # Spec: Simple first visit
 
-Status: approved
+Status: done
 Branch: feature/first-visit
 
 ## Problem
@@ -115,12 +115,12 @@ Removed: `home.ctaPrimary`, `home.features.*`, `home.future.*`,
 
 Added (both locales):
 
-- `home.subhead` (rewritten), `home.form.submit`, `home.form.placeholder`
+- `home.subhead` (rewritten), `home.form.submit`
 - `home.howItWorks.*.text` (shortened)
 - `common.games.notFound` `{username, platform}`, `common.games.tryOther`
   `{username, platform}`, `common.games.noGames` `{username}`,
   `common.games.playChesscom`, `common.games.playLichess`
-- `thinkTime.showLower` `{seconds}`, `thinkTime.noThinks`, `thinkTime.oldGame`
+- `thinkTime.showLower` `{seconds}`, `thinkTime.noThinks`, `thinkTime.detail.oldGame`
 - `coaching.bodyLabel` (rewritten)
 
 ## Decisions made by Claude
