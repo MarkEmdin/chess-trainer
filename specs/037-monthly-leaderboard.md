@@ -1,6 +1,6 @@
 # Spec: Monthly leaderboard with a podium
 
-Status: in-progress
+Status: done
 Branch: feature/monthly-leaderboard
 
 ## Problem
