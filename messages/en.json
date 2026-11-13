@@ -624,7 +624,7 @@
         },
         "leaderboard": {
           "title": "Leaderboard",
-          "text": "Coaches like good questions, and the most liked players of the week get to the top."
+          "text": "Coaches like good questions, and the most liked players of the month get to the top."
         },
         "learning": {
           "title": "Learning materials",
@@ -667,12 +667,13 @@
   },
   "leaderboard": {
     "metaTitle": "Leaderboard",
-    "title": "Leaderboard of the week",
-    "subtitle": "Coach likes over the last 7 days",
-    "empty": "No likes yet this week. Ask a coach a good question!",
+    "title": "Leaderboard of the month",
+    "empty": "No likes yet this month. Ask a coach a good question!",
     "you": "You",
     "positions": "{count, plural, one {# position} other {# positions}}",
-    "place": "Place {place}"
+    "place": "Place {place}",
+    "hint": "A coach likes a good question. One like is one position.",
+    "podium": "Top places"
   },
   "footer": {
     "about": "About",

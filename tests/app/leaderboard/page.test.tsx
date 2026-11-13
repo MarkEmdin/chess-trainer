@@ -20,8 +20,17 @@ jest.mock('@/lib/leaderboard/getLeaderboard', () => ({
 }));
 jest.mock('@/app/components/PageLayout', () => ({
   __esModule: true,
-  default: ({ children }: { children: React.ReactNode }) => (
-    <main>{children}</main>
+  default: ({
+    subtitle,
+    children,
+  }: {
+    subtitle?: string;
+    children: React.ReactNode;
+  }) => (
+    <main>
+      {subtitle && <p>{subtitle}</p>}
+      {children}
+    </main>
   ),
 }));
 jest.mock('@/app/components/Leaderboard', () => ({
@@ -46,6 +55,9 @@ describe('leaderboard page', () => {
     getAuthedUser.mockResolvedValue({ id: 'u1', role: 'user' });
     render(await LeaderboardPage());
     expect(screen.getByText('leaderboard-table')).toBeInTheDocument();
+    expect(
+      screen.queryByText('leaderboard.subtitle'),
+    ).not.toBeInTheDocument();
     expect(redirect).not.toHaveBeenCalled();
   });
 });

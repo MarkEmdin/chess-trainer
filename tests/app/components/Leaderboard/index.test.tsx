@@ -1,4 +1,4 @@
-import { renderWithIntl, screen } from '../../../test-utils';
+import { renderWithIntl, screen, within } from '../../../test-utils';
 import Leaderboard from '@/app/components/Leaderboard';
 import type { LeaderboardRow } from '@/lib/leaderboard/types';
 
@@ -51,7 +51,48 @@ describe('Leaderboard', () => {
     renderWithIntl(<Leaderboard rows={[]} />);
     expect(
       screen.getByText(
-        'No likes yet this week. Ask a coach a good question!',
+        'No likes yet this month. Ask a coach a good question!',
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('puts places 1-3 with likes on the podium', () => {
+    renderWithIntl(
+      <Leaderboard
+        rows={[r(1, 'A', 7), r(2, 'B', 5), r(2, 'C', 5), r(4, 'D', 3)]}
+      />,
+    );
+    const podium = screen.getByRole('list', { name: 'Top places' });
+    expect(within(podium).getByText('A')).toBeInTheDocument();
+    expect(within(podium).getByText('B')).toBeInTheDocument();
+    expect(within(podium).getByText('C')).toBeInTheDocument();
+    expect(within(podium).queryByText('D')).not.toBeInTheDocument();
+    expect(screen.getByText('D')).toBeInTheDocument();
+  });
+
+  it('has no podium when nobody has a like', () => {
+    renderWithIntl(<Leaderboard rows={[r(1, 'A', 0), r(1, 'B', 0)]} />);
+    expect(
+      screen.queryByRole('list', { name: 'Top places' }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText('A')).toBeInTheDocument();
+    expect(screen.getByText('B')).toBeInTheDocument();
+  });
+
+  it('marks own podium card', () => {
+    renderWithIntl(<Leaderboard rows={[r(1, 'Me', 3, true)]} />);
+    const podium = screen.getByRole('list', { name: 'Top places' });
+    expect(within(podium).getByText('You').closest('li')).toHaveAttribute(
+      'aria-current',
+      'true',
+    );
+  });
+
+  it('shows the hint', () => {
+    renderWithIntl(<Leaderboard rows={[r(1, 'A', 1)]} />);
+    expect(
+      screen.getByText(
+        'A coach likes a good question. One like is one position.',
       ),
     ).toBeInTheDocument();
   });
