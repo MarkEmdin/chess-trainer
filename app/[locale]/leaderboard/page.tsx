@@ -22,7 +22,7 @@ export default async function LeaderboardPage() {
   const rows = await getLeaderboard();
 
   return (
-    <PageLayout title={t('title')} subtitle={t('subtitle')}>
+    <PageLayout title={t('title')}>
       <Leaderboard rows={rows} />
     </PageLayout>
   );

@@ -10,10 +10,37 @@ const CUP_COLOR: Record<Cup, string> = {
   bronze: 'text-[#c98a54]',
 };
 
+// With no likes everyone ties for first, and nobody earned a cup.
+function cupOf(row: LeaderboardRow): Cup | null {
+  return row.likes > 0 ? cupFor(row.place) : null;
+}
+
+function PodiumCard({ row, cup }: { row: LeaderboardRow; cup: Cup }) {
+  const t = useTranslations('leaderboard');
+  return (
+    <li
+      aria-current={row.is_me ? 'true' : undefined}
+      className={cn(
+        'flex min-w-0 flex-col items-center gap-1 rounded-lg border bg-card px-2 py-3 text-center',
+        row.is_me ? 'border-primary' : 'border-border',
+      )}
+    >
+      <TrophyIcon
+        aria-label={t('place', { place: row.place })}
+        className={cn('size-7', CUP_COLOR[cup])}
+      />
+      <span className="w-full truncate font-medium text-foreground">
+        {row.is_me ? t('you') : row.nickname}
+      </span>
+      <span className="text-sm font-semibold text-primary">
+        {t('positions', { count: row.likes })}
+      </span>
+    </li>
+  );
+}
+
 function Row({ row }: { row: LeaderboardRow }) {
   const t = useTranslations('leaderboard');
-  // With no likes this week everyone ties for first, and nobody earned a cup.
-  const cup = row.likes > 0 ? cupFor(row.place) : null;
   return (
     <li
       aria-current={row.is_me ? 'true' : undefined}
@@ -23,14 +50,7 @@ function Row({ row }: { row: LeaderboardRow }) {
       )}
     >
       <span className="flex w-7 shrink-0 font-semibold text-muted-foreground">
-        {cup ? (
-          <TrophyIcon
-            aria-label={t('place', { place: row.place })}
-            className={cn('size-5', CUP_COLOR[cup])}
-          />
-        ) : (
-          row.place
-        )}
+        {row.place}
       </span>
       <span className="min-w-0 flex-1 truncate text-foreground">
         {row.is_me ? t('you') : row.nickname}
@@ -49,11 +69,30 @@ export default function Leaderboard({ rows }: { rows: LeaderboardRow[] }) {
     return <p className="text-muted-foreground">{t('empty')}</p>;
   }
 
+  const podium = rows.flatMap((row) => {
+    const cup = cupOf(row);
+    return cup ? [{ row, cup }] : [];
+  });
+  const rest = rows.filter((row) => !cupOf(row));
+  const key = (row: LeaderboardRow) => `${row.place}-${row.nickname}`;
+
   return (
-    <ol className="flex max-w-xl flex-col gap-1.5">
-      {rows.map((row) => (
-        <Row key={`${row.place}-${row.nickname}`} row={row} />
-      ))}
-    </ol>
+    <div className="flex max-w-xl flex-col gap-3">
+      {podium.length > 0 && (
+        <ol aria-label={t('podium')} className="grid grid-cols-3 gap-2">
+          {podium.map(({ row, cup }) => (
+            <PodiumCard key={key(row)} row={row} cup={cup} />
+          ))}
+        </ol>
+      )}
+      {rest.length > 0 && (
+        <ol className="flex flex-col gap-1.5">
+          {rest.map((row) => (
+            <Row key={key(row)} row={row} />
+          ))}
+        </ol>
+      )}
+      <p className="text-sm text-muted-foreground">{t('hint')}</p>
+    </div>
   );
 }
