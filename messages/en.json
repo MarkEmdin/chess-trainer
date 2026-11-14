@@ -189,7 +189,7 @@
   "coachingPage": {
     "title": "My coaching",
     "subtitle": "Positions you've asked the coach about.",
-    "empty": "No questions yet — go to Key Positions and click \"Ask coach\" on any long-think position.",
+    "empty": "No questions yet — open “Positions” and press “Ask coach” on a long think, or open a game under “Games” and ask about any of your moves.",
     "tabs": {
       "waiting": "Awaiting reply ({count})",
       "answered": "Answered ({count})"

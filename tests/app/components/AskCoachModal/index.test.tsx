@@ -114,6 +114,23 @@ it('opens the earlier question in the game it was asked in', () => {
   );
 });
 
+it('browses the viewed game for an older question without a saved game', () => {
+  renderWithIntl(
+    <AskCoachModal
+      game={game}
+      target={target}
+      thread={thread({ pgn: null, game_url: game.url })}
+      onClose={noop}
+      onSubmitted={noop}
+      onSeen={noop}
+    />,
+  );
+  expect(JSON.parse(screen.getByTestId('coaching').dataset.game!)).toEqual({
+    pgn: '1. e4 e5 2. Nf3',
+    moveIndex: 2,
+  });
+});
+
 it('keeps the game date for a question from this game', () => {
   renderWithIntl(
     <AskCoachModal

@@ -1,6 +1,6 @@
 # Spec: Ask about any move
 
-Status: in-progress
+Status: done
 Branch: feature/ask-any-move
 
 ## Problem
@@ -154,14 +154,18 @@ node --env-file=.env.prod.local scripts/telegram-broadcast.mjs ask-any-move http
 - [ ] On /games a signed-in student opens a game, steps to any of their moves
       and asks; the question appears on /coaching and staff get the Telegram
       notification
-- [ ] The button names the student's move for every shown position, and is
+      (unit-tested; manual check signed in is pending, guest flow checked in dev)
+- [x] The button names the student's move for every shown position, and is
       disabled when there is none
-- [ ] A position asked before opens the earlier thread (with the other game's
+- [x] A position asked before opens the earlier thread (with the other game's
       board and link), never "already asked"
-- [ ] /think-time card and viewer still open the same question as before
-- [ ] Guests get a register link
-- [ ] Broadcast dry run prints counts and sends nothing; `--send` sends once
-      per chat, survives a re-run without duplicates, unlinks blocked chats
-- [ ] `npm run lint` passes with zero warnings
-- [ ] `npm run build` passes
-- [ ] Tests added under `tests/` for the new logic and components
+- [x] /think-time card and viewer still open the same question as before
+- [x] Guests get a register link
+- [x] Broadcast dry run prints counts and sends nothing (checked on the local
+      DB)
+- [ ] `--send` with the dev bot to one's own chat before the prod run (not
+      exercised here: sending was blocked in the dev sandbox; the send loop,
+      re-run skip and blocked-chat unlink are unit-tested)
+- [x] `npm run lint` passes with zero warnings
+- [x] `npm run build` passes
+- [x] Tests added under `tests/` for the new logic and components

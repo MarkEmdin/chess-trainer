@@ -1,5 +1,10 @@
+import { mkdtempSync, readdirSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import {
   buildMessage,
+  fetchAllPages,
+  writeJsonAtomic,
   planRecipients,
   sendAll,
   toLocale,
@@ -116,5 +121,31 @@ describe('sendAll', () => {
     const send = jest.fn(async () => ({ ok: true as const }));
     await sendAll(todo, { ...d, send, gapMs: 50 });
     expect(d.sleep).toHaveBeenCalledWith(50);
+  });
+});
+
+describe('fetchAllPages', () => {
+  it('reads past the server row limit, page by page', async () => {
+    const rows = Array.from({ length: 5 }, (_, i) => i);
+    const fetchPage = jest.fn(async (from: number, to: number) =>
+      rows.slice(from, to + 1),
+    );
+    expect(await fetchAllPages(fetchPage, 2)).toEqual(rows);
+    expect(fetchPage.mock.calls).toEqual([
+      [0, 1],
+      [2, 3],
+      [4, 5],
+    ]);
+  });
+});
+
+describe('writeJsonAtomic', () => {
+  it('replaces the file whole and leaves no temp file', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'broadcast-'));
+    const path = join(dir, 'x.sent.json');
+    writeJsonAtomic(path, [1]);
+    writeJsonAtomic(path, [1, 2]);
+    expect(JSON.parse(readFileSync(path, 'utf8'))).toEqual([1, 2]);
+    expect(readdirSync(dir)).toEqual(['x.sent.json']);
   });
 });

@@ -49,7 +49,9 @@ const fetcher = async (): Promise<CoachingRequestsByFen> => {
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
-  if (error || !data) return {};
+  // Throw, not {}: an empty map reads as "never asked" (spec 038).
+  if (error || !data)
+    throw new Error(error?.message ?? 'coaching requests read failed');
 
   const threads = await withAuthors(
     supabase,

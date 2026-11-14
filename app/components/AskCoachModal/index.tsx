@@ -53,10 +53,12 @@ export default function AskCoachModal({
         moveLabel={thread.move_san ?? target.label}
         subtitle={otherGame ? t('askedInOtherGame') : gameDate}
         thread={thread}
+        // Older questions have no saved game: the viewed one reaches the
+        // same position (same fen), so it can be browsed instead.
         game={
           thread.pgn
             ? { pgn: thread.pgn, moveIndex: thread.move_index }
-            : undefined
+            : { pgn: game.pgn, moveIndex: target.moveIndex }
         }
         gameUrl={thread.game_url ?? game.url}
         onClose={onClose}

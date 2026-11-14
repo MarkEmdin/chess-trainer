@@ -1,5 +1,6 @@
 // Helpers for scripts/telegram-broadcast.mjs (spec 038). Plain ESM so the
 // script runs on Node 20 without the app; tested from tests/scripts.
+import { renameSync, writeFileSync } from 'node:fs';
 
 /** @typedef {'en' | 'ru'} Locale */
 /** @typedef {{ chatId: number, locale: Locale }} Recipient */
@@ -91,4 +92,33 @@ export async function sendAll(
     }
   }
   return result;
+}
+
+/**
+ * PostgREST returns at most `max_rows` (1000) rows per request: read pages
+ * until one comes back short.
+ * @template T
+ * @param {(from: number, to: number) => Promise<T[]>} fetchPage inclusive range
+ * @param {number} [pageSize]
+ * @returns {Promise<T[]>}
+ */
+export async function fetchAllPages(fetchPage, pageSize = 1000) {
+  /** @type {T[]} */
+  const all = [];
+  for (let from = 0; ; from += pageSize) {
+    const page = await fetchPage(from, from + pageSize - 1);
+    all.push(...page);
+    if (page.length < pageSize) return all;
+  }
+}
+
+/**
+ * Write-then-rename, so a crash mid-write never leaves a half-written log.
+ * @param {string} path
+ * @param {unknown} value
+ */
+export function writeJsonAtomic(path, value) {
+  const tmp = `${path}.tmp`;
+  writeFileSync(tmp, JSON.stringify(value));
+  renameSync(tmp, path);
 }

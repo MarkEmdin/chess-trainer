@@ -8,14 +8,16 @@
 // Every delivered chat is appended to scripts/announcements/<id>.sent.json
 // right away, and re-runs skip those chats: a crash or a second run never
 // sends twice. Keep that file until the announcement is done.
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   ANNOUNCEMENTS,
   buildMessage,
+  fetchAllPages,
   planRecipients,
   sendAll,
+  writeJsonAtomic,
 } from './broadcast.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -65,21 +67,30 @@ const sentLog = existsSync(logPath)
 async function rest(path, init = {}) {
   const res = await fetch(`${env.url}/rest/v1/${path}`, {
     ...init,
-    headers: { apikey: env.key, Authorization: `Bearer ${env.key}` },
+    headers: {
+      apikey: env.key,
+      Authorization: `Bearer ${env.key}`,
+      ...init.headers,
+    },
   });
   if (!res.ok) throw new Error(`${path}: ${res.status} ${await res.text()}`);
   return init.method === 'DELETE' ? null : res.json();
 }
 
+// Whole table, ordered so pages are stable, past the 1000-row cap.
+const readAll = (path) =>
+  fetchAllPages((from, to) =>
+    rest(path, { headers: { Range: `${from}-${to}` } }),
+  );
+
 /** @type {{ chat_id: number, user_id: string }[]} */
-const links = await rest('telegram_links?select=chat_id,user_id');
+const links = await readAll(
+  'telegram_links?select=chat_id,user_id&order=chat_id',
+);
+// Every profile rather than `id=in.(...)`: that URL grows with each user.
 /** @type {{ id: string, preferred_locale: string | null }[]} */
 const profiles = links.length
-  ? await rest(
-      `user_profiles?select=id,preferred_locale&id=in.(${links
-        .map((l) => l.user_id)
-        .join(',')})`,
-    )
+  ? await readAll('user_profiles?select=id,preferred_locale&order=id')
   : [];
 
 const { todo, skipped } = planRecipients(links, profiles, new Set(sentLog));
@@ -144,7 +155,7 @@ const result = await sendAll(todo, {
   sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
   onSent: (chatId) => {
     sentLog.push(chatId);
-    writeFileSync(logPath, JSON.stringify(sentLog));
+    writeJsonAtomic(logPath, sentLog);
   },
   onBlocked: async (chatId) => {
     await rest(`telegram_links?chat_id=eq.${chatId}`, {
