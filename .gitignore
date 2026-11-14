@@ -43,3 +43,6 @@ next-env.d.ts
 
 # superpowers subagent-driven-development scratch workspace
 .superpowers/
+
+# telegram broadcast logs (spec 038)
+/scripts/announcements/*.sent.json

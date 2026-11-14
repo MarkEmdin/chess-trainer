@@ -593,6 +593,12 @@
       "text": "Want to know when the coach answers? We'll message you in Telegram.",
       "connect": "Connect Telegram",
       "dontRemind": "Don't remind me"
+    },
+    "announcements": {
+      "askAnyMove": {
+        "text": "🆕 You can now ask the coach about any of your moves, not only long thinks. Open a game in the Games section, go to the move and press “Ask about”.",
+        "button": "Open games"
+      }
     }
   },
   "about": {
