@@ -731,7 +731,7 @@
       "steps": {
         "find": {
           "title": "Find a position",
-          "text": "Open “Positions”, enter your Chess.com or Lichess nickname and pick a move you thought about for a long time. Any game under “Games” works too. Press “Ask coach”. You need an account for this."
+          "text": "Open “Positions”, enter your Chess.com or Lichess nickname and pick a move you thought about for a long time, then press “Ask coach”. Or open any game under “Games”, go to one of your moves and press “Ask about”. You need an account for this."
         },
         "write": {
           "title": "Write what you were thinking",
