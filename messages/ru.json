@@ -109,6 +109,7 @@
     "yourQuestion": "Ваш вопрос",
     "coachResponse": "Ответ тренера",
     "awaitingReply": "Ожидание ответа.",
+    "askedInOtherGame": "Вы уже спрашивали об этой позиции в другой партии",
     "openGame": "Открыть партию",
     "playedAs": "играл {color}",
     "youPlayed": "Вы играли {color}",

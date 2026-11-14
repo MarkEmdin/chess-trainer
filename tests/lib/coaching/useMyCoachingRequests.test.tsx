@@ -13,6 +13,8 @@ const rows = [
     variation: null,
     content: null,
     move_index: 3,
+    move_san: '2. Nf3',
+    game_url: 'https://lichess.org/g1',
     pgn: null,
     response_seen_at: null,
     coaching_responses: [
@@ -90,6 +92,17 @@ describe('useMyCoachingRequests', () => {
       first_name: 'Ivan',
       last_name: 'Petrov',
       title: 'IM',
+    });
+  });
+
+  it('keeps the game and move the question was asked in', async () => {
+    const { result } = renderHook(() => useMyCoachingRequests(true), {
+      wrapper,
+    });
+    await waitFor(() => expect(result.current.data).toBeDefined());
+    expect(result.current.data?.FEN).toMatchObject({
+      move_san: '2. Nf3',
+      game_url: 'https://lichess.org/g1',
     });
   });
 

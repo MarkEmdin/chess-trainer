@@ -109,6 +109,7 @@
     "yourQuestion": "Your question",
     "coachResponse": "Coach's response",
     "awaitingReply": "Awaiting reply.",
+    "askedInOtherGame": "You already asked about this position in another game",
     "openGame": "Open game",
     "playedAs": "played {color}",
     "youPlayed": "You played {color}",
