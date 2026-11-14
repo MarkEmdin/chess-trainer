@@ -482,7 +482,10 @@
       "viewGame": "View game",
       "white": "White",
       "black": "Black",
-      "toMove": "To move"
+      "toMove": "To move",
+      "askAbout": "Ask about {move}",
+      "questionAbout": "Question about {move}",
+      "goToOwnMove": "Go to one of your moves"
     },
     "loadMore": {
       "button": "Load more games",

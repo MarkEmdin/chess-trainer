@@ -482,7 +482,10 @@
       "viewGame": "Открыть партию",
       "white": "Белые",
       "black": "Чёрные",
-      "toMove": "Ходит"
+      "toMove": "Ходит",
+      "askAbout": "Спросить о ходе {move}",
+      "questionAbout": "Вопрос о ходе {move}",
+      "goToOwnMove": "Перейдите к своему ходу"
     },
     "loadMore": {
       "button": "Загрузить ещё партии",
