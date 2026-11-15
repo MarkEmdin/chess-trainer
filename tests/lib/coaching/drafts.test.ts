@@ -64,6 +64,41 @@ describe('loadDraft / saveDraft', () => {
     expect(draft?.recorder.chips).toEqual(recorder.chips);
   });
 
+  it('round-trips reasons and the question', () => {
+    saveDraft(
+      KEY,
+      { doc, recorder, reasons: ['threat'], question: 'why?' },
+      NOW,
+    );
+    const draft = loadDraft(KEY, FEN, NOW);
+    expect(draft?.reasons).toEqual(['threat']);
+    expect(draft?.question).toBe('why?');
+  });
+
+  it('drops unknown reasons', () => {
+    localStorage.setItem(
+      KEY,
+      JSON.stringify({
+        savedAt: NOW,
+        doc,
+        recorder,
+        reasons: ['threat', 'bogus', 3],
+        question: 42,
+      }),
+    );
+    const draft = loadDraft(KEY, FEN, NOW);
+    expect(draft?.reasons).toEqual(['threat']);
+    expect(draft?.question).toBeUndefined();
+  });
+
+  it('loads a draft saved without reasons or question', () => {
+    saveDraft(KEY, { doc, recorder }, NOW);
+    const draft = loadDraft(KEY, FEN, NOW);
+    expect(draft?.reasons).toBeUndefined();
+    expect(draft?.question).toBeUndefined();
+    expect(draft?.recorder.lines).toEqual({ l1: ['Nf6'] });
+  });
+
   it('puts the board back on the key position', () => {
     saveDraft(KEY, { doc, recorder }, NOW);
     const r = loadDraft(KEY, FEN, NOW)!.recorder;
