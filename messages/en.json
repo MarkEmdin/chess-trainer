@@ -100,12 +100,28 @@
     "open": "Open",
     "askTitle": "Ask the coach",
     "threadTitle": "Coaching thread",
-    "bodyLabel": "What were you thinking — or what do you think now — in this position?",
-    "bodyPlaceholder": "Describe your thoughts, the candidate moves you considered, what made you hesitate…",
     "charCount": "{count} / {max}",
     "submit": "Send to coach",
     "submitting": "Sending…",
     "submitted": "Your question is on its way.",
+    "guided": {
+      "candidatesLabel": "1. Which moves did you consider?",
+      "candidatesPlaceholder": "Play the moves on the board, they appear here",
+      "reasonsLabel": "2. What held you back?",
+      "reasons": {
+        "noPlan": "Couldn't see a plan",
+        "threat": "Worried about a threat",
+        "calculation": "Couldn't calculate it",
+        "choice": "Couldn't choose between moves"
+      },
+      "questionLabel": "3. What do you want to ask the coach? (optional)",
+      "questionPlaceholder": "For example: why not e5?",
+      "prefix": {
+        "candidates": "Candidates:",
+        "reasons": "Held me back:",
+        "question": "Question:"
+      }
+    },
     "yourQuestion": "Your question",
     "coachResponse": "Coach's response",
     "awaitingReply": "Awaiting reply.",
@@ -741,7 +757,7 @@
         },
         "write": {
           "title": "Write what you were thinking",
-          "text": "Tap the text field. “Recording” appears above the board: from now on the board writes moves into your text. Describe the moves you considered and what made you doubt."
+          "text": "Tap the first field. “Recording” appears above the board: from now on the board writes moves into your text. Describe the moves you considered and what made you doubt."
         },
         "moves": {
           "title": "Show lines on the board",

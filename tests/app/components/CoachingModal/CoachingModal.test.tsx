@@ -151,7 +151,9 @@ const baseProps = {
   onClose: jest.fn(),
 };
 
-const editor = () => screen.getByRole('textbox');
+// The stub editor; a student's new question also has a plain step 3 box.
+const editor = () =>
+  document.querySelector('#stub-editor') as HTMLTextAreaElement;
 const frame = () => screen.getByTestId('variation-board-frame');
 
 // Focus the text (recording starts) and play g8-f6 on the board.
@@ -233,7 +235,7 @@ describe('CoachingModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Send to coach' }));
     await waitFor(() => expect(createCoachingRequest).toHaveBeenCalled());
     const fd = submittedForm(createCoachingRequest);
-    expect(fd.get('body')).toBe('Is this fine? 3… Nf6');
+    expect(fd.get('body')).toBe('Candidates: Is this fine? 3… Nf6');
     expect(Object.values(sentContent(createCoachingRequest).lines)).toEqual([
       ['Nf6'],
     ]);
@@ -319,11 +321,12 @@ describe('CoachingModal', () => {
     );
     const send = () => screen.getByRole('button', { name: 'Send to coach' });
     expect(send()).toBeDisabled();
-    fireEvent.change(editor(), { target: { value: 'a'.repeat(8001) } });
-    expect(screen.getByText('8001 / 8000')).toHaveClass('text-destructive');
+    // "Candidates: " (12) is part of the message.
+    fireEvent.change(editor(), { target: { value: 'a'.repeat(7990) } });
+    expect(screen.getByText('8002 / 8000')).toHaveClass('text-destructive');
     expect(send()).toBeDisabled();
     fireEvent.change(editor(), { target: { value: 'a\nb' } });
-    expect(screen.getByText('3 / 8000')).not.toHaveClass('text-destructive');
+    expect(screen.getByText('15 / 8000')).not.toHaveClass('text-destructive');
     expect(send()).toBeEnabled();
   });
 
@@ -524,7 +527,7 @@ describe('CoachingModal game browsing', () => {
   it('focusing the text brings the board back to the key position', () => {
     renderAsking();
     fireEvent.click(screen.getByRole('button', { name: 'Previous move' }));
-    fireEvent.focus(screen.getByRole('textbox'));
+    fireEvent.focus(editor());
     expect(screen.getByTestId('board')).toHaveAttribute(
       'data-position',
       KEY_FEN,
@@ -555,7 +558,7 @@ describe('CoachingModal game browsing', () => {
 
   it('ignores arrow keys typed in the comment', () => {
     renderAsking();
-    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'ArrowLeft' });
+    fireEvent.keyDown(editor(), { key: 'ArrowLeft' });
     expect(screen.getByTestId('board')).toHaveAttribute(
       'data-position',
       KEY_FEN,
@@ -628,7 +631,7 @@ describe('CoachingModal game browsing', () => {
 
   it('sends the pgn with a new question', async () => {
     renderAsking();
-    fireEvent.change(screen.getByRole('textbox'), {
+    fireEvent.change(editor(), {
       target: { value: 'Why Bb5?' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Send to coach' }));
@@ -652,7 +655,7 @@ describe('CoachingModal game browsing', () => {
     it('hides game navigation while recording on a wide screen', () => {
       setWide(true);
       renderAsking();
-      fireEvent.focus(screen.getByRole('textbox'));
+      fireEvent.focus(editor());
       expect(
         screen.queryByRole('button', { name: 'Previous move' }),
       ).not.toBeInTheDocument();
@@ -672,7 +675,7 @@ describe('CoachingModal game browsing', () => {
     it('puts the game below the form on a narrow screen, even while recording', () => {
       setWide(false);
       renderAsking();
-      fireEvent.focus(screen.getByRole('textbox'));
+      fireEvent.focus(editor());
       const previous = screen.getByRole('button', { name: 'Previous move' });
       const send = screen.getByRole('button', { name: 'Send to coach' });
       expect(
@@ -722,14 +725,14 @@ describe('CoachingModal game browsing', () => {
       expect(
         screen.queryByRole('button', { name: 'Hide board' }),
       ).not.toBeInTheDocument();
-      fireEvent.focus(screen.getByRole('textbox'));
+      fireEvent.focus(editor());
       expect(column()).not.toHaveClass('sticky');
     });
 
     it('hides and shows the board without stopping the recording', () => {
       setWide(false);
       renderAsking();
-      fireEvent.focus(screen.getByRole('textbox'));
+      fireEvent.focus(editor());
       const button = screen.getByRole('button', { name: 'Hide board' });
       fireEvent.pointerDown(button);
       fireEvent.click(button);
@@ -755,7 +758,7 @@ describe('CoachingModal game browsing', () => {
         setWide(false);
         renderAsking();
         resized = () => {};
-        fireEvent.focus(screen.getByRole('textbox'));
+        fireEvent.focus(editor());
         resized();
         expect(mockRevealCaret).toHaveBeenCalledTimes(1);
       } finally {
@@ -775,7 +778,7 @@ describe('CoachingModal game browsing', () => {
       setWide(false);
       renderAsking();
       hide();
-      fireEvent.focus(screen.getByRole('textbox'));
+      fireEvent.focus(editor());
       expect(column()).toHaveClass('max-lg:hidden');
     });
 
@@ -822,7 +825,7 @@ describe('CoachingModal game browsing', () => {
       setWide(false);
       renderAsking();
       expect(column()).not.toHaveClass('sticky');
-      fireEvent.focus(screen.getByRole('textbox'));
+      fireEvent.focus(editor());
       expect(column()).toHaveClass('sticky');
       fireEvent.pointerDown(screen.getByText('Ask the coach'));
       expect(column()).not.toHaveClass('sticky');
@@ -970,7 +973,7 @@ describe('CoachingModal drafts', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Send to coach' }));
     await waitFor(() => expect(createCoachingRequest).toHaveBeenCalled());
     expect(submittedForm(createCoachingRequest).get('body')).toBe(
-      'Is this fine?',
+      'Candidates: Is this fine?',
     );
   });
 
@@ -1081,5 +1084,113 @@ describe('CoachingModal like mark', () => {
       <CoachingModal {...baseProps} mode="coach" thread={answered(true)} />,
     );
     expect(screen.queryByText(MARK)).toBeNull();
+  });
+});
+
+describe('CoachingModal guided question', () => {
+  const ASK_KEY = 'coaching-draft:ask:https://lichess.org/abc:5';
+  const askProps = {
+    ...baseProps,
+    mode: 'student' as const,
+    thread: undefined,
+    ask: { gameUrl: 'https://lichess.org/abc', moveIndex: 5 },
+  };
+  const send = () => screen.getByRole('button', { name: 'Send to coach' });
+  const reason = (name: string) => screen.getByRole('button', { name });
+  const question = () =>
+    screen.getByRole('textbox', {
+      name: '3. What do you want to ask the coach? (optional)',
+    });
+
+  it('shows the three steps to a student asking', () => {
+    renderWithIntl(<CoachingModal {...askProps} />);
+    expect(editor()).toHaveAccessibleName('1. Which moves did you consider?');
+    const group = screen.getByRole('group', { name: '2. What held you back?' });
+    const buttons = group.querySelectorAll('button');
+    expect(buttons).toHaveLength(4);
+    buttons.forEach((b) => expect(b).toHaveAttribute('aria-pressed', 'false'));
+    expect(question()).toBeInTheDocument();
+  });
+
+  it('keeps the coach reply form as it was', () => {
+    renderWithIntl(
+      <CoachingModal {...baseProps} mode="coach" thread={thread()} />,
+    );
+    expect(screen.queryByRole('group')).toBeNull();
+    expect(screen.getAllByRole('textbox')).toHaveLength(1);
+  });
+
+  it('sends with only a reason picked', async () => {
+    renderWithIntl(<CoachingModal {...askProps} />);
+    expect(send()).toBeDisabled();
+    fireEvent.click(reason("Couldn't calculate it"));
+    expect(reason("Couldn't calculate it")).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(createCoachingRequest).not.toHaveBeenCalled();
+    expect(send()).toBeEnabled();
+    fireEvent.click(send());
+    await waitFor(() => expect(createCoachingRequest).toHaveBeenCalled());
+    expect(submittedForm(createCoachingRequest).get('body')).toBe(
+      "Held me back: couldn't calculate it",
+    );
+  });
+
+  it('sends all three steps as one message', async () => {
+    renderWithIntl(<CoachingModal {...askProps} />);
+    fireEvent.change(editor(), { target: { value: 'Maybe ' } });
+    playNf6();
+    fireEvent.click(reason('Worried about a threat'));
+    fireEvent.change(question(), { target: { value: 'why not e5?' } });
+    fireEvent.click(send());
+    await waitFor(() => expect(createCoachingRequest).toHaveBeenCalled());
+    expect(submittedForm(createCoachingRequest).get('body')).toBe(
+      'Candidates: Maybe 3… Nf6\nHeld me back: worried about a threat\nQuestion: why not e5?',
+    );
+    expect(Object.values(sentContent(createCoachingRequest).lines)).toEqual([
+      ['Nf6'],
+    ]);
+  });
+
+  it('keeps reasons and question after a server error', async () => {
+    createCoachingRequest.mockResolvedValue({ error: 'boom' });
+    renderWithIntl(<CoachingModal {...askProps} />);
+    fireEvent.click(reason("Couldn't see a plan"));
+    fireEvent.change(question(), { target: { value: 'why?' } });
+    fireEvent.click(send());
+    expect(await screen.findByRole('alert')).toHaveTextContent('boom');
+    expect(reason("Couldn't see a plan")).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(question()).toHaveValue('why?');
+  });
+
+  it('saves reasons and question in the draft and restores them', async () => {
+    const { unmount } = renderWithIntl(<CoachingModal {...askProps} />);
+    fireEvent.click(reason("Couldn't choose between moves"));
+    fireEvent.change(question(), { target: { value: 'which one?' } });
+    await waitFor(() =>
+      expect(JSON.parse(localStorage.getItem(ASK_KEY) ?? 'null')).toMatchObject(
+        { reasons: ['choice'], question: 'which one?' },
+      ),
+    );
+    unmount();
+
+    renderWithIntl(<CoachingModal {...askProps} />);
+    expect(reason("Couldn't choose between moves")).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(question()).toHaveValue('which one?');
+  });
+
+  it('counts the whole message', () => {
+    renderWithIntl(<CoachingModal {...askProps} />);
+    fireEvent.change(question(), { target: { value: 'a'.repeat(8000) } });
+    // "Question: " (10) is part of the message.
+    expect(screen.getByText('8010 / 8000')).toHaveClass('text-destructive');
+    expect(send()).toBeDisabled();
   });
 });

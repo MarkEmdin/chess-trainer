@@ -60,7 +60,11 @@ import {
 } from '@/lib/coaching/drafts';
 import { cn } from '@/lib/utils';
 import type { CoachingMessage, CoachingThreadData } from '@/lib/coaching/types';
+import { Textarea } from '@/app/components/ui/textarea';
+import type { QuestionReason } from '@/app/constants/questionReasons';
+import { composeGuidedContent } from '@/lib/coaching/guidedQuestion';
 import MessageContentView from './MessageContentView';
+import ReasonPicker from './ReasonPicker';
 import MoveEditor, { useRecorderStore, type MoveEditorApi } from './MoveEditor';
 import VariationBoard, { GameMoves, type ViewedLine } from './VariationBoard';
 import VariationLine from './VariationLine';
@@ -89,6 +93,12 @@ type Props = {
 };
 
 const DRAFT_SAVE_DELAY_MS = 500;
+
+// A draft of a guided question whose editor was never touched.
+const EMPTY_DOC: JSONContent = {
+  type: 'doc',
+  content: [{ type: 'paragraph' }],
+};
 
 // The line the board is showing, and which chip (or old variation) of
 // which message opened it, so that chip can be highlighted.
@@ -134,6 +144,13 @@ export default function CoachingModal({
       : null;
   });
   const [draft] = useState(() => (draftId ? loadDraft(draftId, fen) : null));
+  // A student's new question is asked in three steps (spec 039).
+  const guided = mode === 'student' && !thread;
+  const tGuided = useTranslations('coaching.guided');
+  const [reasons, setReasons] = useState<QuestionReason[]>(
+    () => draft?.reasons ?? [],
+  );
+  const [question, setQuestion] = useState(() => draft?.question ?? '');
   const store = useRecorderStore(fen, draft?.recorder);
   const draftDoc = useRef<JSONContent | null>(draft?.doc ?? null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -158,7 +175,18 @@ export default function CoachingModal({
   const colorLabel = t(`color.${askerColor}`);
   const keyIndex = replay?.keyIndex ?? 0;
   const [boardIndex, setBoardIndex] = useState(keyIndex);
-  const content = recorderContent(store.state, segments);
+  const recorded = recorderContent(store.state, segments);
+  const content = guided
+    ? composeGuidedContent(
+        { candidates: recorded, reasons, question },
+        {
+          candidates: tGuided('prefix.candidates'),
+          reasons: tGuided('prefix.reasons'),
+          question: tGuided('prefix.question'),
+          reason: (r) => tGuided(`reasons.${r}`),
+        },
+      )
+    : recorded;
   const plainText = contentToPlainText(fen, content).trim();
   const tooLong = plainText.length > MAX_BODY_LENGTH;
 
@@ -190,19 +218,32 @@ export default function CoachingModal({
   }, []);
 
   const scheduleDraftSave = useCallback(() => {
-    if (!draftId || justSubmitted || !draftDoc.current) return;
+    const stepsTouched = guided && (reasons.length > 0 || question !== '');
+    if (!draftId || justSubmitted || (!draftDoc.current && !stepsTouched)) {
+      return;
+    }
     cancelPendingSave();
     const save = () => {
-      if (draftDoc.current) {
-        saveDraft(draftId, { doc: draftDoc.current, recorder: store.get() });
-      }
+      saveDraft(draftId, {
+        doc: draftDoc.current ?? EMPTY_DOC,
+        recorder: store.get(),
+        ...(guided && { reasons, question }),
+      });
     };
     pendingSave.current = save;
     saveTimer.current = setTimeout(() => {
       pendingSave.current = null;
       save();
     }, DRAFT_SAVE_DELAY_MS);
-  }, [draftId, justSubmitted, store, cancelPendingSave]);
+  }, [
+    draftId,
+    justSubmitted,
+    store,
+    cancelPendingSave,
+    guided,
+    reasons,
+    question,
+  ]);
 
   // Drawings change the recorder without touching the text.
   useEffect(scheduleDraftSave, [store.state, scheduleDraftSave]);
@@ -285,9 +326,7 @@ export default function CoachingModal({
   useEffect(() => {
     const scroller = form.current?.closest('[data-slot="dialog-content"]');
     if (wide || !recording || !scroller || !boardColumn.current) return;
-    const observer = new ResizeObserver(() =>
-      editorApi.current?.revealCaret(),
-    );
+    const observer = new ResizeObserver(() => editorApi.current?.revealCaret());
     observer.observe(boardColumn.current);
     observer.observe(scroller);
     return () => observer.disconnect();
@@ -504,8 +543,8 @@ export default function CoachingModal({
 
                 <div className="flex flex-wrap items-baseline justify-between gap-x-3">
                   <span className="text-sm font-medium text-foreground">
-                    {mode === 'student'
-                      ? t('bodyLabel')
+                    {guided
+                      ? tGuided('candidatesLabel')
                       : tAdmin('yourResponse')}
                   </span>
                   {/* A new tab: this window and its text stay as they are. */}
@@ -521,11 +560,11 @@ export default function CoachingModal({
                   ref={editorApi}
                   store={store}
                   label={
-                    mode === 'student' ? t('bodyLabel') : tAdmin('yourResponse')
+                    guided ? tGuided('candidatesLabel') : tAdmin('yourResponse')
                   }
                   placeholder={
-                    mode === 'student'
-                      ? t('bodyPlaceholder')
+                    guided
+                      ? tGuided('candidatesPlaceholder')
                       : tAdmin('responsePlaceholder')
                   }
                   onSegmentsChange={setSegments}
@@ -537,6 +576,21 @@ export default function CoachingModal({
                   onFocus={startRecording}
                   visibleArea={visibleArea}
                 />
+                {guided && (
+                  <>
+                    <ReasonPicker value={reasons} onChange={setReasons} />
+                    <label className="flex flex-col gap-2 text-sm font-medium text-foreground">
+                      {tGuided('questionLabel')}
+                      <Textarea
+                        rows={3}
+                        placeholder={tGuided('questionPlaceholder')}
+                        value={question}
+                        onChange={(e) => setQuestion(e.target.value)}
+                        className="font-normal"
+                      />
+                    </label>
+                  </>
+                )}
                 <p
                   className={cn(
                     'self-end text-xs text-muted-foreground',
