@@ -1,7 +1,13 @@
 'use client';
 
-import { useCallback, useDeferredValue, useEffect, useState } from 'react';
-import { useFormatter, useTranslations } from 'next-intl';
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { Loader2Icon } from 'lucide-react';
 import {
@@ -15,7 +21,7 @@ import { useStoredThreshold } from '@/lib/chesscom/useStoredThreshold';
 import { useMyCoachingRequests } from '@/lib/coaching/useMyCoachingRequests';
 import { threadStatus } from '@/lib/coaching/status';
 import { isUnseen } from '@/lib/coaching/notifications';
-import { markResponseSeen } from '@/lib/coaching/actions';
+import type { AskTarget } from '@/lib/coaching/askTarget';
 import { rememberAsk, takePendingAsk } from '@/lib/coaching/pendingAsk';
 import {
   ASKED_FILTERS,
@@ -27,7 +33,7 @@ import { cn } from '@/lib/utils';
 import PositionRow from './PositionRow';
 import PositionDetail from './PositionDetail';
 import ThresholdSelector from './ThresholdSelector';
-import { formatThinkMove } from './format';
+import { thinkAskTarget } from './format';
 
 // Same chunk as /games — Turbopack/webpack dedupes, so opening the modal
 // from either route pays for the chess engine just once.
@@ -39,11 +45,12 @@ const GameModal = dynamic(
 // Coaching modal pulls in react-chessboard too but only mounts when a
 // signed-in user clicks "Ask coach" — defer to keep it out of the
 // first render budget.
-const CoachingModal = dynamic(() => import('@/app/components/CoachingModal'), {
+const AskCoachModal = dynamic(() => import('@/app/components/AskCoachModal'), {
   ssr: false,
 });
 
 type EnrichedThink = { think: LongThink; game: Game };
+type CoachingTarget = { game: Game; target: AskTarget };
 
 const thinkKey = ({ think, game }: EnrichedThink) =>
   `${game.id}-${think.moveIndex}`;
@@ -107,7 +114,7 @@ export default function LongThinks({
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [gameTarget, setGameTarget] = useState<EnrichedThink | null>(null);
-  const [coachingTarget, setCoachingTarget] = useState<EnrichedThink | null>(
+  const [coachingTarget, setCoachingTarget] = useState<CoachingTarget | null>(
     null,
   );
   const [threshold, setThreshold] = useStoredThreshold();
@@ -121,10 +128,13 @@ export default function LongThinks({
   // feedback). `deferredThreshold` lags during heavy re-renders so React
   // can keep the picker responsive — we use it for the actual filtering.
   // The mismatch between the two is what `isPending` watches.
+  const askedFens = useMemo(
+    () => new Set(Object.keys(requestsByFen ?? {})),
+    [requestsByFen],
+  );
   const deferredThreshold = useDeferredValue(threshold);
   const isPending = threshold !== deferredThreshold;
   const t = useTranslations('thinkTime');
-  const format = useFormatter();
 
   // While the mobile full-screen detail is up, the page behind it must not
   // scroll and Escape closes it — unless a modal on top owns Escape.
@@ -151,19 +161,6 @@ export default function LongThinks({
     setSelectedKey(key);
     setMobileOpen(true);
   }, []);
-
-  // Opening the thread shows the coach's answer in full, so an unseen one
-  // counts as read (spec 012); refetch so the badge drops.
-  function openCoaching(target: EnrichedThink) {
-    setCoachingTarget(target);
-    const thread = requestsByFen?.[target.think.fenBefore];
-    if (thread && isUnseen(thread)) {
-      void markResponseSeen(thread.id).then(
-        () => refreshRequests(),
-        () => {},
-      );
-    }
-  }
 
   return (
     <>
@@ -294,7 +291,10 @@ export default function LongThinks({
                     isAuthenticated={isAuthenticated}
                     onAskCoach={() =>
                       isAuthenticated
-                        ? openCoaching(selected)
+                        ? setCoachingTarget({
+                            game: selected.game,
+                            target: thinkAskTarget(selected.think),
+                          })
                         : rememberAsk(thinkKey(selected))
                     }
                     onOpenGame={() => setGameTarget(selected)}
@@ -313,38 +313,23 @@ export default function LongThinks({
           game={gameTarget.game}
           initialIndex={gameTarget.think.moveIndex - 1}
           onClose={() => setGameTarget(null)}
-          onAskCoach={
-            isAuthenticated
-              ? () => {
-                  setGameTarget(null);
-                  openCoaching(gameTarget);
-                }
-              : undefined
-          }
+          onAsk={(target) => {
+            setGameTarget(null);
+            setCoachingTarget({ game: gameTarget.game, target });
+          }}
+          askedFens={askedFens}
+          isAuthenticated={isAuthenticated}
         />
       )}
 
       {coachingTarget && (
-        <CoachingModal
-          mode="student"
-          fen={coachingTarget.think.fenBefore}
-          orientation={coachingTarget.game.userColor}
-          moveLabel={formatThinkMove(coachingTarget.think)}
-          subtitle={format.dateTime(coachingTarget.game.endTime, {
-            dateStyle: 'medium',
-          })}
-          thread={requestsByFen?.[coachingTarget.think.fenBefore]}
-          ask={{
-            gameUrl: coachingTarget.game.url,
-            moveIndex: coachingTarget.think.moveIndex,
-          }}
-          game={{
-            pgn: coachingTarget.game.pgn,
-            moveIndex: coachingTarget.think.moveIndex,
-          }}
-          gameUrl={coachingTarget.game.url}
+        <AskCoachModal
+          game={coachingTarget.game}
+          target={coachingTarget.target}
+          thread={requestsByFen?.[coachingTarget.target.fen]}
           onClose={() => setCoachingTarget(null)}
           onSubmitted={refreshRequests}
+          onSeen={refreshRequests}
         />
       )}
     </>

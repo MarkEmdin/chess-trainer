@@ -1,4 +1,5 @@
 import type { LongThink } from '@/lib/games/longThinks';
+import type { AskTarget } from '@/lib/coaching/askTarget';
 
 // Soft yellow — classic chess "last move" highlight (matches Lichess/Chess.com
 // conventions and stays readable on the board's own colours).
@@ -9,6 +10,14 @@ export function formatThinkMove(think: LongThink): string {
   return think.color === 'white'
     ? `${think.fullMoveNumber}. ${think.san}`
     : `${think.fullMoveNumber}… ${think.san}`;
+}
+
+export function thinkAskTarget(think: LongThink): AskTarget {
+  return {
+    moveIndex: think.moveIndex,
+    fen: think.fenBefore,
+    label: formatThinkMove(think),
+  };
 }
 
 // Highlights the opponent's move the player was answering.

@@ -4,6 +4,7 @@ import { useMyCoachingRequests } from '@/lib/coaching/useMyCoachingRequests';
 
 const eq = jest.fn();
 let user: { id: string } | null = { id: 'u1' };
+let failRead = false;
 const rows = [
   {
     id: 'r1',
@@ -13,6 +14,8 @@ const rows = [
     variation: null,
     content: null,
     move_index: 3,
+    move_san: '2. Nf3',
+    game_url: 'https://lichess.org/g1',
     pgn: null,
     response_seen_at: null,
     coaching_responses: [
@@ -53,7 +56,10 @@ jest.mock('@/lib/supabase/client', () => ({
           eq(column, value);
           return builder;
         },
-        order: async () => ({ data: rows, error: null }),
+        order: async () =>
+          failRead
+            ? { data: null, error: { message: 'boom' } }
+            : { data: rows, error: null },
       };
       return builder;
     },
@@ -69,6 +75,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 beforeEach(() => {
   eq.mockClear();
   user = { id: 'u1' };
+  failRead = false;
 });
 
 describe('useMyCoachingRequests', () => {
@@ -91,6 +98,28 @@ describe('useMyCoachingRequests', () => {
       last_name: 'Petrov',
       title: 'IM',
     });
+  });
+
+  it('keeps the game and move the question was asked in', async () => {
+    const { result } = renderHook(() => useMyCoachingRequests(true), {
+      wrapper,
+    });
+    await waitFor(() => expect(result.current.data).toBeDefined());
+    expect(result.current.data?.FEN).toMatchObject({
+      move_san: '2. Nf3',
+      game_url: 'https://lichess.org/g1',
+    });
+  });
+
+  // An empty map would read as "never asked" and the student would hit
+  // "already asked" on submit (spec 038); an error lets SWR retry.
+  it('fails instead of returning no questions when the read fails', async () => {
+    failRead = true;
+    const { result } = renderHook(() => useMyCoachingRequests(true), {
+      wrapper,
+    });
+    await waitFor(() => expect(result.current.error).toBeDefined());
+    expect(result.current.data).toBeUndefined();
   });
 
   it('returns nothing without a session', async () => {

@@ -11,7 +11,7 @@ import {
   MessageSquareIcon,
 } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
-import { Button } from '@/app/components/ui/button';
+import { Button, buttonVariants } from '@/app/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,9 @@ import { formatSeconds } from '@/lib/chesscom/format';
 import { sideToMove } from '@/lib/chess/fen';
 import { buildReplay, formatMoveLabel } from '@/lib/chess/replay';
 import type { Game, GameColor } from '@/lib/games/types';
+import { findAskTarget, type AskTarget } from '@/lib/coaching/askTarget';
+import { rememberAsk } from '@/lib/coaching/pendingAsk';
+import { Link } from '@/i18n/navigation';
 import GameMatchup from '@/app/components/GameMatchup';
 import PlayerRow from '@/app/components/PlayerRow';
 
@@ -33,16 +36,22 @@ type Props = {
   game: Game;
   onClose: () => void;
   initialIndex?: number;
-  // Shown on /think-time for a position not asked about yet, mirroring the
-  // card's button (spec 013).
-  onAskCoach?: () => void;
+  // Asking the coach about the student's move at the shown position
+  // (spec 038). Without it there is no ask button.
+  onAsk?: (target: AskTarget) => void;
+  // Positions the student already asked about: the button opens that thread.
+  askedFens?: ReadonlySet<string>;
+  // Guests get a link to registration instead.
+  isAuthenticated?: boolean;
 };
 
 export default function GameModal({
   game,
   onClose,
   initialIndex,
-  onAskCoach,
+  onAsk,
+  askedFens,
+  isAuthenticated = false,
 }: Props) {
   const t = useTranslations('games.modal');
   const tCoaching = useTranslations('coaching');
@@ -117,6 +126,13 @@ export default function GameModal({
     ? { [lastMove.from]: LAST_MOVE_STYLE, [lastMove.to]: LAST_MOVE_STYLE }
     : undefined;
   const lastMoveLabel = lastMove ? formatMoveLabel(lastMove) : undefined;
+
+  const askTarget = findAskTarget(positions, moves, index, game.userColor);
+  const askLabel =
+    askTarget &&
+    t(askedFens?.has(askTarget.fen) ? 'questionAbout' : 'askAbout', {
+      move: askTarget.label,
+    });
 
   return (
     <Dialog
@@ -224,12 +240,41 @@ export default function GameModal({
                   : t('lastMoveCaption', { move: lastMoveLabel }))}
             </span>
             <div className="flex gap-2 flex-wrap">
-              {onAskCoach && (
-                <Button variant="outline" size="sm" onClick={onAskCoach}>
-                  <MessageSquareIcon className="size-4" />
-                  {tCoaching('askCoach')}
-                </Button>
-              )}
+              {onAsk &&
+                (!askTarget ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled
+                    title={t('goToOwnMove')}
+                  >
+                    <MessageSquareIcon className="size-4" />
+                    {tCoaching('askCoach')}
+                  </Button>
+                ) : isAuthenticated ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onAsk(askTarget)}
+                  >
+                    <MessageSquareIcon className="size-4" />
+                    {askLabel}
+                  </Button>
+                ) : (
+                  <Link
+                    href="/register"
+                    onClick={() =>
+                      rememberAsk(`${game.id}-${askTarget.moveIndex}`)
+                    }
+                    className={buttonVariants({
+                      variant: 'outline',
+                      size: 'sm',
+                    })}
+                  >
+                    <MessageSquareIcon className="size-4" />
+                    {askLabel}
+                  </Link>
+                ))}
               <Button variant="outline" size="sm" asChild>
                 <a href={game.url} target="_blank" rel="noopener noreferrer">
                   <ExternalLinkIcon className="size-4" />

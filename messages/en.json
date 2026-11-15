@@ -109,6 +109,7 @@
     "yourQuestion": "Your question",
     "coachResponse": "Coach's response",
     "awaitingReply": "Awaiting reply.",
+    "askedInOtherGame": "You already asked about this position in another game",
     "openGame": "Open game",
     "playedAs": "played {color}",
     "youPlayed": "You played {color}",
@@ -188,7 +189,7 @@
   "coachingPage": {
     "title": "My coaching",
     "subtitle": "Positions you've asked the coach about.",
-    "empty": "No questions yet — go to Key Positions and click \"Ask coach\" on any long-think position.",
+    "empty": "No questions yet — open “Positions” and press “Ask coach” on a long think, or open a game under “Games” and ask about any of your moves.",
     "tabs": {
       "waiting": "Awaiting reply ({count})",
       "answered": "Answered ({count})"
@@ -481,7 +482,10 @@
       "viewGame": "View game",
       "white": "White",
       "black": "Black",
-      "toMove": "To move"
+      "toMove": "To move",
+      "askAbout": "Ask about {move}",
+      "questionAbout": "Question about {move}",
+      "goToOwnMove": "Go to one of your moves"
     },
     "loadMore": {
       "button": "Load more games",
@@ -589,6 +593,12 @@
       "text": "Want to know when the coach answers? We'll message you in Telegram.",
       "connect": "Connect Telegram",
       "dontRemind": "Don't remind me"
+    },
+    "announcements": {
+      "askAnyMove": {
+        "text": "🆕 You can now ask the coach about any of your moves, not only long thinks. Open a game in the Games section, go to the move and press “Ask about”.",
+        "button": "Open games"
+      }
     }
   },
   "about": {
@@ -727,7 +737,7 @@
       "steps": {
         "find": {
           "title": "Find a position",
-          "text": "Open “Positions”, enter your Chess.com or Lichess nickname and pick a move you thought about for a long time. Any game under “Games” works too. Press “Ask coach”. You need an account for this."
+          "text": "Open “Positions”, enter your Chess.com or Lichess nickname and pick a move you thought about for a long time, then press “Ask coach”. Or open any game under “Games”, go to one of your moves and press “Ask about”. You need an account for this."
         },
         "write": {
           "title": "Write what you were thinking",

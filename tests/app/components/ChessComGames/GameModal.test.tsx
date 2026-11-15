@@ -51,6 +51,7 @@ const rowOf = (name: string) =>
     .getAllByText(name)
     .map((el) => el.closest('[data-slot="player-row"]'))
     .find(Boolean) as HTMLElement;
+const START_FEN = new Chess().fen();
 const board = () => screen.getByTestId('board');
 const press = (key: string) => fireEvent.keyDown(document, { key });
 
@@ -140,23 +141,86 @@ describe('<GameModal />', () => {
     expect(screen.getByText('Move 3 / 3')).toBeInTheDocument();
   });
 
-  it('offers "Ask coach" when given a handler', () => {
-    const onAskCoach = jest.fn();
+  it('asks about the move played from the shown position', () => {
+    const onAsk = jest.fn();
     renderWithIntl(
       <GameModal
         game={makeGame()}
         onClose={() => {}}
-        onAskCoach={onAskCoach}
+        onAsk={onAsk}
+        isAuthenticated
       />,
     );
-    fireEvent.click(screen.getByRole('button', { name: /ask coach/i }));
-    expect(onAskCoach).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Ask about 1. e4' }));
+    expect(onAsk).toHaveBeenCalledWith({
+      moveIndex: 1,
+      fen: START_FEN,
+      label: '1. e4',
+    });
   });
 
-  it('has no "Ask coach" without a handler', () => {
+  it("follows the board to the student's nearest own move", () => {
+    renderWithIntl(
+      <GameModal
+        game={makeGame()}
+        onClose={() => {}}
+        onAsk={() => {}}
+        isAuthenticated
+      />,
+    );
+    press('ArrowRight');
+    expect(
+      screen.getByRole('button', { name: 'Ask about 1. e4' }),
+    ).toBeInTheDocument();
+    press('ArrowRight');
+    expect(
+      screen.getByRole('button', { name: 'Ask about 2. Nf3' }),
+    ).toBeInTheDocument();
+  });
+
+  it('opens the earlier question about an asked position', () => {
+    renderWithIntl(
+      <GameModal
+        game={makeGame()}
+        onClose={() => {}}
+        onAsk={() => {}}
+        askedFens={new Set([START_FEN])}
+        isAuthenticated
+      />,
+    );
+    expect(
+      screen.getByRole('button', { name: 'Question about 1. e4' }),
+    ).toBeInTheDocument();
+  });
+
+  it('disables asking before the student has a move', () => {
+    renderWithIntl(
+      <GameModal
+        game={makeGame({ userColor: 'black' })}
+        onClose={() => {}}
+        onAsk={() => {}}
+        isAuthenticated
+      />,
+    );
+    const button = screen.getByRole('button', { name: 'Ask coach' });
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute('title', 'Go to one of your moves');
+  });
+
+  it('sends guests to register, remembering the move', () => {
+    renderWithIntl(
+      <GameModal game={makeGame()} onClose={() => {}} onAsk={() => {}} />,
+    );
+    const link = screen.getByRole('link', { name: 'Ask about 1. e4' });
+    expect(link.getAttribute('href')).toContain('/register');
+    fireEvent.click(link);
+    expect(localStorage.getItem('pending-ask')).toBe('g1-1');
+  });
+
+  it('has no ask button without a handler', () => {
     renderWithIntl(<GameModal game={makeGame()} onClose={() => {}} />);
     expect(
-      screen.queryByRole('button', { name: /ask coach/i }),
+      screen.queryByRole('button', { name: /ask/i }),
     ).not.toBeInTheDocument();
   });
 });

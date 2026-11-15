@@ -4,15 +4,39 @@ import LongThinks from '@/app/components/LongThinks';
 const FEN_A = 'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 2 3';
 const FEN_B = 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2';
 
-// Both modals load through next/dynamic, so one stub stands in for each;
-// it exposes the game modal's "Ask coach" handler when it gets one.
+// Both modals load through next/dynamic, so one stub stands in for each.
+// It shows which move and thread the coaching modal got, and exposes the
+// game modal's ask handler (asking about move 9) and the seen callback.
 jest.mock(
   'next/dynamic',
   () => () =>
-    function ModalStub({ onAskCoach }: { onAskCoach?: () => void }) {
+    function ModalStub({
+      onAsk,
+      onSeen,
+      target,
+      thread,
+    }: {
+      onAsk?: (t: { moveIndex: number; fen: string; label: string }) => void;
+      onSeen?: () => void;
+      target?: { moveIndex: number };
+      thread?: { id: string };
+    }) {
       return (
-        <div data-testid="modal">
-          {onAskCoach && <button onClick={onAskCoach}>modal ask</button>}
+        <div
+          data-testid="modal"
+          data-target={target?.moveIndex ?? ''}
+          data-thread={thread?.id ?? ''}
+        >
+          {onAsk && (
+            <button
+              onClick={() =>
+                onAsk({ moveIndex: 9, fen: 'FEN_X', label: '5. Bc4' })
+              }
+            >
+              modal ask
+            </button>
+          )}
+          {onSeen && <button onClick={onSeen}>modal seen</button>}
         </div>
       );
     },
@@ -262,30 +286,24 @@ describe('<LongThinks /> selection', () => {
 });
 
 describe('<LongThinks /> actions', () => {
-  it('marks an unseen answer seen when opening the question', async () => {
-    requests = { [FEN_A]: { ...answered, response_seen_at: null } };
+  it("opens the card's question with its thread", async () => {
+    requests = { [FEN_A]: answered };
     renderIt();
-    expect(screen.getByRole('button', { name: 'row g1' })).toHaveAttribute(
-      'data-new',
-      'true',
-    );
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'ask' }));
     });
-    expect(markResponseSeen).toHaveBeenCalledWith('r1');
-    expect(mutate).toHaveBeenCalled();
-    expect(screen.getByTestId('modal')).toBeInTheDocument();
+    const modal = screen.getByTestId('modal');
+    expect(modal).toHaveAttribute('data-target', '5');
+    expect(modal).toHaveAttribute('data-thread', 'r1');
   });
 
-  it('leaves a seen answer alone', async () => {
-    requests = {
-      [FEN_A]: { ...answered, response_seen_at: '2026-10-22T00:00Z' },
-    };
+  it('refetches questions once an answer is marked seen', async () => {
     renderIt();
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'ask' }));
     });
-    expect(markResponseSeen).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'modal seen' }));
+    expect(mutate).toHaveBeenCalled();
   });
 
   it('opens the game modal from the detail panel', () => {
@@ -294,17 +312,15 @@ describe('<LongThinks /> actions', () => {
     expect(screen.getByTestId('modal')).toBeInTheDocument();
   });
 
-  it('asks the coach from the game modal', async () => {
+  it("asks the coach about the viewer's move", async () => {
     renderIt();
     fireEvent.click(screen.getByRole('button', { name: 'game' }));
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'modal ask' }));
     });
-    // Game modal swapped for the coaching one, which has no ask handler.
+    // Game modal swapped for the coaching one, on the move asked about.
     expect(screen.getAllByTestId('modal')).toHaveLength(1);
-    expect(
-      screen.queryByRole('button', { name: 'modal ask' }),
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('modal')).toHaveAttribute('data-target', '9');
   });
 
   it('opens full-screen detail on mobile and closes it with back', () => {
