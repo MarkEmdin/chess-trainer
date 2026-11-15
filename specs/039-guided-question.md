@@ -1,6 +1,6 @@
 # Spec: Guided question form
 
-Status: approved
+Status: done
 Branch: feature/guided-question
 
 ## Problem
@@ -151,11 +151,11 @@ first letter is lower-cased.
 
 ## Acceptance criteria
 
-- [ ] A new question form shows the three steps; reply form and threads are unchanged
-- [ ] Send is disabled with all steps empty, enabled when any step has content
-- [ ] The sent message has one line per filled step, chips from step 1 stay clickable
-- [ ] Reasons and step 3 text survive closing and reopening the form (draft)
-- [ ] Both locales have the same keys
-- [ ] Tests for `composeGuidedContent`, drafts and the form under `tests/`
-- [ ] `npm run lint` passes with zero warnings
-- [ ] `npm run build` passes
+- [x] A new question form shows the three steps; reply form and threads are unchanged
+- [x] Send is disabled with all steps empty, enabled when any step has content
+- [x] The sent message has one line per filled step, chips from step 1 stay clickable
+- [x] Reasons and step 3 text survive closing and reopening the form (draft)
+- [x] Both locales have the same keys
+- [x] Tests for `composeGuidedContent`, drafts and the form under `tests/`
+- [x] `npm run lint` passes with zero warnings
+- [x] `npm run build` passes
