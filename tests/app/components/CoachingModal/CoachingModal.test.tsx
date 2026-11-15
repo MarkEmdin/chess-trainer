@@ -1186,6 +1186,28 @@ describe('CoachingModal guided question', () => {
     expect(question()).toHaveValue('which one?');
   });
 
+  it('forgets a reason that was picked and then unpicked', async () => {
+    const { unmount } = renderWithIntl(<CoachingModal {...askProps} />);
+    fireEvent.click(reason("Couldn't see a plan"));
+    await waitFor(() => expect(localStorage.getItem(ASK_KEY)).not.toBeNull());
+    fireEvent.click(reason("Couldn't see a plan"));
+    unmount();
+
+    renderWithIntl(<CoachingModal {...askProps} />);
+    expect(reason("Couldn't see a plan")).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
+  });
+
+  it('stops recording when the student moves to step 3', () => {
+    renderWithIntl(<CoachingModal {...askProps} />);
+    fireEvent.focus(editor());
+    expect(frame()).toHaveClass('ring-primary');
+    fireEvent.focus(question());
+    expect(frame()).not.toHaveClass('ring-primary');
+  });
+
   it('counts the whole message', () => {
     renderWithIntl(<CoachingModal {...askProps} />);
     fireEvent.change(question(), { target: { value: 'a'.repeat(8000) } });

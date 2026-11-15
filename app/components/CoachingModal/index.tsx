@@ -218,8 +218,15 @@ export default function CoachingModal({
   }, []);
 
   const scheduleDraftSave = useCallback(() => {
+    if (!draftId || justSubmitted) return;
     const stepsTouched = guided && (reasons.length > 0 || question !== '');
-    if (!draftId || justSubmitted || (!draftDoc.current && !stepsTouched)) {
+    if (!draftDoc.current && !stepsTouched) {
+      // Everything picked or typed was taken back: forget it, or the
+      // pending save would bring it back on reopen.
+      if (guided) {
+        cancelPendingSave();
+        clearDraft(draftId);
+      }
       return;
     }
     cancelPendingSave();
@@ -586,6 +593,9 @@ export default function CoachingModal({
                         placeholder={tGuided('questionPlaceholder')}
                         value={question}
                         onChange={(e) => setQuestion(e.target.value)}
+                        // The board records into step 1 only; leaving it
+                        // pinned would cover this box on a phone.
+                        onFocus={() => setRecording(false)}
                         className="font-normal"
                       />
                     </label>
