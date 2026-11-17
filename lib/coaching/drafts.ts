@@ -1,5 +1,9 @@
 import type { JSONContent } from '@tiptap/core';
 import type { RecorderState } from './moveRecorder';
+import {
+  isQuestionReason,
+  type QuestionReason,
+} from '@/app/constants/questionReasons';
 
 // Unsent text in the coaching modal (spec 012), kept in this browser so an
 // accidental close loses nothing. The recorder travels with the document:
@@ -9,6 +13,9 @@ export type Draft = {
   savedAt: number;
   doc: JSONContent;
   recorder: RecorderState;
+  // The guided ask form's steps 2 and 3 (spec 039); absent in older drafts.
+  reasons?: QuestionReason[];
+  question?: string;
 };
 
 export type DraftTarget =
@@ -95,10 +102,15 @@ export function loadDraft(
     active: null,
     typed: true,
   };
+  const { reasons, question } = parsed as Record<string, unknown>;
   return {
     savedAt: parsed.savedAt,
     doc: dropUnknownChips(parsed.doc, recorder.chips),
     recorder,
+    reasons: Array.isArray(reasons)
+      ? reasons.filter(isQuestionReason)
+      : undefined,
+    question: typeof question === 'string' ? question : undefined,
   };
 }
 
